@@ -435,6 +435,9 @@ export function AiGovernanceSection({ draft, patch, patchConfig }: SectionProps)
 /* ---------------- Supervisors & permissions ---------------- */
 
 export function SupervisorSection({ draft, patch, patchConfig }: SectionProps) {
+  const { users } = useUsers();
+  const supervisorUsers = users.filter((u) => u.role === "Supervisor");
+
   const toggleSupervisor = (name: string) =>
     patch({
       supervisors: draft.supervisors.includes(name)
@@ -454,18 +457,22 @@ export function SupervisorSection({ draft, patch, patchConfig }: SectionProps) {
       <div>
         <p className="text-[13px] font-semibold text-foreground">Assigned Supervisors</p>
         <p className="mb-2 text-[11px] text-muted-foreground">
-          Supervisors only see clients assigned to them.
+          Assignment decides where a supervisor works. Supervisors only see assigned clients.
         </p>
-        <div className="rounded-lg border border-border bg-card divide-y divide-border">
-          {supervisorDirectory.map((name) => (
-            <label key={name} className="flex cursor-pointer items-center gap-2.5 px-3 py-2.5">
+        <div className="divide-y divide-border rounded-lg border border-border bg-card">
+          {supervisorUsers.map((user) => (
+            <label
+              key={user.id}
+              className="flex cursor-pointer items-center gap-2.5 px-3 py-2.5"
+            >
               <input
                 type="checkbox"
-                checked={draft.supervisors.includes(name)}
-                onChange={() => toggleSupervisor(name)}
+                checked={draft.supervisors.includes(user.shortName)}
+                onChange={() => toggleSupervisor(user.shortName)}
                 className="size-3.5 accent-[var(--primary)]"
               />
-              <span className="text-[13px] text-foreground">{name}</span>
+              <span className="text-[13px] text-foreground">{user.name}</span>
+              <span className="ml-auto text-[11px] text-muted-foreground">{user.status}</span>
             </label>
           ))}
         </div>
@@ -473,19 +480,24 @@ export function SupervisorSection({ draft, patch, patchConfig }: SectionProps) {
       <div>
         <p className="text-[13px] font-semibold text-foreground">Client Permissions</p>
         <p className="mb-2 text-[11px] text-muted-foreground">
-          Applies to supervisors assigned to this client.
+          Permissions decide what assigned supervisors may do for this client.
         </p>
-        <div className="grid gap-x-4 rounded-lg border border-border bg-card p-3 sm:grid-cols-2">
-          {clientPermissions.map((perm) => (
-            <label key={perm} className="flex cursor-pointer items-center gap-2.5 py-1.5">
-              <input
-                type="checkbox"
-                checked={draft.config.permissions.includes(perm)}
-                onChange={() => togglePermission(perm)}
-                className="size-3.5 accent-[var(--primary)]"
-              />
-              <span className={cn("text-[12px] text-foreground")}>{perm}</span>
-            </label>
+        <div className="grid gap-3 rounded-lg border border-border bg-card p-3">
+          {permissionGroups.map((group) => (
+            <div key={group.group}>
+              <p className="text-eyebrow">{group.group}</p>
+              {group.permissions.map((perm) => (
+                <label key={perm} className="flex cursor-pointer items-center gap-2.5 py-1">
+                  <input
+                    type="checkbox"
+                    checked={draft.config.permissions.includes(perm)}
+                    onChange={() => togglePermission(perm)}
+                    className="size-3.5 accent-[var(--primary)]"
+                  />
+                  <span className={cn("text-[12px] text-foreground")}>{perm}</span>
+                </label>
+              ))}
+            </div>
           ))}
         </div>
       </div>
