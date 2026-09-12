@@ -37,6 +37,7 @@ import {
   type ClientDraft,
 } from "@/components/client-config-sections";
 import { useRole } from "@/lib/role-context";
+import { buildIntegrations, integrationTone } from "@/lib/integration-data";
 import { useUsers } from "@/lib/users-context";
 import { ClientSupervisorAccess } from "@/components/user-access";
 import {
@@ -522,6 +523,40 @@ function ClientConfiguration({
           <ClientSupervisorAccess clientId={clientId} clientName={draft.name} editable />
         )}
       </Panel>
+    </div>
+  );
+}
+
+function ClientDataSourceIntegration({ clientId }: { clientId: string }) {
+  const { allClients } = useRole();
+  const client = allClients.find((c) => c.id === clientId);
+  if (!client) return null;
+  const integration = buildIntegrations([client]).find((i) => i.category === "Data Source");
+  if (!integration) return null;
+
+  return (
+    <div className="rounded-lg border border-border bg-surface p-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-[13px] font-semibold text-foreground">
+            Primary Data Source: {integration.dataSource ?? "Not selected"}
+          </p>
+          <p className="text-[11px] text-muted-foreground">
+            Last sync {integration.lastActivity}
+            {integration.lastSuccessful ? ` · ${integration.lastSuccessful}` : ""}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <StatusPill tone={integrationTone(integration.status)}>{integration.status}</StatusPill>
+          <Link
+            to="/integrations/$integrationId"
+            params={{ integrationId: integration.id }}
+            className="text-[13px] font-medium text-primary hover:underline"
+          >
+            View Integration
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }
