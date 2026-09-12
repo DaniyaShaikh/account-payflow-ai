@@ -10,6 +10,8 @@ import {
 import { RuleSummaryCard } from "@/components/rule-builder";
 import { useRole } from "@/lib/role-context";
 import { useRules } from "@/lib/rules-context";
+import { useReviews } from "@/lib/reviews-context";
+import { formatWaiting, reviewStatusTone } from "@/lib/review-data";
 import { conditionSummary, statusToneForRule } from "@/lib/rules-data";
 
 export const Route = createFileRoute("/rules/$ruleId")({
