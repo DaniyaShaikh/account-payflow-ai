@@ -128,7 +128,7 @@ function RuleDetail() {
             title="Where This Rule Is Used"
             description={
               rule.type === "System Rule"
-                ? "System rules can be applied to any client"
+                ? "System rules are available globally, but are only active for clients where they have been enabled"
                 : "Client rules apply only to their own client"
             }
           >

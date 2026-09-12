@@ -39,7 +39,7 @@ interface ReviewsContextValue {
   canDecide: (review: HumanReview) => boolean;
   /** Modify / guide the AI recommendation — a separate supervisor permission. */
   canModify: (review: HumanReview) => boolean;
-  approve: (id: string) => void;
+  approve: (id: string, note?: string) => void;
   modify: (id: string, input: { action: string; guidance: string }) => void;
   reject: (id: string, input: { reason: string; comment: string }) => void;
   hold: (id: string, input: { until: string; reason: string }) => void;
@@ -113,7 +113,7 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
       },
       canDecide: (review) => can("Approve Human Reviews", review.clientId),
       canModify: (review) => can("Modify / Guide AI Recommendation", review.clientId),
-      approve: (id) => {
+      approve: (id, note) => {
         const review = allReviews.find((r) => r.id === id);
         if (!review) return;
         const at = stamp();
@@ -131,7 +131,9 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
             {
               at,
               event: "Approved by supervisor",
-              detail: `Governance requirement satisfied · ${review.ruleName}`,
+              detail: note?.trim()
+                ? `Governance requirement satisfied · ${review.ruleName} · Note: ${note.trim()}`
+                : `Governance requirement satisfied · ${review.ruleName}`,
               by: userName,
             },
           ],

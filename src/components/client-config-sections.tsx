@@ -273,12 +273,21 @@ export function MappingSection({ draft, patchConfig }: SectionProps) {
 
 export function BrandingSection({ draft, patchConfig }: SectionProps) {
   const c = draft.config;
-  const brand = c.brandName || draft.name || "Client";
+  const thirdParty = c.clientType === "Third Party";
+  // Central branding rule: First Party uses client branding, Third Party uses the
+  // collection operator (PayFlow) branding on behalf of the client.
+  const clientBrand = c.brandName || draft.name || "Client";
+  const brand = thirdParty ? "PayFlow Collections" : clientBrand;
   const initials = brand.slice(0, 2).toUpperCase();
 
   return (
     <div className="grid gap-5 lg:grid-cols-2">
       <div className="space-y-4">
+        <p className="rounded-lg border border-border bg-surface px-3 py-2 text-[11px] leading-relaxed text-muted-foreground">
+          {thirdParty
+            ? `This is a Third Party client, so customer-facing communications and the payment page use PayFlow collection-operator branding on behalf of ${clientBrand}.`
+            : `This is a First Party client, so customer-facing communications and the payment page use ${clientBrand} branding.`}
+        </p>
         <div className="flex items-center gap-3">
           <div className="grid size-11 place-items-center rounded-md border border-border bg-surface text-[13px] font-semibold text-foreground">
             {initials}
