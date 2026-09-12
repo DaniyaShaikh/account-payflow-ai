@@ -8,7 +8,7 @@ import {
   FilterSelect,
 } from "@/components/payflow-ui";
 import { useRole, useVisibleAccounts, useVisibleActivity } from "@/lib/role-context";
-import { formatCurrency, formatNumber } from "@/lib/payflow-data";
+import { formatCurrency, formatNumber, journeys } from "@/lib/payflow-data";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -54,7 +54,7 @@ function funnelVolumes(client: string, date: string, channel: string, journey: s
   return funnelStages.map((stage, i) => {
     if (i === 0) return { stage, volume: base, rate: null as number | null };
     const jitter = 0.94 + ((seed >> (i * 3)) % 13) / 100;
-    const volume = Math.round(previous * stageRates[i] * jitter);
+    const volume = Math.round(previous * (stageRates[i] ?? 1) * jitter);
     const rate = volume / previous;
     previous = volume;
     return { stage, volume, rate };
