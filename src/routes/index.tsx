@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   PageHeader,
   Panel,
@@ -11,6 +11,8 @@ import { useRole, useVisibleAccounts, useVisibleActivity } from "@/lib/role-cont
 import { useReviews } from "@/lib/reviews-context";
 import { formatCurrency, formatNumber, journeys } from "@/lib/payflow-data";
 import { paymentOutcomeTotals } from "@/lib/payment-data";
+import { useVisibleCommunications } from "@/components/communication-table";
+import { buildIntegrations, integrationSummary } from "@/lib/integration-data";
 
 export const Route = createFileRoute("/")({
   head: () => ({
