@@ -255,11 +255,16 @@ function Dashboard() {
           tone="primary"
           trend={{ direction: "up", text: "8.4% vs previous period" }}
         />
-        <KpiCard
-          label="Human Reviews Pending"
-          value={formatNumber(reviews)}
-          trend={{ direction: "flat", text: "steady week over week" }}
-        />
+        <Link to="/human-review" search={{ status: "Awaiting Review" }} className="block">
+          <KpiCard
+            label="Human Reviews Pending"
+            value={formatNumber(reviewCounts.awaiting)}
+            trend={{
+              direction: "flat",
+              text: `${reviewCounts.highPriority} high priority · open queue`,
+            }}
+          />
+        </Link>
       </div>
 
       <CommunicationFunnel />
