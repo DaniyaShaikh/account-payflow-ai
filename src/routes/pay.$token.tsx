@@ -36,7 +36,9 @@ type Step =
   | "options"
   | "full"
   | "partial"
-  | "plan"
+  | "plan-frequency"
+  | "plan-schedule"
+  | "plan-amount"
   | "review"
   | "success"
   | "plan-success"
@@ -44,6 +46,7 @@ type Step =
 
 type Mode = "full" | "partial" | "plan";
 type Method = "Card" | "Bank Account";
+type Frequency = "Daily" | "Weekly" | "Monthly";
 
 function referenceCode(seed: string) {
   let hash = 0;
@@ -51,8 +54,34 @@ function referenceCode(seed: string) {
   return `PMT-${String(hash).padStart(6, "0")}`;
 }
 
-const firstPaymentDate = "20 Sep 2026";
 const paymentDate = "12 Sep 2026";
+/** Fixed demo "today" so dates render identically on server and client. */
+const demoToday = "2026-09-12";
+
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+function parseISO(value: string) {
+  const [y, m, d] = value.split("-").map(Number);
+  return new Date(Date.UTC(y ?? 2026, (m ?? 1) - 1, d ?? 1));
+}
+
+function formatDate(date: Date) {
+  return `${String(date.getUTCDate()).padStart(2, "0")} ${MONTHS[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
+}
+
+function addIntervals(date: Date, frequency: Frequency, count: number) {
+  const next = new Date(date.getTime());
+  if (frequency === "Daily") next.setUTCDate(next.getUTCDate() + count);
+  else if (frequency === "Weekly") next.setUTCDate(next.getUTCDate() + count * 7);
+  else next.setUTCMonth(next.getUTCMonth() + count);
+  return next;
+}
+
+const frequencyMeta: Record<Frequency, { label: string; every: string; divisor: number; note: string }> = {
+  Daily: { label: "Daily", every: "every day", divisor: 60, note: "Small amounts, paid each day" },
+  Weekly: { label: "Weekly", every: "every week", divisor: 12, note: "Sync with a weekly pay cycle" },
+  Monthly: { label: "Monthly", every: "every month", divisor: 6, note: "One payment each month" },
+};
 
 function CustomerPaymentExperience() {
   const { token } = Route.useParams();
