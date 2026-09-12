@@ -1,15 +1,33 @@
 /**
- * Phase 1 user model for PayFlow.
+ * User and role model for PayFlow.
  *
- * Two internal roles only: Operations Admin (platform-wide) and Supervisor
- * (client-scoped). Client assignment controls WHERE a supervisor works,
- * permissions control WHAT they may do there. Permissions can differ per
- * assigned client.
+ * Roles are definable: PayFlow ships Operations Admin (platform-wide) and
+ * Supervisor (client-scoped), and an admin can add further roles built from the
+ * same permission set. Client assignment controls WHERE a client-scoped user
+ * works, permissions control WHAT they may do there, and permissions can still
+ * differ per assigned client.
  */
 
-export type UserRole = "Operations Admin" | "Supervisor";
+/** A role name — built-in or admin-defined. */
+export type UserRole = string;
 export type UserStatus = "Active" | "Inactive";
-export type PermissionProfile = "Full Access" | "Standard Supervisor" | "Custom";
+export type PermissionProfile = string;
+
+export type RoleScope = "Platform-wide" | "Client-scoped";
+
+export interface RoleDefinition {
+  id: string;
+  name: string;
+  scope: RoleScope;
+  description: string;
+  /** Default permission set applied when the role is assigned to a client. */
+  permissions: string[];
+  /** Built-in roles cannot be deleted. */
+  builtIn: boolean;
+}
+
+export const ADMIN_ROLE_NAME = "Operations Admin";
+export const SUPERVISOR_ROLE_NAME = "Supervisor";
 
 /** Grouped so the UI stays scannable instead of a permission matrix. */
 export const permissionGroups = [
