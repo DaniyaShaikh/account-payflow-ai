@@ -56,6 +56,7 @@ function slugify(name: string) {
 
 function AddClientPage() {
   const { isAdmin, addClient } = useRole();
+  const { users, assignClient } = useUsers();
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [created, setCreated] = useState<Client | null>(null);
@@ -107,14 +108,24 @@ function AddClientPage() {
     },
   });
 
+  /** Keep the user model in sync: assigning a supervisor here grants client access. */
+  const syncSupervisorAccess = (client: Client) =>
+    draft.supervisors.forEach((shortName) => {
+      const user = users.find((u) => u.shortName === shortName || u.name === shortName);
+      if (user) assignClient(user.id, client.id, client.name);
+    });
+
   const saveDraft = () => {
-    addClient(buildClient("Draft"));
+    const client = buildClient("Draft");
+    addClient(client);
+    syncSupervisorAccess(client);
     navigate({ to: "/clients" });
   };
 
   const activate = () => {
     const client = buildClient("Active");
     addClient(client);
+    syncSupervisorAccess(client);
     setCreated(client);
   };
 
