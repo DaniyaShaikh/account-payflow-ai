@@ -1,4 +1,5 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import { useContext, useMemo, useState, type ReactNode } from "react";
+import { createStableContext } from "./stable-context";
 import { rulesSeed, slugify, type Rule } from "./rules-data";
 import { useRole } from "./role-context";
 
@@ -13,7 +14,7 @@ interface RulesContextValue {
   canCreateRuleForClient: (clientId: string | null) => boolean;
 }
 
-const RulesContext = createContext<RulesContextValue | null>(null);
+const RulesContext = createStableContext<RulesContextValue | null>("rules", null);
 
 export function RulesProvider({ children }: { children: ReactNode }) {
   const [allRules, setAllRules] = useState<Rule[]>(rulesSeed);
