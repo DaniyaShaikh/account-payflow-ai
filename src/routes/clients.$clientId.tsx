@@ -162,19 +162,22 @@ function ClientDetail() {
       {tab === "Accounts" && <ClientAccounts clientName={client.name} accounts={accounts} />}
 
       {tab === "Journeys" && (
-        <PlaceholderSection
+        <Panel
           title="Journeys"
-          description={`Collection journeys configured for ${client.name}`}
-          items={journeys.slice(0, 3)}
-        />
+          description={`Global journeys in use by ${client.name} and ${client.name}-specific journeys`}
+        >
+          <JourneyLibrary journeys={journeysForClient(client.id)} showClientFilter={false} />
+        </Panel>
       )}
       {tab === "Communications" && (
-        <PlaceholderSection
+        <Panel
           title="Communications"
-          description="Outbound and inbound message history"
-          items={["Email", "SMS", "WhatsApp (later)"]}
-        />
+          description={`Customer communications sent for ${client.name} accounts`}
+        >
+          <CommunicationTable rows={communicationsForClient(client.id)} showClientFilter={false} />
+        </Panel>
       )}
+
       {tab === "Rules" && <ClientRules clientId={client.id} clientName={client.name} />}
       {tab === "Human Reviews" && (
         <ReviewQueue
