@@ -72,20 +72,46 @@ function UserMenu({ compact = false }: { compact?: boolean }) {
       <DropdownMenuTrigger
         className={
           compact
-            ? "flex items-center gap-2 rounded-md border border-border bg-card px-2 py-1.5 transition-colors hover:bg-surface"
+            ? "flex items-center gap-2.5 rounded-lg px-1.5 py-1.5 text-left transition-colors hover:bg-muted"
             : "flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left transition-colors hover:bg-sidebar-accent"
         }
       >
-        <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-semibold text-primary">
+        <span
+          className={
+            compact
+              ? "flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-bold text-primary"
+              : "flex size-8 shrink-0 items-center justify-center rounded-full bg-sidebar-primary/25 text-[11px] font-bold text-sidebar-foreground"
+          }
+        >
           {initials}
         </span>
-        <span className="min-w-0 leading-tight">
-          <span className="block truncate text-[13px] font-medium text-foreground">{userName}</span>
-          {!compact && (
-            <span className="block truncate text-[11px] text-muted-foreground">{roleLabel}</span>
-          )}
+        <span className="hidden min-w-0 leading-tight sm:block">
+          <span
+            className={
+              compact
+                ? "block truncate text-[13px] font-semibold text-foreground"
+                : "block truncate text-[13px] font-semibold text-sidebar-foreground"
+            }
+          >
+            {userName}
+          </span>
+          <span
+            className={
+              compact
+                ? "block truncate text-[11px] text-muted-foreground"
+                : "block truncate text-[11px] text-sidebar-muted"
+            }
+          >
+            {roleLabel}
+          </span>
         </span>
-        {!compact && <ChevronsUpDown className="ml-auto size-3.5 text-muted-foreground" />}
+        <ChevronsUpDown
+          className={
+            compact
+              ? "size-3.5 text-muted-foreground"
+              : "ml-auto size-3.5 text-sidebar-muted"
+          }
+        />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" side="top" className="w-60">
         <DropdownMenuLabel className="text-eyebrow">Preview role</DropdownMenuLabel>
