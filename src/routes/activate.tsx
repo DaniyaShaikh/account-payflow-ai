@@ -5,14 +5,14 @@ import { PayflowWordmark } from "@/components/brand";
 import { Btn, Field } from "@/components/payflow-ui";
 
 type ActivateSearch = {
-  token?: string;
-  email?: string;
+  token: string | undefined;
+  email: string | undefined;
 };
 
 export const Route = createFileRoute("/activate")({
   validateSearch: (search: Record<string, unknown>): ActivateSearch => ({
-    token: typeof search.token === "string" ? search.token : undefined,
-    email: typeof search.email === "string" ? search.email : undefined,
+    token: typeof search["token"] === "string" ? search["token"] : undefined,
+    email: typeof search["email"] === "string" ? search["email"] : undefined,
   }),
   head: () => ({
     meta: [
