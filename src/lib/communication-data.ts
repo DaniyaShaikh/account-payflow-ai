@@ -145,38 +145,7 @@ export function brandingFor(clientId: string) {
 }
 
 export const communications: Communication[] = [
-  {
-    id: "cm-90412",
-    clientId: "paypal",
-    accountId: "ct-20394-placeholder-unused",
-    customer: "",
-    reference: "",
-    channel: "SMS",
-    purpose: "Payment Reminder",
-    journeyId: "progressive-collection",
-    journeyStage: "Second Reminder",
-    status: "Delivered",
-    engagement: null,
-    dateBucket: "Today",
-    dateLabel: "12 Sep 2026",
-    time: "09:42",
-    createdAt: "12 Sep 2026 · 09:40",
-    sentAt: "12 Sep 2026 · 09:42",
-    balance: 0,
-    bodyLines: [],
-    paymentLink: false,
-    whyMessage: "",
-    whyChannel: "",
-    whyTiming: "",
-    events: [],
-  },
-];
 
-// The seeded list above is replaced below with the full demo set; keeping a
-// single source of truth for the demo communications.
-communications.length = 0;
-
-communications.push(
   {
     id: "cm-90412",
     clientId: "paypal",
