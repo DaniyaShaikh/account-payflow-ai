@@ -9,7 +9,7 @@ import {
   useRouterState,
   useNavigate,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { RoleProvider } from "../lib/role-context";
