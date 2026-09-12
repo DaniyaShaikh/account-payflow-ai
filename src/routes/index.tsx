@@ -204,7 +204,7 @@ function Dashboard() {
   const totalAccounts = scoped.reduce((sum, c) => sum + c.accounts, 0);
   const totalCases = scoped.reduce((sum, c) => sum + c.activeCases, 0);
   const recovered = scoped.reduce((sum, c) => sum + c.recovered, 0);
-  const reviews = scoped.reduce((sum, c) => sum + c.reviewsPending, 0);
+  const { counts: reviewCounts } = useReviews();
 
   const scopedIds = scoped.map((c) => c.id);
   const scopedActivity = activity.filter((a) => scopedIds.includes(a.clientId));
