@@ -174,18 +174,18 @@ function UsersPage() {
                 <PrimaryCell title={u.name} subtitle={u.email} />
               </Td>
               <Td>
-                <StatusPill tone={u.role === "Operations Admin" ? "info" : "neutral"}>
+                <StatusPill tone={isPlatformRoleName(u.role) ? "info" : "neutral"}>
                   {u.role}
                 </StatusPill>
               </Td>
               <Td className="text-muted-foreground">
-                {u.role === "Operations Admin"
+                {isPlatformRoleName(u.role)
                   ? "All Clients"
                   : u.assignments.length === 0
                     ? "None assigned"
                     : u.assignments.map((a) => clientName(a.clientId)).join(", ")}
               </Td>
-              <Td className="text-muted-foreground">{userProfile(u)}</Td>
+              <Td className="text-muted-foreground">{userProfile(u, roles)}</Td>
               <Td>
                 <StatusPill tone={u.status === "Active" ? "success" : "neutral"}>
                   {u.status}
