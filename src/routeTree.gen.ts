@@ -10,12 +10,60 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CommunicationsRouteImport } from './routes/communications'
+import { Route as HumanReviewRouteImport } from './routes/human-review'
+import { Route as IntegrationsRouteImport } from './routes/integrations'
+import { Route as JourneysRouteImport } from './routes/journeys'
+import { Route as RulesRouteImport } from './routes/rules'
+import { Route as UsersRouteImport } from './routes/users'
+import { Route as AccountsIndexRouteImport } from './routes/accounts.index'
+import { Route as AccountsAccountIdRouteImport } from './routes/accounts.$accountId'
 import { Route as ClientsIndexRouteImport } from './routes/clients.index'
 import { Route as ClientsClientIdRouteImport } from './routes/clients.$clientId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunicationsRoute = CommunicationsRouteImport.update({
+  id: '/communications',
+  path: '/communications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HumanReviewRoute = HumanReviewRouteImport.update({
+  id: '/human-review',
+  path: '/human-review',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IntegrationsRoute = IntegrationsRouteImport.update({
+  id: '/integrations',
+  path: '/integrations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JourneysRoute = JourneysRouteImport.update({
+  id: '/journeys',
+  path: '/journeys',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RulesRoute = RulesRouteImport.update({
+  id: '/rules',
+  path: '/rules',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UsersRoute = UsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountsIndexRoute = AccountsIndexRouteImport.update({
+  id: '/accounts/',
+  path: '/accounts/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountsAccountIdRoute = AccountsAccountIdRouteImport.update({
+  id: '/accounts/$accountId',
+  path: '/accounts/$accountId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ClientsIndexRoute = ClientsIndexRouteImport.update({
@@ -31,31 +79,97 @@ const ClientsClientIdRoute = ClientsClientIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/communications': typeof CommunicationsRoute
+  '/human-review': typeof HumanReviewRoute
+  '/integrations': typeof IntegrationsRoute
+  '/journeys': typeof JourneysRoute
+  '/rules': typeof RulesRoute
+  '/users': typeof UsersRoute
+  '/accounts/$accountId': typeof AccountsAccountIdRoute
   '/clients/$clientId': typeof ClientsClientIdRoute
+  '/accounts/': typeof AccountsIndexRoute
   '/clients/': typeof ClientsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/communications': typeof CommunicationsRoute
+  '/human-review': typeof HumanReviewRoute
+  '/integrations': typeof IntegrationsRoute
+  '/journeys': typeof JourneysRoute
+  '/rules': typeof RulesRoute
+  '/users': typeof UsersRoute
+  '/accounts/$accountId': typeof AccountsAccountIdRoute
   '/clients/$clientId': typeof ClientsClientIdRoute
+  '/accounts': typeof AccountsIndexRoute
   '/clients': typeof ClientsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/communications': typeof CommunicationsRoute
+  '/human-review': typeof HumanReviewRoute
+  '/integrations': typeof IntegrationsRoute
+  '/journeys': typeof JourneysRoute
+  '/rules': typeof RulesRoute
+  '/users': typeof UsersRoute
+  '/accounts/$accountId': typeof AccountsAccountIdRoute
   '/clients/$clientId': typeof ClientsClientIdRoute
+  '/accounts/': typeof AccountsIndexRoute
   '/clients/': typeof ClientsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/clients/$clientId' | '/clients/'
+  fullPaths:
+    | '/'
+    | '/communications'
+    | '/human-review'
+    | '/integrations'
+    | '/journeys'
+    | '/rules'
+    | '/users'
+    | '/accounts/$accountId'
+    | '/clients/$clientId'
+    | '/accounts/'
+    | '/clients/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/clients/$clientId' | '/clients'
-  id: '__root__' | '/' | '/clients/$clientId' | '/clients/'
+  to:
+    | '/'
+    | '/communications'
+    | '/human-review'
+    | '/integrations'
+    | '/journeys'
+    | '/rules'
+    | '/users'
+    | '/accounts/$accountId'
+    | '/clients/$clientId'
+    | '/accounts'
+    | '/clients'
+  id:
+    | '__root__'
+    | '/'
+    | '/communications'
+    | '/human-review'
+    | '/integrations'
+    | '/journeys'
+    | '/rules'
+    | '/users'
+    | '/accounts/$accountId'
+    | '/clients/$clientId'
+    | '/accounts/'
+    | '/clients/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CommunicationsRoute: typeof CommunicationsRoute
+  HumanReviewRoute: typeof HumanReviewRoute
+  IntegrationsRoute: typeof IntegrationsRoute
+  JourneysRoute: typeof JourneysRoute
+  RulesRoute: typeof RulesRoute
+  UsersRoute: typeof UsersRoute
+  AccountsAccountIdRoute: typeof AccountsAccountIdRoute
   ClientsClientIdRoute: typeof ClientsClientIdRoute
+  AccountsIndexRoute: typeof AccountsIndexRoute
   ClientsIndexRoute: typeof ClientsIndexRoute
 }
 
@@ -66,6 +180,62 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/communications': {
+      id: '/communications'
+      path: '/communications'
+      fullPath: '/communications'
+      preLoaderRoute: typeof CommunicationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/human-review': {
+      id: '/human-review'
+      path: '/human-review'
+      fullPath: '/human-review'
+      preLoaderRoute: typeof HumanReviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/integrations': {
+      id: '/integrations'
+      path: '/integrations'
+      fullPath: '/integrations'
+      preLoaderRoute: typeof IntegrationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/journeys': {
+      id: '/journeys'
+      path: '/journeys'
+      fullPath: '/journeys'
+      preLoaderRoute: typeof JourneysRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rules': {
+      id: '/rules'
+      path: '/rules'
+      fullPath: '/rules'
+      preLoaderRoute: typeof RulesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/users': {
+      id: '/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof UsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/accounts/': {
+      id: '/accounts/'
+      path: '/accounts'
+      fullPath: '/accounts/'
+      preLoaderRoute: typeof AccountsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/accounts/$accountId': {
+      id: '/accounts/$accountId'
+      path: '/accounts/$accountId'
+      fullPath: '/accounts/$accountId'
+      preLoaderRoute: typeof AccountsAccountIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/clients/': {
@@ -87,7 +257,15 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CommunicationsRoute: CommunicationsRoute,
+  HumanReviewRoute: HumanReviewRoute,
+  IntegrationsRoute: IntegrationsRoute,
+  JourneysRoute: JourneysRoute,
+  RulesRoute: RulesRoute,
+  UsersRoute: UsersRoute,
+  AccountsAccountIdRoute: AccountsAccountIdRoute,
   ClientsClientIdRoute: ClientsClientIdRoute,
+  AccountsIndexRoute: AccountsIndexRoute,
   ClientsIndexRoute: ClientsIndexRoute,
 }
 export const routeTree = rootRouteImport
