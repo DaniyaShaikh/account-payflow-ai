@@ -59,7 +59,7 @@ function HumanReviewPage() {
 
       <Panel className="mt-5">
         <p className="text-xs leading-relaxed text-muted-foreground">
-          Human review is an exception workspace, not the normal collection workflow. Routine
+          Human review is an exception workspace, not the normal workflow. Routine
           outcomes — partial payments, successful installments, no response, failed payments and
           communication failures — update the customer context and trigger reassessment. A review is
           created only when an evaluated governance rule requires human judgement.

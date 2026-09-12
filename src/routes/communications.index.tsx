@@ -75,14 +75,14 @@ function CommunicationsPage() {
 
       <Panel
         title="Communication Log"
-        description="Every communication belongs to a client, customer account, collection case and collection workflow."
+        description="Every communication belongs to a client, customer account, collection case and workflow."
       >
         <CommunicationTable
           rows={rows}
           initialStatus={search.status ?? "All Statuses"}
           initialChannel={search.channel ?? "All Channels"}
           initialClient={search.client ?? "All Clients"}
-          initialJourney={search.journey ?? "All Collection Workflows"}
+          initialJourney={search.journey ?? "All Workflows"}
         />
       </Panel>
     </>

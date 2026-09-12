@@ -64,7 +64,7 @@ export function JourneyLibrary({
         <SearchInput
           value={query}
           onChange={setQuery}
-          placeholder="Search collection workflows"
+          placeholder="Search workflows"
           className="w-56"
         />
         {showClientFilter && (
@@ -97,14 +97,14 @@ export function JourneyLibrary({
 
       {rows.length === 0 ? (
         <EmptyState
-          title="No collection workflows match these filters"
+          title="No workflows match these filters"
           description="Adjust the search or filters to see collection strategies."
         />
       ) : (
         <DataTable
           minWidth={980}
           head={[
-            "Collection Workflow",
+            "Workflow",
             "Scope",
             "Type",
             "Accounts Assigned",

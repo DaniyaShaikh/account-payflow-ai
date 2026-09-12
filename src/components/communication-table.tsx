@@ -38,7 +38,7 @@ export function CommunicationTable({
   initialStatus = "All Statuses",
   initialChannel = "All Channels",
   initialClient = "All Clients",
-  initialJourney = "All Collection Workflows",
+  initialJourney = "All Workflows",
 }: {
   rows: Communication[];
   showClientFilter?: boolean;
@@ -78,7 +78,7 @@ export function CommunicationTable({
       return false;
     if (channel !== "All Channels" && c.channel !== channel) return false;
     if (status !== "All Statuses" && c.status !== status) return false;
-    if (journey !== "All Collection Workflows" && journeyById(c.journeyId)?.name !== journey) return false;
+    if (journey !== "All Workflows" && journeyById(c.journeyId)?.name !== journey) return false;
     if (purpose !== "All Purposes" && c.purpose !== purpose) return false;
     return true;
   });
@@ -126,10 +126,10 @@ export function CommunicationTable({
           options={["All Statuses", ...commStatuses]}
         />
         <FilterSelect
-          label="Collection Workflow"
+          label="Workflow"
           value={journey}
           onChange={setJourney}
-          options={["All Collection Workflows", ...journeyNames]}
+          options={["All Workflows", ...journeyNames]}
         />
         <FilterSelect
           label="Purpose"
@@ -154,7 +154,7 @@ export function CommunicationTable({
             "Account",
             "Channel",
             "Purpose",
-            "Collection Workflow",
+            "Workflow",
             "Status",
             "Engagement",
           ]}

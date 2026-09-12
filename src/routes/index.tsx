@@ -85,20 +85,20 @@ function CommunicationFunnel() {
   const [client, setClient] = useState("All Clients");
   const [date, setDate] = useState("Today");
   const [channel, setChannel] = useState("All Channels");
-  const [journey, setJourney] = useState("All Collection Workflows");
+  const [journey, setJourney] = useState("All Workflows");
 
   const isDefault =
     client === "All Clients" &&
     date === "Today" &&
     channel === "All Channels" &&
-    journey === "All Collection Workflows";
+    journey === "All Workflows";
 
   const rows = funnelVolumes(client, date, channel, journey);
   const activeParts = [
     client !== "All Clients" ? client : null,
     channel !== "All Channels" ? channel : null,
     date !== "Today" ? date : null,
-    journey !== "All Collection Workflows" ? journey : null,
+    journey !== "All Workflows" ? journey : null,
   ].filter(Boolean);
 
   return (
@@ -113,7 +113,7 @@ function CommunicationFunnel() {
               setClient("All Clients");
               setDate("Today");
               setChannel("All Channels");
-              setJourney("All Collection Workflows");
+              setJourney("All Workflows");
             }}
             className="text-xs font-medium text-muted-foreground underline-offset-2 transition-colors hover:text-foreground hover:underline"
           >
@@ -149,10 +149,10 @@ function CommunicationFunnel() {
           <span className="text-[13px] font-medium text-muted-foreground">WhatsApp · soon</span>
         </span>
         <FilterSelect
-          label="Collection Workflow"
+          label="Workflow"
           value={journey}
           onChange={setJourney}
-          options={["All Collection Workflows", ...journeys]}
+          options={["All Workflows", ...journeys]}
         />
         {!isDefault && (
           <span className="text-xs text-muted-foreground">{activeParts.join(" · ")}</span>
@@ -171,7 +171,7 @@ function CommunicationFunnel() {
               search={{
                 ...(client !== "All Clients" ? { client } : {}),
                 ...(channel !== "All Channels" ? { channel } : {}),
-                ...(journey !== "All Collection Workflows" ? { journey } : {}),
+                ...(journey !== "All Workflows" ? { journey } : {}),
                 ...(stageStatus(row.stage) ? { status: stageStatus(row.stage) } : {}),
               }}
               className="group block rounded-lg px-3 py-2.5 transition-colors hover:bg-surface"

@@ -6,13 +6,13 @@ import { formatNumber } from "@/lib/payflow-data";
 export const Route = createFileRoute("/journeys/")({
   head: () => ({
     meta: [
-      { title: "Collection Collection Workflows — PayFlow" },
+      { title: "Workflows — PayFlow" },
       {
         name: "description",
         content:
           "Library of approved, AI-adapted and AI-created collection strategies applied to customer accounts across PayFlow clients.",
       },
-      { property: "og:title", content: "Collection Collection Workflows — PayFlow" },
+      { property: "og:title", content: "Workflows — PayFlow" },
       {
         property: "og:description",
         content: "Reusable collection strategies, their scope, assigned accounts and outcomes.",
@@ -29,34 +29,34 @@ function JourneysPage() {
 
   const active = journeys.filter((j) => j.status === "Active");
   const assigned = journeys.reduce((sum, j) => sum + j.accountsAssigned, 0);
-  const adapted = journeys.filter((j) => j.type === "AI-Adapted Collection Workflow").length;
-  const created = journeys.filter((j) => j.type === "AI-Created Collection Workflow").length;
+  const adapted = journeys.filter((j) => j.type === "AI-Adapted Workflow").length;
+  const created = journeys.filter((j) => j.type === "AI-Created Workflow").length;
 
   return (
     <>
       <PageHeader
-        title="Collection Workflows"
-        description="View and manage the collection strategies used across PayFlow."
+        title="Workflows"
+        description="Manage and monitor the collection workflows used across PayFlow."
       />
 
       <div className="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <KpiCard label="Active Collection Workflows" value={String(active.length)} hint="Available for assignment" />
+        <KpiCard label="Active Workflows" value={String(active.length)} hint="Available for assignment" />
         <KpiCard
           label="Accounts Currently Assigned"
           value={formatNumber(assigned)}
-          hint="Across all visible collection workflows"
+          hint="Across all visible workflows"
         />
-        <KpiCard label="AI-Adapted Collection Workflows" value={String(adapted)} hint="Adapted from approved strategies" />
+        <KpiCard label="AI-Adapted Workflows" value={String(adapted)} hint="Adapted from approved strategies" />
         <KpiCard
-          label="AI-Created Collection Workflows"
+          label="AI-Created Workflows"
           value={String(created)}
-          hint="Created where no collection workflow fitted"
+          hint="Created where no workflow fitted"
         />
       </div>
 
       <Panel
-        title="Collection Workflow Library"
-        description="Reusable collection strategies. Existing collection workflows are reused or adapted before a new one is created."
+        title="Workflow Library"
+        description="Reusable collection strategies. Existing workflows are reused or adapted before a new one is created."
       >
         <JourneyLibrary journeys={journeys} />
       </Panel>

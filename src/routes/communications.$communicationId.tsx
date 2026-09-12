@@ -82,8 +82,8 @@ function CommunicationDetail() {
     { label: "Collection Case", value: account ? account.status : "—" },
     { label: "Channel", value: comm.channel },
     { label: "Purpose", value: comm.purpose },
-    { label: "Collection Workflow", value: journey?.name ?? "—" },
-    { label: "Collection Workflow Stage", value: comm.journeyStage },
+    { label: "Workflow", value: journey?.name ?? "—" },
+    { label: "Workflow Stage", value: comm.journeyStage },
     { label: "Status", value: comm.status },
     { label: "Created", value: comm.createdAt },
     { label: "Sent", value: comm.sentAt ?? "Not sent" },
@@ -156,7 +156,7 @@ function CommunicationDetail() {
                     params={{ journeyId: journey.id }}
                     className="font-medium text-primary hover:underline"
                   >
-                    View collection workflow · {journey.name}
+                    View workflow · {journey.name}
                   </Link>
                 </li>
               )}

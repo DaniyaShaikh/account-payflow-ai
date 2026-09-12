@@ -41,7 +41,7 @@ const navGroups = [
   {
     label: "AI Operations",
     items: [
-      { to: "/journeys", label: "Collection Workflows", icon: RouteIcon },
+      { to: "/journeys", label: "Workflows", icon: RouteIcon },
       { to: "/communications", label: "Communications", icon: MessageSquare },
     ],
   },
