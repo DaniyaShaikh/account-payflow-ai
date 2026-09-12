@@ -6,12 +6,20 @@ import {
   KpiCard,
   DataTable,
   Td,
+  Tr,
   StatusPill,
   statusTone,
   FilterSelect,
   PlaceholderSection,
   Btn,
+  EmptyState,
+  PrimaryCell,
+  SectionHeading,
+  SearchInput,
+  TabBar,
 } from "@/components/payflow-ui";
+import { useRules } from "@/lib/rules-context";
+import { ruleConditionSummary, statusToneForRule } from "@/lib/rules-data";
 import {
   ProfileSection,
   DataSourceSection,
@@ -140,22 +148,7 @@ function ClientDetail() {
         }
       />
 
-      <div className="mb-5 flex gap-1 overflow-x-auto border-b border-border">
-        {tabs.map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={cn(
-              "-mb-px border-b-2 px-3 py-2 text-[13px] font-medium whitespace-nowrap transition-colors",
-              tab === t
-                ? "border-primary text-foreground"
-                : "border-transparent text-muted-foreground hover:text-foreground",
-            )}
-          >
-            {t}
-          </button>
-        ))}
-      </div>
+      <TabBar tabs={tabs} active={tab} onChange={setTab} />
 
       {tab === "Overview" && (
         <ClientOverview
@@ -181,17 +174,7 @@ function ClientDetail() {
           items={["Email", "SMS", "WhatsApp (later)"]}
         />
       )}
-      {tab === "Rules" && (
-        <PlaceholderSection
-          title="Rules"
-          description={
-            client.config.governanceRules.length
-              ? `${client.config.governanceRules.length} governance rules applied`
-              : "No governance rules applied"
-          }
-          items={client.config.governanceRules}
-        />
-      )}
+      {tab === "Rules" && <ClientRules clientId={client.id} clientName={client.name} />}
       {tab === "Human Reviews" && (
         <PlaceholderSection
           title="Human Reviews"
@@ -364,11 +347,11 @@ function ClientAccounts({
         a client.
       </p>
       <div className="mb-3 flex flex-wrap items-center gap-2">
-        <input
+        <SearchInput
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={setSearch}
           placeholder="Search customer or reference"
-          className="w-60 rounded-md border border-border bg-card px-2.5 py-1.5 text-[13px] outline-none focus:border-primary"
+          className="w-60"
         />
         <FilterSelect
           label="Status"
@@ -500,6 +483,74 @@ function ClientConfiguration({
         {section === "AI & Governance" && <AiGovernanceSection {...props} />}
         {section === "Supervisors & Permissions" && <SupervisorSection {...props} />}
       </Panel>
+    </div>
+  );
+}
+
+function ClientRules({ clientId, clientName }: { clientId: string; clientName: string }) {
+  const { rulesForClient, canCreateRuleForClient } = useRules();
+  const { systemRules, clientRules } = rulesForClient(clientId);
+  const canCreate = canCreateRuleForClient(clientId);
+
+  const table = (rules: typeof systemRules, empty: string) =>
+    rules.length === 0 ? (
+      <EmptyState title={empty} />
+    ) : (
+      <DataTable minWidth={760} head={["Rule Name", "Category", "Condition Summary", "Result", "Status"]}>
+        {rules.map((rule) => (
+          <Tr key={rule.id}>
+            <Td>
+              <Link to="/rules/$ruleId" params={{ ruleId: rule.id }} className="hover:underline">
+                <PrimaryCell title={rule.name} subtitle={rule.type} />
+              </Link>
+            </Td>
+            <Td className="text-muted-foreground">{rule.category}</Td>
+            <Td className="max-w-[300px] truncate">{ruleConditionSummary(rule)}</Td>
+            <Td className="text-muted-foreground">{rule.action}</Td>
+            <Td>
+              <StatusPill tone={statusToneForRule(rule.status)}>{rule.status}</StatusPill>
+            </Td>
+          </Tr>
+        ))}
+      </DataTable>
+    );
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-xs text-muted-foreground">
+          Governance rules evaluated for {clientName} only. Rules belonging to other clients never
+          apply here.
+        </p>
+        {canCreate ? (
+          <div className="flex items-center gap-2">
+            <Link to="/rules">
+              <Btn>Add Existing Rule</Btn>
+            </Link>
+            <Link to="/rules/new">
+              <Btn variant="primary">Create Client Rule</Btn>
+            </Link>
+          </div>
+        ) : (
+          <StatusPill>Read-only</StatusPill>
+        )}
+      </div>
+
+      <div>
+        <SectionHeading
+          title="System Rules Applied"
+          description="Reusable governance rules from the PayFlow catalogue"
+        />
+        {table(systemRules, "No system rules applied to this client")}
+      </div>
+
+      <div>
+        <SectionHeading
+          title={`${clientName} Client Rules`}
+          description="Configured specifically for this client"
+        />
+        {table(clientRules, "No client rules configured yet")}
+      </div>
     </div>
   );
 }

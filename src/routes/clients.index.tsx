@@ -4,8 +4,11 @@ import {
   PageHeader,
   DataTable,
   Td,
+  Tr,
   StatusPill,
   FilterSelect,
+  SearchInput,
+  PrimaryCell,
   Btn,
   type Tone,
 } from "@/components/payflow-ui";
@@ -78,12 +81,12 @@ function ClientsPage() {
         }
       />
 
-      <div className="mb-3 flex flex-wrap items-center gap-2">
-        <input
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <SearchInput
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={setSearch}
           placeholder="Search clients"
-          className="w-56 rounded-md border border-border bg-card px-2.5 py-1.5 text-[13px] outline-none focus:border-primary"
+          className="w-56"
         />
         <FilterSelect
           label="Status"
@@ -106,6 +109,7 @@ function ClientsPage() {
       </div>
 
       <DataTable
+        minWidth={980}
         head={[
           "Client",
           "Customer Accounts",
@@ -118,31 +122,26 @@ function ClientsPage() {
         ]}
       >
         {rows.map((c) => (
-          <tr key={c.id} className="border-b border-border last:border-0 hover:bg-surface">
+          <Tr key={c.id}>
             <Td>
-              <Link
-                to="/clients/$clientId"
-                params={{ clientId: c.id }}
-                className="font-semibold text-foreground hover:underline"
-              >
-                {c.name}
+              <Link to="/clients/$clientId" params={{ clientId: c.id }} className="hover:underline">
+                <PrimaryCell title={c.name} subtitle={`${c.industry} · ${c.config.code || "—"}`} />
               </Link>
-              <span className="ml-2 text-xs text-muted-foreground">{c.industry}</span>
             </Td>
             <Td className="tabular">{formatNumber(c.accounts)}</Td>
             <Td className="tabular">{formatNumber(c.activeCases)}</Td>
-            <Td className="tabular">{formatCurrency(c.outstanding, true)}</Td>
-            <Td className="tabular">{formatCurrency(c.recovered, true)}</Td>
+            <Td className="tabular font-medium">{formatCurrency(c.outstanding, true)}</Td>
+            <Td className="tabular font-medium text-success">
+              {formatCurrency(c.recovered, true)}
+            </Td>
             <Td>
-              <StatusPill tone={c.aiMode === "Autopilot" ? "info" : "neutral"}>
-                {c.aiMode}
-              </StatusPill>
+              <StatusPill tone={c.aiMode === "Autopilot" ? "ai" : "neutral"}>{c.aiMode}</StatusPill>
             </Td>
             <Td className="text-muted-foreground">{c.supervisors.join(", ") || "—"}</Td>
             <Td>
               <StatusPill tone={clientStatusTone(c.status)}>{c.status}</StatusPill>
             </Td>
-          </tr>
+          </Tr>
         ))}
         {rows.length === 0 && (
           <tr>

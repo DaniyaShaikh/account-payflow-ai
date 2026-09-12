@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { PageHeader, Panel, Btn, StatusPill } from "@/components/payflow-ui";
+import { PageHeader, Panel, Btn, StatusPill, type Tone } from "@/components/payflow-ui";
 import {
   ProfileSection,
   DataSourceSection,
@@ -345,7 +345,7 @@ function ReviewBlock({
 }: {
   title: string;
   rows: string[];
-  tone?: "neutral" | "success" | "warning" | "info" | "danger";
+  tone?: Tone;
 }) {
   return (
     <div className="rounded-lg border border-border bg-surface px-3.5 py-3">

@@ -484,12 +484,27 @@ export const collectionStatuses: CollectionStatus[] = [
   "Resolved",
 ];
 
+function trim(value: number, digits: number) {
+  return value
+    .toFixed(digits)
+    .replace(/(\.\d*?)0+$/, "$1")
+    .replace(/\.$/, "");
+}
+
+// Deterministic compact formatting (identical on server and client — Intl
+// compact notation differs between ICU builds and breaks hydration).
 export function formatCurrency(value: number, compact = false) {
+  if (compact) {
+    const abs = Math.abs(value);
+    const sign = value < 0 ? "-" : "";
+    if (abs >= 1_000_000) return `${sign}$${trim(abs / 1_000_000, 2)}M`;
+    if (abs >= 1_000) return `${sign}$${trim(abs / 1_000, abs < 10_000 ? 1 : 0)}K`;
+    return `${sign}$${Math.round(abs)}`;
+  }
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
-    maximumFractionDigits: compact ? 1 : 0,
-    notation: compact ? "compact" : "standard",
+    maximumFractionDigits: 0,
   }).format(value);
 }
 

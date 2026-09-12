@@ -9,7 +9,7 @@ import {
   Scale,
   Users,
   Plug,
-  ChevronDown,
+  ChevronsUpDown,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useRole } from "@/lib/role-context";
@@ -55,24 +55,71 @@ const navGroups = [
   },
 ] as const;
 
+function UserMenu({ compact = false }: { compact?: boolean }) {
+  const { role, setRole, userName, roleLabel } = useRole();
+  const initials = userName
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2);
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        className={
+          compact
+            ? "flex items-center gap-2 rounded-md border border-border bg-card px-2 py-1.5 transition-colors hover:bg-surface"
+            : "flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left transition-colors hover:bg-sidebar-accent"
+        }
+      >
+        <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-semibold text-primary">
+          {initials}
+        </span>
+        <span className="min-w-0 leading-tight">
+          <span className="block truncate text-[13px] font-medium text-foreground">{userName}</span>
+          {!compact && (
+            <span className="block truncate text-[11px] text-muted-foreground">{roleLabel}</span>
+          )}
+        </span>
+        {!compact && <ChevronsUpDown className="ml-auto size-3.5 text-muted-foreground" />}
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" side="top" className="w-60">
+        <DropdownMenuLabel className="text-eyebrow">Preview role</DropdownMenuLabel>
+        <DropdownMenuItem onClick={() => setRole("admin")}>
+          <span className="flex-1">Operations Admin</span>
+          {role === "admin" && <span className="text-xs text-primary">Active</span>}
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setRole("supervisor")}>
+          <span className="flex-1">Supervisor · Zeeshan</span>
+          {role === "supervisor" && <span className="text-xs text-primary">Active</span>}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuLabel className="text-[11px] font-normal text-muted-foreground">
+          Supervisors only see assigned clients.
+        </DropdownMenuLabel>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 export function AppShell({ children }: { children: ReactNode }) {
-  const { role, setRole, userName, roleLabel, visibleClients } = useRole();
+  const { role, visibleClients } = useRole();
 
   return (
     <div className="flex min-h-screen bg-surface">
-      <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-border bg-sidebar lg:flex">
-        <div className="flex h-14 items-center gap-2.5 border-b border-sidebar-border px-5">
-          <span className="flex size-6 items-center justify-center rounded-md bg-primary text-[11px] font-bold text-primary-foreground">
+      <aside className="sticky top-0 hidden h-screen w-[236px] shrink-0 flex-col border-r border-sidebar-border bg-sidebar lg:flex">
+        <div className="flex h-16 items-center gap-2.5 px-5">
+          <span className="flex size-7 items-center justify-center rounded-lg bg-primary text-[12px] font-bold text-primary-foreground">
             P
           </span>
-          <span className="text-sm font-semibold tracking-tight text-sidebar-foreground">
+          <span className="text-[15px] font-semibold tracking-tight text-sidebar-foreground">
             PayFlow
           </span>
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-3 py-4">
+        <nav className="flex-1 overflow-y-auto px-3 pb-4">
           {navGroups.map((group) => (
-            <div key={group.label} className="mb-5">
+            <div key={group.label} className="mb-4">
               <p className="text-eyebrow px-2 pb-1.5">{group.label}</p>
               <ul className="space-y-0.5">
                 {group.items.map((item) => (
@@ -80,10 +127,10 @@ export function AppShell({ children }: { children: ReactNode }) {
                     <Link
                       to={item.to}
                       activeOptions={{ exact: "exact" in item ? item.exact : false }}
-                      className="flex items-center gap-2.5 rounded-md px-2 py-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[status=active]:bg-sidebar-accent data-[status=active]:text-sidebar-accent-foreground"
+                      className="group relative flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground data-[status=active]:bg-sidebar-accent data-[status=active]:text-sidebar-accent-foreground"
                       activeProps={{ className: "font-semibold" }}
                     >
-                      <item.icon className="size-4 shrink-0 opacity-70" />
+                      <item.icon className="size-[15px] shrink-0 opacity-70" />
                       {item.label}
                     </Link>
                   </li>
@@ -93,18 +140,18 @@ export function AppShell({ children }: { children: ReactNode }) {
           ))}
         </nav>
 
-        <div className="border-t border-sidebar-border px-3 py-3">
-          <p className="text-eyebrow px-2 pb-1">Client access</p>
-          <p className="px-2 text-xs text-muted-foreground">
+        <div className="border-t border-sidebar-border p-2">
+          <p className="px-2 pt-1 pb-2 text-[11px] text-muted-foreground">
             {role === "admin"
-              ? "All clients"
-              : `${visibleClients.map((c) => c.name).join(", ")}`}
+              ? "All clients in view"
+              : visibleClients.map((c) => c.name).join(" · ")}
           </p>
+          <UserMenu />
         </div>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 flex h-14 items-center justify-between gap-4 border-b border-border bg-background/85 px-5 backdrop-blur lg:px-8">
+        <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-4 border-b border-border bg-background/80 px-5 backdrop-blur lg:px-10">
           <div className="flex items-center gap-2 lg:hidden">
             <span className="flex size-6 items-center justify-center rounded-md bg-primary text-[11px] font-bold text-primary-foreground">
               P
@@ -115,37 +162,12 @@ export function AppShell({ children }: { children: ReactNode }) {
             Collections operations · {visibleClients.length} client
             {visibleClients.length === 1 ? "" : "s"} in view
           </p>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger className="flex items-center gap-2.5 rounded-md border border-border bg-card px-2.5 py-1.5 text-left transition-colors hover:bg-accent">
-              <span className="flex size-6 items-center justify-center rounded-full bg-secondary text-[10px] font-semibold text-secondary-foreground">
-                {userName.slice(0, 1)}
-              </span>
-              <span className="leading-tight">
-                <span className="block text-[13px] font-medium">{userName}</span>
-                <span className="block text-[11px] text-muted-foreground">{roleLabel}</span>
-              </span>
-              <ChevronDown className="size-3.5 text-muted-foreground" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel className="text-eyebrow">Preview role</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => setRole("admin")}>
-                <span className="flex-1">Operations Admin</span>
-                {role === "admin" && <span className="text-xs text-primary">Active</span>}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setRole("supervisor")}>
-                <span className="flex-1">Supervisor · Zeeshan</span>
-                {role === "supervisor" && <span className="text-xs text-primary">Active</span>}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel className="text-[11px] font-normal text-muted-foreground">
-                Supervisors only see assigned clients.
-              </DropdownMenuLabel>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="lg:hidden">
+            <UserMenu compact />
+          </div>
         </header>
 
-        <main className="flex-1 px-5 py-6 lg:px-8 lg:py-8">
+        <main className="flex-1 px-5 py-7 lg:px-10 lg:py-9">
           <div className="mx-auto w-full max-w-[1180px]">{children}</div>
         </main>
       </div>
