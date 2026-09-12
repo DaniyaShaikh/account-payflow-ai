@@ -40,7 +40,16 @@ export const Route = createFileRoute("/users/$userId")({
 function UserDetail() {
   const { userId } = Route.useParams();
   const { isAdmin, allClients } = useRole();
-  const { userById, updateUser, setUserStatus, assignClient, removeAssignment } = useUsers();
+  const {
+    userById,
+    updateUser,
+    setUserStatus,
+    assignClient,
+    removeAssignment,
+    roles,
+    roleNames,
+    isPlatformRoleName,
+  } = useUsers();
   const user = userById(userId);
   const [editing, setEditing] = useState(false);
   const [assigning, setAssigning] = useState(false);
