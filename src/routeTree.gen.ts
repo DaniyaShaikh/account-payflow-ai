@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CommunicationsRouteImport } from './routes/communications'
-import { Route as HumanReviewRouteImport } from './routes/human-review'
 import { Route as IntegrationsRouteImport } from './routes/integrations'
 import { Route as JourneysRouteImport } from './routes/journeys'
 import { Route as UsersRouteImport } from './routes/users'
@@ -32,11 +31,6 @@ const IndexRoute = IndexRouteImport.update({
 const CommunicationsRoute = CommunicationsRouteImport.update({
   id: '/communications',
   path: '/communications',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const HumanReviewRoute = HumanReviewRouteImport.update({
-  id: '/human-review',
-  path: '/human-review',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IntegrationsRoute = IntegrationsRouteImport.update({
@@ -98,7 +92,6 @@ const RulesNewRoute = RulesNewRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/communications': typeof CommunicationsRoute
-  '/human-review': typeof HumanReviewRoute
   '/integrations': typeof IntegrationsRoute
   '/journeys': typeof JourneysRoute
   '/users': typeof UsersRoute
@@ -114,7 +107,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/communications': typeof CommunicationsRoute
-  '/human-review': typeof HumanReviewRoute
   '/integrations': typeof IntegrationsRoute
   '/journeys': typeof JourneysRoute
   '/users': typeof UsersRoute
@@ -131,7 +123,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/communications': typeof CommunicationsRoute
-  '/human-review': typeof HumanReviewRoute
   '/integrations': typeof IntegrationsRoute
   '/journeys': typeof JourneysRoute
   '/users': typeof UsersRoute
@@ -149,7 +140,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/communications'
-    | '/human-review'
     | '/integrations'
     | '/journeys'
     | '/users'
@@ -165,7 +155,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/communications'
-    | '/human-review'
     | '/integrations'
     | '/journeys'
     | '/users'
@@ -181,7 +170,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/communications'
-    | '/human-review'
     | '/integrations'
     | '/journeys'
     | '/users'
@@ -198,7 +186,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CommunicationsRoute: typeof CommunicationsRoute
-  HumanReviewRoute: typeof HumanReviewRoute
   IntegrationsRoute: typeof IntegrationsRoute
   JourneysRoute: typeof JourneysRoute
   UsersRoute: typeof UsersRoute
@@ -226,13 +213,6 @@ declare module '@tanstack/react-router' {
       path: '/communications'
       fullPath: '/communications'
       preLoaderRoute: typeof CommunicationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/human-review': {
-      id: '/human-review'
-      path: '/human-review'
-      fullPath: '/human-review'
-      preLoaderRoute: typeof HumanReviewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/integrations': {
@@ -318,7 +298,6 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CommunicationsRoute: CommunicationsRoute,
-  HumanReviewRoute: HumanReviewRoute,
   IntegrationsRoute: IntegrationsRoute,
   JourneysRoute: JourneysRoute,
   UsersRoute: UsersRoute,
