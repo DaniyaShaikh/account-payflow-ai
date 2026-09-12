@@ -13,6 +13,7 @@ import {
   Bell,
 } from "lucide-react";
 import type { ReactNode } from "react";
+import { PayflowWordmark } from "@/components/brand";
 import { useRole } from "@/lib/role-context";
 import { useReviews } from "@/lib/reviews-context";
 import { formatWaiting } from "@/lib/review-data";
