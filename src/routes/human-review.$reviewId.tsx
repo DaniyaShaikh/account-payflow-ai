@@ -47,7 +47,7 @@ type Mode = null | "approve" | "modify" | "reject" | "hold";
 
 function ReviewDetail() {
   const { reviewId } = Route.useParams();
-  const { visibleReviews, canDecide, approve, modify, reject, hold } = useReviews();
+  const { visibleReviews, canDecide, canModify, approve, modify, reject, hold } = useReviews();
   const { visibleClients } = useRole();
   const [mode, setMode] = useState<Mode>(null);
   const [why, setWhy] = useState(false);
@@ -187,12 +187,20 @@ function ReviewDetail() {
                   <Btn variant="primary" onClick={() => setMode("approve")}>
                     Approve
                   </Btn>
-                  <Btn onClick={() => setMode("modify")}>Modify / Guide</Btn>
+                  {canModify(review) && (
+                    <Btn onClick={() => setMode("modify")}>Modify / Guide</Btn>
+                  )}
                   <Btn variant="danger" onClick={() => setMode("reject")}>
                     Reject
                   </Btn>
                   <Btn onClick={() => setMode("hold")}>Hold</Btn>
                 </div>
+                {!canModify(review) && (
+                  <p className="mt-2 text-[11px] text-muted-foreground">
+                    Guiding the recommendation requires the “Modify / Guide AI Recommendation”
+                    permission for this client.
+                  </p>
+                )}
 
                 {mode === "approve" && (
                   <ApprovePanel

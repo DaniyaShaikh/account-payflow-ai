@@ -36,6 +36,8 @@ interface ReviewsContextValue {
   notifications: HumanReview[];
   counts: { awaiting: number; highPriority: number; dueToday: number; onHold: number };
   canDecide: (review: HumanReview) => boolean;
+  /** Modify / guide the AI recommendation — a separate supervisor permission. */
+  canModify: (review: HumanReview) => boolean;
   approve: (id: string) => void;
   modify: (id: string, input: { action: string; guidance: string }) => void;
   reject: (id: string, input: { reason: string; comment: string }) => void;
@@ -46,7 +48,7 @@ const ReviewsContext = createContext<ReviewsContextValue | null>(null);
 
 export function ReviewsProvider({ children }: { children: ReactNode }) {
   const [allReviews, setAllReviews] = useState<HumanReview[]>(reviewsSeed);
-  const { isAdmin, visibleClientIds, visibleClients, userName } = useRole();
+  const { isAdmin, visibleClientIds, userName, can } = useRole();
 
   const value = useMemo<ReviewsContextValue>(() => {
     const visibleReviews = isAdmin
@@ -108,12 +110,8 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
         dueToday: awaiting.filter((r) => r.waitingMinutes < 1440).length,
         onHold: visibleReviews.filter((r) => r.status === "On Hold").length,
       },
-      canDecide: (review) =>
-        isAdmin ||
-        visibleClients.some(
-          (c) =>
-            c.id === review.clientId && c.config.permissions.includes("Approve Human Reviews"),
-        ),
+      canDecide: (review) => can("Approve Human Reviews", review.clientId),
+      canModify: (review) => can("Modify / Guide AI Recommendation", review.clientId),
       approve: (id) => {
         const review = allReviews.find((r) => r.id === id);
         if (!review) return;
@@ -214,7 +212,7 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
         );
       },
     };
-  }, [allReviews, isAdmin, visibleClientIds, visibleClients, userName]);
+  }, [allReviews, isAdmin, visibleClientIds, userName, can]);
 
   return <ReviewsContext.Provider value={value}>{children}</ReviewsContext.Provider>;
 }
