@@ -137,9 +137,12 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function SessionGate({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
+  const [ready, setReady] = useState(false);
   useEffect(() => {
-    if (!isSignedIn()) navigate({ to: "/login" });
+    if (isSignedIn()) setReady(true);
+    else navigate({ to: "/login", replace: true });
   }, [navigate]);
+  if (!ready) return <div className="min-h-screen bg-surface" />;
   return <>{children}</>;
 }
 
