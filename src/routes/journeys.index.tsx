@@ -36,7 +36,7 @@ function JourneysPage() {
     <>
       <PageHeader
         title="Workflows"
-        description="View and manage the collection strategies used across PayFlow."
+        description="Manage and monitor the collection workflows used across PayFlow."
       />
 
       <div className="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
