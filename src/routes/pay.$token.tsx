@@ -145,7 +145,7 @@ function CustomerPaymentExperience() {
 
   return (
     <div className="min-h-screen bg-surface">
-      <header className={cn("px-5 py-5", brand.headerClass)}>
+      <header className={cn("px-5 py-5 shadow-subtle", brand.headerClass)}>
         <div className="mx-auto flex max-w-lg items-center justify-between gap-3">
           <span className="text-[17px] font-bold tracking-tight">{brand.name}</span>
           <span className="inline-flex items-center gap-1.5 text-[12px] opacity-90">
@@ -167,7 +167,7 @@ function CustomerPaymentExperience() {
               </p>
             </div>
 
-            <dl className="overflow-hidden rounded-xl border border-border bg-card">
+            <dl className="overflow-hidden rounded-xl border border-border bg-card shadow-subtle">
               <div className="flex items-center justify-between gap-4 border-b border-border px-4 py-3">
                 <dt className="text-[13px] text-muted-foreground">Account Reference</dt>
                 <dd className="tabular text-[14px] font-medium text-foreground">
