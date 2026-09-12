@@ -68,7 +68,7 @@ function JourneyDetail() {
     { label: "Type", value: journey.type },
     { label: "Current Version", value: journey.version },
     { label: "Status", value: journey.status },
-    { label: "Accounts Assigned", value: `${formatNumber(collection workflow.accountsAssigned)} accounts` },
+    { label: "Accounts Assigned", value: `${formatNumber(journey.accountsAssigned)} accounts` },
     { label: "Created By / Source", value: journey.source },
     { label: "Recovery / Outcome", value: journey.recoveryNote },
     { label: "Last Updated", value: journey.lastUpdated },
@@ -79,7 +79,7 @@ function JourneyDetail() {
       <PageHeader
         breadcrumb={[{ label: "Collection Workflows", to: "/journeys" }, { label: journey.name }]}
         title={journey.name}
-        description={`${collection workflow.scope} · ${collection workflow.type}`}
+        description={`${journey.scope} · ${journey.type}`}
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <StatusPill tone={journeyTypeTone(journey.type)}>{journey.type}</StatusPill>

@@ -67,7 +67,7 @@ function hashSeed(input: string) {
 }
 
 function funnelVolumes(client: string, date: string, channel: string, journey: string) {
-  const seed = hashSeed(`${client}|${date}|${channel}|${collection workflow}`);
+  const seed = hashSeed(`${client}|${date}|${channel}|${journey}`);
   const base = 5200 + (seed % 5200);
   let previous = base;
   return funnelStages.map((stage, i) => {
