@@ -206,8 +206,8 @@ function ReviewDetail() {
                   <ApprovePanel
                     review={review}
                     onCancel={close}
-                    onConfirm={() => {
-                      approve(review.id);
+                    onConfirm={(note) => {
+                      approve(review.id, note);
                       close();
                     }}
                   />
@@ -398,8 +398,9 @@ function ApprovePanel({
 }: {
   review: HumanReview;
   onCancel: () => void;
-  onConfirm: () => void;
+  onConfirm: (note: string) => void;
 }) {
+  const [note, setNote] = useState("");
   return (
     <DecisionBox>
       <p className="text-[13px] font-semibold text-foreground">Approve this recommended action?</p>
@@ -407,8 +408,17 @@ function ApprovePanel({
         {review.proposedAction} — the governance requirement is satisfied and the approved action
         proceeds on the collection case.
       </p>
+      <div className="mt-3">
+        <Field label="Decision note (optional)" hint="Recorded with the decision.">
+          <TextArea
+            value={note}
+            onChange={setNote}
+            placeholder="Balance verified against the latest payment file."
+          />
+        </Field>
+      </div>
       <div className="mt-3 flex gap-2">
-        <Btn variant="primary" onClick={onConfirm}>
+        <Btn variant="primary" onClick={() => onConfirm(note)}>
           Approve &amp; Continue
         </Btn>
         <Btn variant="ghost" onClick={onCancel}>
