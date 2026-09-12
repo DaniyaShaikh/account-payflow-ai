@@ -15,7 +15,7 @@ export function PageHeader({
   breadcrumb?: { label: string; to?: string }[];
 }) {
   return (
-    <div className="mb-6">
+    <div className="mb-7">
       {breadcrumb && (
         <nav className="mb-2 flex items-center gap-1.5 text-xs text-muted-foreground">
           {breadcrumb.map((crumb, i) => (
@@ -32,9 +32,9 @@ export function PageHeader({
           ))}
         </nav>
       )}
-      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-4">
+      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-border/80 pb-5">
         <div className="min-w-0">
-          <h1 className="text-[21px] leading-tight font-bold tracking-tight text-foreground">
+          <h1 className="text-[24px] leading-tight font-bold text-foreground">
             {title}
           </h1>
           {description && (
@@ -87,9 +87,9 @@ export function Panel({
   bodyClassName?: string;
 }) {
   return (
-    <section className={cn("panel overflow-hidden", className)}>
+    <section className={cn("panel overflow-hidden transition-[border-color,box-shadow] duration-200 hover:border-border-strong/80", className)}>
       {title && (
-        <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border/70 px-5 py-3.5">
+        <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 bg-card/80 px-5 py-4">
           <div>
             <h2 className="text-[13.5px] font-semibold tracking-tight text-foreground">{title}</h2>
             {description && (
@@ -126,8 +126,8 @@ export function KpiCard({
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-lg border border-border bg-card px-4 py-3.5 transition-all hover:border-border-strong hover:shadow-panel",
-        tone === "primary" && "border-primary/25 bg-primary/[0.035]",
+        "group relative min-h-[106px] overflow-hidden rounded-lg border border-border/80 bg-card px-4 py-4 shadow-subtle transition-all duration-200 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-panel",
+        tone === "primary" && "border-primary/30 bg-primary/[0.055] shadow-brand",
       )}
     >
       <span
@@ -139,7 +139,7 @@ export function KpiCard({
       <p className="text-eyebrow">{label}</p>
       <p
         className={cn(
-          "tabular mt-2 text-[23px] leading-none font-bold tracking-tight",
+           "tabular mt-2.5 text-[25px] leading-none font-bold",
           tone === "primary" ? "text-primary" : "text-foreground",
         )}
       >
@@ -229,14 +229,14 @@ export function DataTable({
   minWidth?: number;
 }) {
   return (
-    <div className="panel max-h-[70vh] overflow-auto">
+    <div className="panel max-h-[70vh] overflow-auto shadow-panel">
       <table className="w-full border-collapse text-[13px]" style={{ minWidth }}>
         <thead className="sticky top-0 z-10">
           <tr>
             {head.map((h, i) => (
               <th
                 key={i}
-                className="text-eyebrow border-b border-border bg-surface px-4 py-2.5 text-left font-semibold whitespace-nowrap"
+                 className="text-eyebrow border-b border-border-strong/70 bg-card px-4 py-3 text-left font-semibold whitespace-nowrap"
               >
                 {h}
               </th>
@@ -262,7 +262,7 @@ export function Tr({
     <tr
       onClick={onClick}
       className={cn(
-        "border-b border-border/70 transition-colors last:border-0 hover:bg-surface",
+         "border-b border-border/60 transition-colors last:border-0 hover:bg-accent/35",
         onClick && "cursor-pointer",
         className,
       )}
@@ -326,7 +326,7 @@ export function SearchInput({
   return (
     <div
       className={cn(
-        "flex h-8 items-center gap-2 rounded-md border border-border bg-card px-2.5 transition-colors focus-within:border-primary",
+         "flex h-9 items-center gap-2 rounded-md border border-border bg-card px-3 shadow-subtle transition-all focus-within:border-primary focus-within:ring-2 focus-within:ring-ring/10",
         className,
       )}
     >
@@ -358,7 +358,7 @@ export function FilterSelect({
   return (
     <label
       className={cn(
-        "flex h-8 items-center gap-2 rounded-md border px-2.5 transition-colors",
+         "flex h-9 items-center gap-2 rounded-md border px-3 shadow-subtle transition-all",
         applied
           ? "border-primary/40 bg-primary/[0.06]"
           : "border-border bg-card hover:border-border-strong",
@@ -467,7 +467,7 @@ export function Field({
 }
 
 const controlClass =
-  "h-9 w-full rounded-md border border-border bg-card px-2.5 text-[13px] text-foreground outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-ring/15 disabled:opacity-60";
+   "h-9 w-full rounded-md border border-border bg-card px-3 text-[13px] text-foreground shadow-subtle outline-none transition-all focus:border-primary focus:ring-2 focus:ring-ring/15 disabled:opacity-60";
 
 export function TextInput({
   value,
@@ -651,7 +651,7 @@ export function Btn({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-[13px] font-semibold transition-all focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none disabled:opacity-50",
+         "inline-flex h-9 items-center gap-1.5 rounded-md px-3.5 text-[13px] font-semibold transition-all duration-150 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none active:translate-y-px disabled:opacity-50",
         variant === "primary" &&
           "bg-primary text-primary-foreground shadow-brand hover:bg-primary/92 active:translate-y-px",
         variant === "secondary" &&

@@ -123,6 +123,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   const { queryClient } = Route.useRouteContext();
+  useEffect(() => {
+    const preference = window.localStorage.getItem("payflow.theme");
+    const dark =
+      preference === "dark" ||
+      (preference === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    document.documentElement.classList.toggle("dark", dark);
+  }, []);
   return (
     <html lang="en">
       <head>
