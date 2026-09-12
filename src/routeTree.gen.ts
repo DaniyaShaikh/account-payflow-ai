@@ -20,6 +20,7 @@ import { Route as ClientsIndexRouteImport } from './routes/clients.index'
 import { Route as ClientsClientIdRouteImport } from './routes/clients.$clientId'
 import { Route as ClientsNewRouteImport } from './routes/clients.new'
 import { Route as HumanReviewIndexRouteImport } from './routes/human-review.index'
+import { Route as HumanReviewReviewIdRouteImport } from './routes/human-review.$reviewId'
 import { Route as RulesIndexRouteImport } from './routes/rules.index'
 import { Route as RulesRuleIdRouteImport } from './routes/rules.$ruleId'
 import { Route as RulesNewRouteImport } from './routes/rules.new'
@@ -79,6 +80,11 @@ const HumanReviewIndexRoute = HumanReviewIndexRouteImport.update({
   path: '/human-review/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HumanReviewReviewIdRoute = HumanReviewReviewIdRouteImport.update({
+  id: '/human-review/$reviewId',
+  path: '/human-review/$reviewId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RulesIndexRoute = RulesIndexRouteImport.update({
   id: '/rules/',
   path: '/rules/',
@@ -104,6 +110,7 @@ export interface FileRoutesByFullPath {
   '/accounts/$accountId': typeof AccountsAccountIdRoute
   '/clients/$clientId': typeof ClientsClientIdRoute
   '/clients/new': typeof ClientsNewRoute
+  '/human-review/$reviewId': typeof HumanReviewReviewIdRoute
   '/rules/$ruleId': typeof RulesRuleIdRoute
   '/rules/new': typeof RulesNewRoute
   '/accounts/': typeof AccountsIndexRoute
@@ -120,6 +127,7 @@ export interface FileRoutesByTo {
   '/accounts/$accountId': typeof AccountsAccountIdRoute
   '/clients/$clientId': typeof ClientsClientIdRoute
   '/clients/new': typeof ClientsNewRoute
+  '/human-review/$reviewId': typeof HumanReviewReviewIdRoute
   '/rules/$ruleId': typeof RulesRuleIdRoute
   '/rules/new': typeof RulesNewRoute
   '/accounts': typeof AccountsIndexRoute
@@ -137,6 +145,7 @@ export interface FileRoutesById {
   '/accounts/$accountId': typeof AccountsAccountIdRoute
   '/clients/$clientId': typeof ClientsClientIdRoute
   '/clients/new': typeof ClientsNewRoute
+  '/human-review/$reviewId': typeof HumanReviewReviewIdRoute
   '/rules/$ruleId': typeof RulesRuleIdRoute
   '/rules/new': typeof RulesNewRoute
   '/accounts/': typeof AccountsIndexRoute
@@ -155,6 +164,7 @@ export interface FileRouteTypes {
     | '/accounts/$accountId'
     | '/clients/$clientId'
     | '/clients/new'
+    | '/human-review/$reviewId'
     | '/rules/$ruleId'
     | '/rules/new'
     | '/accounts/'
@@ -171,6 +181,7 @@ export interface FileRouteTypes {
     | '/accounts/$accountId'
     | '/clients/$clientId'
     | '/clients/new'
+    | '/human-review/$reviewId'
     | '/rules/$ruleId'
     | '/rules/new'
     | '/accounts'
@@ -187,6 +198,7 @@ export interface FileRouteTypes {
     | '/accounts/$accountId'
     | '/clients/$clientId'
     | '/clients/new'
+    | '/human-review/$reviewId'
     | '/rules/$ruleId'
     | '/rules/new'
     | '/accounts/'
@@ -204,6 +216,7 @@ export interface RootRouteChildren {
   AccountsAccountIdRoute: typeof AccountsAccountIdRoute
   ClientsClientIdRoute: typeof ClientsClientIdRoute
   ClientsNewRoute: typeof ClientsNewRoute
+  HumanReviewReviewIdRoute: typeof HumanReviewReviewIdRoute
   RulesRuleIdRoute: typeof RulesRuleIdRoute
   RulesNewRoute: typeof RulesNewRoute
   AccountsIndexRoute: typeof AccountsIndexRoute
@@ -291,6 +304,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HumanReviewIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/human-review/$reviewId': {
+      id: '/human-review/$reviewId'
+      path: '/human-review/$reviewId'
+      fullPath: '/human-review/$reviewId'
+      preLoaderRoute: typeof HumanReviewReviewIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/rules/': {
       id: '/rules/'
       path: '/rules'
@@ -324,6 +344,7 @@ const rootRouteChildren: RootRouteChildren = {
   AccountsAccountIdRoute: AccountsAccountIdRoute,
   ClientsClientIdRoute: ClientsClientIdRoute,
   ClientsNewRoute: ClientsNewRoute,
+  HumanReviewReviewIdRoute: HumanReviewReviewIdRoute,
   RulesRuleIdRoute: RulesRuleIdRoute,
   RulesNewRoute: RulesNewRoute,
   AccountsIndexRoute: AccountsIndexRoute,
