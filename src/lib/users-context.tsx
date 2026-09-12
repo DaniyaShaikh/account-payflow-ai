@@ -1,11 +1,17 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
 import {
   usersSeed,
+  rolesSeed,
+  allPermissions,
   standardSupervisorPermissions,
   shortNameFor,
+  isPlatformRole,
+  defaultPermissionsForRole,
   type AccessHistoryEntry,
   type ClientAssignment,
   type PayflowUser,
+  type RoleDefinition,
+  type RoleScope,
   type UserRole,
   type UserStatus,
 } from "./users-data";
@@ -21,14 +27,33 @@ export interface NewUserInput {
   assignments: ClientAssignment[];
 }
 
+export interface NewRoleInput {
+  name: string;
+  scope: RoleScope;
+  description: string;
+  permissions: string[];
+}
+
 interface UsersContextValue {
   users: PayflowUser[];
+  roles: RoleDefinition[];
+  roleNames: string[];
+  roleByName: (name: string) => RoleDefinition | undefined;
+  isPlatformRoleName: (name: string) => boolean;
+  defaultPermissions: (roleName: string) => string[];
+  addRole: (input: NewRoleInput) => RoleDefinition;
+  updateRole: (id: string, patch: Partial<Omit<RoleDefinition, "id" | "builtIn">>) => void;
+  deleteRole: (id: string) => void;
+  usersWithRole: (roleName: string) => PayflowUser[];
   adminUserId: string;
   demoSupervisorId: string;
   userById: (id: string) => PayflowUser | undefined;
   supervisorsForClient: (clientId: string) => PayflowUser[];
   addUser: (input: NewUserInput) => PayflowUser;
-  updateUser: (id: string, patch: Partial<Pick<PayflowUser, "name" | "email" | "status">>) => void;
+  updateUser: (
+    id: string,
+    patch: Partial<Pick<PayflowUser, "name" | "email" | "status" | "role">>,
+  ) => void;
   setUserStatus: (id: string, status: UserStatus) => void;
   assignClient: (id: string, clientId: string, clientName: string) => void;
   removeAssignment: (id: string, clientId: string, clientName: string) => void;
