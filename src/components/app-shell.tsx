@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   Building2,
@@ -11,12 +11,14 @@ import {
   Plug,
   ChevronsUpDown,
   Bell,
+  LogOut,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { PayflowWordmark } from "@/components/brand";
 import { useRole } from "@/lib/role-context";
 import { useReviews } from "@/lib/reviews-context";
 import { formatWaiting } from "@/lib/review-data";
+import { markSignedOut } from "@/lib/session";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -61,11 +63,20 @@ const navGroups = [
 
 function UserMenu({ compact = false }: { compact?: boolean }) {
   const { role, setRole, userName, roleLabel } = useRole();
+  const navigate = useNavigate();
   const initials = userName
     .split(" ")
     .map((part) => part[0])
     .join("")
     .slice(0, 2);
+
+  const handleLogout = () => {
+    markSignedOut();
+    try {
+      localStorage.removeItem("payflow.role");
+    } catch {}
+    navigate({ to: "/login", replace: true });
+  };
 
   return (
     <DropdownMenu>
@@ -127,6 +138,14 @@ function UserMenu({ compact = false }: { compact?: boolean }) {
         <DropdownMenuLabel className="text-[11px] font-normal text-muted-foreground">
           Supervisors only see assigned clients.
         </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onClick={handleLogout}
+          className="text-destructive focus:text-destructive"
+        >
+          <LogOut className="mr-2 size-4" />
+          <span className="flex-1">Log out</span>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

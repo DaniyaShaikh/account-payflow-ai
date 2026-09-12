@@ -12,6 +12,14 @@ export function markSignedIn() {
   }
 }
 
+export function markSignedOut() {
+  try {
+    sessionStorage.removeItem(KEY);
+  } catch {
+    /* storage unavailable */
+  }
+}
+
 export function isSignedIn() {
   try {
     return sessionStorage.getItem(KEY) === "1";
