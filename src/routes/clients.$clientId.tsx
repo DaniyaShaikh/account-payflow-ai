@@ -509,7 +509,12 @@ function ClientConfiguration({
         action={<Btn variant="ghost">Changes save automatically</Btn>}
       >
         {section === "General" && <ProfileSection {...props} />}
-        {section === "Data Source" && <DataSourceSection {...props} />}
+        {section === "Data Source" && (
+          <div className="space-y-4">
+            <ClientDataSourceIntegration clientId={clientId} />
+            <DataSourceSection {...props} />
+          </div>
+        )}
         {section === "Data Mapping" && <MappingSection {...props} />}
         {section === "Branding & Channels" && <BrandingSection {...props} />}
         {section === "AI & Governance" && <AiGovernanceSection {...props} />}
