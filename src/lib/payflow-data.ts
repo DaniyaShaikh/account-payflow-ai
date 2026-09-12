@@ -6,6 +6,35 @@ export type CollectionStatus =
   | "Human Review"
   | "Resolved";
 
+export type ClientStatus = "Active" | "Onboarding" | "Paused" | "Draft";
+export type ClientType = "First Party" | "Third Party";
+export type DataSource = "CRM" | "ACE";
+export type ConnectionState = "Not Connected" | "Connecting" | "Connected" | "Connection Failed";
+export type MappingStatus = "Mapped" | "Needs Attention" | "Unmapped" | "Validated";
+
+export interface FieldMapping {
+  sourceField: string;
+  payflowField: string;
+  sampleValue: string;
+  status: MappingStatus;
+}
+
+export interface ClientConfig {
+  code: string;
+  clientType: ClientType;
+  useCase: string;
+  dataSource: DataSource | null;
+  connection: ConnectionState;
+  mappings: FieldMapping[];
+  brandName: string;
+  senderName: string;
+  emailFrom: string;
+  smsSenderId: string;
+  channels: { email: boolean; sms: boolean; whatsapp: boolean };
+  governanceRules: string[];
+  permissions: string[];
+}
+
 export interface Client {
   id: string;
   name: string;
@@ -14,12 +43,201 @@ export interface Client {
   activeCases: number;
   aiMode: AiMode;
   supervisors: string[];
-  status: "Active" | "Onboarding" | "Paused";
+  status: ClientStatus;
   outstanding: number;
   recovered: number;
   reviewsPending: number;
   attention?: string;
+  config: ClientConfig;
 }
+
+export const supervisorDirectory = ["Zeeshan", "Sarah", "Ahmed"] as const;
+export const supervisors = supervisorDirectory;
+
+export const payflowFields = [
+  "Customer ID",
+  "Customer Name",
+  "Email",
+  "Mobile Number",
+  "Account Reference",
+  "Outstanding Balance",
+  "Due Date",
+  "Original Balance",
+  "Language",
+  "— Not mapped —",
+];
+
+export const defaultMappings: FieldMapping[] = [
+  {
+    sourceField: "customer_id",
+    payflowField: "Customer ID",
+    sampleValue: "CUST-10482",
+    status: "Mapped",
+  },
+  {
+    sourceField: "customer_name",
+    payflowField: "Customer Name",
+    sampleValue: "John Smith",
+    status: "Mapped",
+  },
+  {
+    sourceField: "email_address",
+    payflowField: "Email",
+    sampleValue: "john@example.com",
+    status: "Mapped",
+  },
+  {
+    sourceField: "mobile",
+    payflowField: "Mobile Number",
+    sampleValue: "+1 xxx xxx xxxx",
+    status: "Mapped",
+  },
+  {
+    sourceField: "account_reference",
+    payflowField: "Account Reference",
+    sampleValue: "PP-10482",
+    status: "Mapped",
+  },
+  {
+    sourceField: "balance_due",
+    payflowField: "Outstanding Balance",
+    sampleValue: "$4,250",
+    status: "Mapped",
+  },
+  {
+    sourceField: "due_date",
+    payflowField: "Due Date",
+    sampleValue: "05 Sep 2026",
+    status: "Mapped",
+  },
+];
+
+export const governanceRuleLibrary = [
+  "High Balance Human Review",
+  "Repeated Attempts Escalation",
+  "Low Confidence Review",
+  "Dispute Detected Review",
+  "Settlement Offer Approval",
+];
+
+export const clientPermissions = [
+  "View Client",
+  "View Customer Accounts",
+  "View Collection Cases",
+  "View Journeys",
+  "View Communications",
+  "View Human Reviews",
+  "Approve Human Reviews",
+  "View Analytics",
+  "View Rules",
+  "Create / Edit Client Rules",
+];
+
+export const defaultPermissions = [
+  "View Client",
+  "View Customer Accounts",
+  "View Collection Cases",
+  "View Journeys",
+  "View Communications",
+  "View Human Reviews",
+  "View Analytics",
+];
+
+export function makeConfig(overrides: Partial<ClientConfig> = {}): ClientConfig {
+  return {
+    code: "",
+    clientType: "Third Party",
+    useCase: "Collections",
+    dataSource: null,
+    connection: "Not Connected",
+    mappings: defaultMappings.map((m) => ({ ...m })),
+    brandName: "",
+    senderName: "",
+    emailFrom: "collections@payflow.io",
+    smsSenderId: "PAYFLOW",
+    channels: { email: true, sms: true, whatsapp: false },
+    governanceRules: [],
+    permissions: [...defaultPermissions],
+    ...overrides,
+  };
+}
+
+export const clients: Client[] = [
+  {
+    id: "paypal",
+    name: "PayPal",
+    industry: "Payments",
+    accounts: 12480,
+    activeCases: 2140,
+    aiMode: "Autopilot",
+    supervisors: ["Zeeshan"],
+    status: "Active",
+    outstanding: 4800000,
+    recovered: 1200000,
+    reviewsPending: 14,
+    attention: "12 escalated cases awaiting supervisor decision",
+    config: makeConfig({
+      code: "PP-CLT-001",
+      clientType: "Third Party",
+      dataSource: "CRM",
+      connection: "Connected",
+      brandName: "PayPal",
+      senderName: "PayPal Collections",
+      emailFrom: "collections@paypal.com",
+      smsSenderId: "PAYPAL",
+    }),
+  },
+  {
+    id: "canadian-tire",
+    name: "Canadian Tire",
+    industry: "Retail",
+    accounts: 8215,
+    activeCases: 1460,
+    aiMode: "Supervised AI",
+    supervisors: ["Zeeshan"],
+    status: "Active",
+    outstanding: 3100000,
+    recovered: 860000,
+    reviewsPending: 9,
+    attention: "Promise-to-pay follow-ups overdue on 38 accounts",
+    config: makeConfig({
+      code: "CT-CLT-002",
+      clientType: "First Party",
+      dataSource: "ACE",
+      connection: "Connected",
+      brandName: "Canadian Tire",
+      senderName: "Canadian Tire Billing",
+      emailFrom: "billing@canadiantire.ca",
+      smsSenderId: "CDNTIRE",
+      governanceRules: ["High Balance Human Review", "Repeated Attempts Escalation"],
+    }),
+  },
+  {
+    id: "northstar-utilities",
+    name: "Northstar Utilities",
+    industry: "Utilities",
+    accounts: 5340,
+    activeCases: 840,
+    aiMode: "Supervised AI",
+    supervisors: ["Sarah"],
+    status: "Active",
+    outstanding: 1700000,
+    recovered: 420000,
+    reviewsPending: 5,
+    attention: "SMS delivery rate down 6% week over week",
+    config: makeConfig({
+      code: "NS-CLT-003",
+      clientType: "First Party",
+      dataSource: "CRM",
+      connection: "Connected",
+      brandName: "Northstar Utilities",
+      senderName: "Northstar Billing",
+      emailFrom: "billing@northstar.com",
+      smsSenderId: "NORTHSTAR",
+      governanceRules: ["Low Confidence Review", "Dispute Detected Review"],
+    }),
+  },
+];
 
 export interface CustomerAccount {
   id: string;
@@ -36,53 +254,6 @@ export interface CustomerAccount {
   humanReview: boolean;
   timeline: { label: string; detail: string; at: string }[];
 }
-
-export const supervisors = ["Zeeshan", "Sarah"] as const;
-
-export const clients: Client[] = [
-  {
-    id: "paypal",
-    name: "PayPal",
-    industry: "Payments",
-    accounts: 12480,
-    activeCases: 2140,
-    aiMode: "Autopilot",
-    supervisors: ["Zeeshan"],
-    status: "Active",
-    outstanding: 18420000,
-    recovered: 4210000,
-    reviewsPending: 14,
-    attention: "12 escalated cases awaiting supervisor decision",
-  },
-  {
-    id: "canadian-tire",
-    name: "Canadian Tire",
-    industry: "Retail",
-    accounts: 8215,
-    activeCases: 1460,
-    aiMode: "Supervised AI",
-    supervisors: ["Zeeshan"],
-    status: "Active",
-    outstanding: 11260000,
-    recovered: 2740000,
-    reviewsPending: 9,
-    attention: "Promise-to-pay follow-ups overdue on 38 accounts",
-  },
-  {
-    id: "northstar-utilities",
-    name: "Northstar Utilities",
-    industry: "Utilities",
-    accounts: 5340,
-    activeCases: 840,
-    aiMode: "Supervised AI",
-    supervisors: ["Sarah"],
-    status: "Active",
-    outstanding: 6480000,
-    recovered: 1180000,
-    reviewsPending: 5,
-    attention: "SMS delivery rate down 6% week over week",
-  },
-];
 
 export const accounts: CustomerAccount[] = [
   {
@@ -317,7 +488,7 @@ export function formatCurrency(value: number, compact = false) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
-    maximumFractionDigits: 0,
+    maximumFractionDigits: compact ? 1 : 0,
     notation: compact ? "compact" : "standard",
   }).format(value);
 }
