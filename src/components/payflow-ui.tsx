@@ -651,11 +651,12 @@ export function Btn({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-[13px] font-medium transition-all disabled:opacity-50",
+        "inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-[13px] font-semibold transition-all focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none disabled:opacity-50",
         variant === "primary" &&
-          "bg-primary text-primary-foreground shadow-subtle hover:bg-primary/90",
-        variant === "secondary" && "border border-border bg-card text-foreground hover:bg-surface",
-        variant === "ghost" && "text-muted-foreground hover:text-foreground",
+          "bg-primary text-primary-foreground shadow-brand hover:bg-primary/92 active:translate-y-px",
+        variant === "secondary" &&
+          "border border-border bg-card text-foreground hover:border-border-strong hover:bg-surface",
+        variant === "ghost" && "font-medium text-muted-foreground hover:text-primary",
         variant === "danger" &&
           "border border-destructive/30 text-destructive hover:bg-destructive/10",
         className,
