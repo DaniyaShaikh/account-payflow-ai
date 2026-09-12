@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   PageHeader,
   Panel,
@@ -11,6 +11,8 @@ import { useRole, useVisibleAccounts, useVisibleActivity } from "@/lib/role-cont
 import { useReviews } from "@/lib/reviews-context";
 import { formatCurrency, formatNumber, journeys } from "@/lib/payflow-data";
 import { paymentOutcomeTotals } from "@/lib/payment-data";
+import { useVisibleCommunications } from "@/components/communication-table";
+import { buildIntegrations, integrationSummary } from "@/lib/integration-data";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -239,6 +241,15 @@ function Dashboard() {
     accounts.filter((a) => scopedIds.includes(a.clientId)),
   );
 
+  const communications = useVisibleCommunications();
+  const failedComms = communications.filter(
+    (c) => c.status === "Failed" && scopedIds.includes(c.clientId),
+  ).length;
+  const integrationAttention = useMemo(
+    () => integrationSummary(buildIntegrations(scoped)).attention,
+    [scoped],
+  );
+
   return (
     <>
       <PageHeader
@@ -296,6 +307,40 @@ function Dashboard() {
           />
         </Link>
       </div>
+
+      <Panel
+        title="Attention Required"
+        description="Open items that need an operations decision or follow-up"
+        className="mb-5"
+      >
+        <div className="flex flex-wrap gap-2">
+          <Link to="/human-review" search={{ status: "Awaiting Review" }}>
+            <StatusPill tone={reviewCounts.awaiting ? "warning" : "neutral"}>
+              Human Reviews Pending · {reviewCounts.awaiting}
+            </StatusPill>
+          </Link>
+          <Link to="/communications" search={{ status: "Failed" }}>
+            <StatusPill tone={failedComms ? "warning" : "neutral"}>
+              Failed Communications · {failedComms}
+            </StatusPill>
+          </Link>
+          <Link to="/accounts">
+            <StatusPill tone={paymentTotals.failedPayments ? "warning" : "neutral"}>
+              Failed Payments · {paymentTotals.failedPayments}
+            </StatusPill>
+          </Link>
+          <Link to="/integrations" search={{ status: "Attention Required" }}>
+            <StatusPill tone={integrationAttention ? "danger" : "neutral"}>
+              Integration Issues · {integrationAttention}
+            </StatusPill>
+          </Link>
+        </div>
+        {!reviewCounts.awaiting && !failedComms && !paymentTotals.failedPayments && !integrationAttention && (
+          <p className="mt-3 text-[12px] text-muted-foreground">
+            Nothing requires attention right now.
+          </p>
+        )}
+      </Panel>
 
       <CommunicationFunnel />
 
