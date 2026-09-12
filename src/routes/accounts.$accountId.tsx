@@ -1,6 +1,8 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { PageHeader, Panel, StatusPill, statusTone } from "@/components/payflow-ui";
 import { useRole } from "@/lib/role-context";
+import { useReviews } from "@/lib/reviews-context";
+import { reviewStatusTone } from "@/lib/review-data";
 import { accounts, clientName, formatCurrency } from "@/lib/payflow-data";
 
 export const Route = createFileRoute("/accounts/$accountId")({
