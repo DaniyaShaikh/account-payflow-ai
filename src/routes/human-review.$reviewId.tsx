@@ -92,7 +92,7 @@ function ReviewDetail() {
 
       <div className="panel mb-5 grid gap-4 px-5 py-4 sm:grid-cols-3">
         <HeaderFact label="Outstanding Balance" value={formatCurrency(review.outstanding)} />
-        <HeaderFact label="Current Journey" value={review.journey} />
+        <HeaderFact label="Current Collection Workflow" value={review.journey} />
         <HeaderFact
           label="Review Created"
           value={`${formatWaiting(review.waitingMinutes)} ago`}
@@ -274,7 +274,7 @@ function ReviewDetail() {
                 ["Outstanding Balance", formatCurrency(review.outstanding)],
                 ["Amount Recovered", formatCurrency(review.recovered)],
                 ["Days Past Due", String(review.daysPastDue)],
-                ["Current Journey", review.journey],
+                ["Current Collection Workflow", review.journey],
                 ...review.context.map((c) => [c.label, c.value] as [string, string]),
               ].map(([label, value]) => (
                 <div key={label} className="flex items-start justify-between gap-4 py-2">
@@ -341,7 +341,7 @@ function ReviewDetail() {
             </dl>
             <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
               Approved, modified and rejected decisions are recorded as feedback for later analytics
-              and journey evaluation. A single decision does not retrain the model.
+              and collection workflow evaluation. A single decision does not retrain the model.
             </p>
           </Panel>
         </div>

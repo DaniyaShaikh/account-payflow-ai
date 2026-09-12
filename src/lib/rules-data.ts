@@ -55,7 +55,7 @@ export const ruleCategories = [
   "Payment Activity",
   "Promise-to-Pay",
   "Payment Plan",
-  "Journey",
+  "Collection Workflow",
   "Communication",
   "Customer Risk",
   "AI Confidence",
@@ -67,7 +67,7 @@ export const ruleActions = [
   "Prevent Communication",
   "Request Reassessment",
   "Escalate Case",
-  "Apply / Change Journey",
+  "Apply / Change Collection Workflow",
 ] as const;
 
 export const ruleFields: RuleField[] = [
@@ -101,8 +101,8 @@ export const ruleFields: RuleField[] = [
   },
   { label: "Missed Installments", category: "Payment Plan", type: "number" },
   {
-    label: "Journey",
-    category: "Journey",
+    label: "Collection Workflow",
+    category: "Collection Workflow",
     type: "enum",
     options: [
       "Early Stage Collection",
@@ -112,7 +112,7 @@ export const ruleFields: RuleField[] = [
       "Escalated Collection",
     ],
   },
-  { label: "Journey Stage", category: "Journey", type: "text" },
+  { label: "Collection Workflow Stage", category: "Collection Workflow", type: "text" },
   {
     label: "Channel",
     category: "Communication",
