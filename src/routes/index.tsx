@@ -10,6 +10,7 @@ import {
 import { useRole, useVisibleAccounts, useVisibleActivity } from "@/lib/role-context";
 import { useReviews } from "@/lib/reviews-context";
 import { formatCurrency, formatNumber, journeys } from "@/lib/payflow-data";
+import { paymentOutcomeTotals } from "@/lib/payment-data";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -234,6 +235,9 @@ function Dashboard() {
 
   const scopedIds = scoped.map((c) => c.id);
   const scopedActivity = activity.filter((a) => scopedIds.includes(a.clientId));
+  const paymentTotals = paymentOutcomeTotals(
+    accounts.filter((a) => scopedIds.includes(a.clientId)),
+  );
 
   return (
     <>
@@ -294,6 +298,20 @@ function Dashboard() {
       </div>
 
       <CommunicationFunnel />
+
+      <Panel
+        title="Payment Outcomes"
+        description="Outcomes received back from the customer payment experience"
+        className="mb-5"
+      >
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <KpiCard label="Amount Recovered" value={formatCurrency(paymentTotals.recovered, true)} />
+          <KpiCard label="Accounts Paid in Full" value={formatNumber(paymentTotals.paidInFull)} />
+          <KpiCard label="Active Payment Plans" value={formatNumber(paymentTotals.activePlans)} />
+          <KpiCard label="Partial Payments" value={formatNumber(paymentTotals.partialPayments)} />
+          <KpiCard label="Failed Payments" value={formatNumber(paymentTotals.failedPayments)} />
+        </div>
+      </Panel>
 
       <div className="grid gap-5 lg:grid-cols-2">
         <Panel title="Clients Needing Attention" bodyClassName="p-0">
