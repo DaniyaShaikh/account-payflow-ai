@@ -42,6 +42,24 @@ const funnelStages = [
 
 const stageRates = [1, 0.956, 0.738, 0.416, 0.737, 0.802];
 
+// Funnel stages map onto the communication statuses that produced them, so a
+// click leads to the underlying communications.
+function stageStatus(stage: string): string | undefined {
+  switch (stage) {
+    case "Delivered":
+      return "Delivered";
+    case "Opened / Read":
+      return "Opened / Read";
+    case "Clicked":
+    case "Payment Initiated":
+    case "Paid":
+      return "Payment Link Clicked";
+    default:
+      return undefined;
+  }
+}
+
+
 function hashSeed(input: string) {
   let h = 0;
   for (let i = 0; i < input.length; i++) h = (h * 31 + input.charCodeAt(i)) >>> 0;
