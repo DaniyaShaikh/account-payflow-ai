@@ -7,6 +7,7 @@ import {
   HeadContent,
   Scripts,
   useRouterState,
+  useNavigate,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
@@ -16,6 +17,7 @@ import { UsersProvider } from "../lib/users-context";
 import { RulesProvider } from "../lib/rules-context";
 import { ReviewsProvider } from "../lib/reviews-context";
 import { AppShell } from "../components/app-shell";
+import { isSignedIn } from "../lib/session";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
