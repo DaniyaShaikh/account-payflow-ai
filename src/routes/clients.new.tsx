@@ -175,11 +175,11 @@ function AddClientPage() {
       />
 
       <div className="mb-5 panel overflow-x-auto px-4 py-3">
-        <ol className="flex min-w-[760px] items-center gap-2">
+        <ol className="flex min-w-max items-center gap-2">
           {steps.map((label, i) => {
             const state = i === step ? "current" : i < step ? "done" : "todo";
             return (
-              <li key={label} className="flex flex-1 items-center gap-2">
+              <li key={label} className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setStep(i)}
@@ -204,7 +204,7 @@ function AddClientPage() {
                     {label}
                   </span>
                 </button>
-                {i < steps.length - 1 && <span className="h-px flex-1 bg-border" />}
+                {i < steps.length - 1 && <span className="h-px w-6 bg-border" />}
               </li>
             );
           })}
