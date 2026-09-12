@@ -124,11 +124,22 @@ export function KpiCard({
         ? "text-destructive"
         : "text-muted-foreground";
   return (
-    <div className="panel px-4 py-3.5 transition-shadow hover:shadow-panel">
+    <div
+      className={cn(
+        "group relative overflow-hidden rounded-lg border border-border bg-card px-4 py-3.5 transition-all hover:border-border-strong hover:shadow-panel",
+        tone === "primary" && "border-primary/25 bg-primary/[0.035]",
+      )}
+    >
+      <span
+        className={cn(
+          "absolute inset-y-0 left-0 w-[3px]",
+          tone === "primary" ? "bg-primary" : "bg-transparent",
+        )}
+      />
       <p className="text-eyebrow">{label}</p>
       <p
         className={cn(
-          "tabular mt-2 text-[22px] leading-none font-semibold tracking-tight",
+          "tabular mt-2 text-[23px] leading-none font-bold tracking-tight",
           tone === "primary" ? "text-primary" : "text-foreground",
         )}
       >
@@ -153,19 +164,42 @@ const toneStyles = {
   ai: "bg-ai/10 text-ai border-ai/20",
 } as const;
 
+const toneDot = {
+  neutral: "bg-muted-foreground/60",
+  success: "bg-success",
+  warning: "bg-warning",
+  info: "bg-info",
+  danger: "bg-destructive",
+  ai: "bg-ai",
+} as const;
+
 export type Tone = keyof typeof toneStyles;
 
-export function StatusPill({ children, tone = "neutral" }: { children: ReactNode; tone?: Tone }) {
+export function StatusPill({
+  children,
+  tone = "neutral",
+  dot = false,
+}: {
+  children: ReactNode;
+  tone?: Tone;
+  dot?: boolean;
+}) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium whitespace-nowrap",
+        "inline-flex items-center gap-1.5 rounded-md border px-2 py-[3px] text-[11px] font-semibold whitespace-nowrap",
         toneStyles[tone],
       )}
     >
+      {dot && <span className={cn("size-1.5 shrink-0 rounded-full", toneDot[tone])} />}
       {children}
     </span>
   );
+}
+
+/** Subtle loading placeholder used while a view settles. */
+export function Skeleton({ className }: { className?: string }) {
+  return <span className={cn("skeleton block h-4 w-full", className)} />;
 }
 
 export function statusTone(status: string): Tone {
