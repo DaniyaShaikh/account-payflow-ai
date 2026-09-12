@@ -14,7 +14,7 @@ Correct the prototype’s hierarchy and business-rule presentation while preserv
 ### 2. Strengthen adaptive Workflow semantics
 - Preserve all current Workflow terminology and existing `/journeys` technical route compatibility.
 - Refine Workflow Detail copy to state that stages are strategic guidance, not mandatory sequential steps.
-- Adjust the stage presentation to reduce rigid numbered-sequence cues and introduce a compact reassessment explanation covering payment, communication, response, promise-to-pay, dispute, and failure events.
+- Refine the explanatory copy around the existing stage list to make clear that Workflow stages are adaptive and event-driven, and that reassessment may change the next action based on payment, communication, response, promise-to-pay, dispute, or failure events. Do not change the stage UI or numbered sequence.
 - Preserve current workflow assignments, versions, communications, and review links.
 
 ### 3. Correct Client onboarding rules

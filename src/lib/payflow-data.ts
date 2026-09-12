@@ -246,6 +246,8 @@ export interface CustomerAccount {
   clientId: string;
   customer: string;
   reference: string;
+  /** Distinct collection-case reference — illustrative, not a technical standard. */
+  caseReference: string;
   originalBalance: number;
   outstanding: number;
   recovered: number;
@@ -257,12 +259,17 @@ export interface CustomerAccount {
   timeline: { label: string; detail: string; at: string }[];
 }
 
+export function caseReferenceFor(accountId: string) {
+  return accounts.find((a) => a.id === accountId)?.caseReference ?? "—";
+}
+
 export const accounts: CustomerAccount[] = [
   {
     id: "pp-10482",
     clientId: "paypal",
     customer: "John Smith",
     reference: "PP-10482",
+    caseReference: "CASE-PP-10482-01",
     originalBalance: 5400,
     outstanding: 4250,
     recovered: 1150,
@@ -287,6 +294,7 @@ export const accounts: CustomerAccount[] = [
     clientId: "paypal",
     customer: "Sarah Khan",
     reference: "PP-11021",
+    caseReference: "CASE-PP-11021-01",
     originalBalance: 9600,
     outstanding: 8900,
     recovered: 700,
@@ -308,6 +316,7 @@ export const accounts: CustomerAccount[] = [
     clientId: "paypal",
     customer: "Michael Brown",
     reference: "PP-12098",
+    caseReference: "CASE-PP-12098-01",
     originalBalance: 3600,
     outstanding: 2100,
     recovered: 1500,
@@ -329,6 +338,7 @@ export const accounts: CustomerAccount[] = [
     clientId: "paypal",
     customer: "David Lee",
     reference: "PP-88831",
+    caseReference: "CASE-PP-88831-01",
     originalBalance: 12500,
     outstanding: 12500,
     recovered: 0,
@@ -350,6 +360,7 @@ export const accounts: CustomerAccount[] = [
     clientId: "canadian-tire",
     customer: "Emily Jones",
     reference: "CT-20394",
+    caseReference: "CASE-CT-20394-01",
     originalBalance: 7800,
     outstanding: 7300,
     recovered: 500,
@@ -370,6 +381,7 @@ export const accounts: CustomerAccount[] = [
     clientId: "canadian-tire",
     customer: "Robert Chen",
     reference: "CT-21877",
+    caseReference: "CASE-CT-21877-01",
     originalBalance: 4100,
     outstanding: 1900,
     recovered: 2200,
@@ -390,6 +402,7 @@ export const accounts: CustomerAccount[] = [
     clientId: "canadian-tire",
     customer: "Priya Nair",
     reference: "CT-22540",
+    caseReference: "CASE-CT-22540-01",
     originalBalance: 3200,
     outstanding: 3200,
     recovered: 0,
@@ -410,6 +423,7 @@ export const accounts: CustomerAccount[] = [
     clientId: "northstar-utilities",
     customer: "Laura Fitzgerald",
     reference: "NS-30112",
+    caseReference: "CASE-NS-30112-01",
     originalBalance: 2600,
     outstanding: 2450,
     recovered: 150,
@@ -429,6 +443,7 @@ export const accounts: CustomerAccount[] = [
     clientId: "northstar-utilities",
     customer: "Marcus Webb",
     reference: "NS-31450",
+    caseReference: "CASE-NS-31450-01",
     originalBalance: 5900,
     outstanding: 5400,
     recovered: 500,

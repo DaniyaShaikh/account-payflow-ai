@@ -148,7 +148,7 @@ function JourneyDetail() {
         <div className="space-y-5">
           <Panel
             title="Collection Strategy"
-            description="Stages are guidance, not a fixed script — each reassessment can change the next action."
+            description="Stages are adaptive guidance, not a fixed script. PayFlow reassesses the next action whenever a payment, communication response, promise-to-pay, dispute, or failure event occurs."
           >
             <ol className="space-y-2">
               {journey.steps.map((step, i) => (

@@ -86,8 +86,6 @@ function AddClientPage() {
   if (summary.attention > 0) issues.push(`${summary.attention} field mapping(s) need attention`);
   if (!draft.config.channels.email && !draft.config.channels.sms)
     issues.push("At least one communication channel must be enabled");
-  if (draft.aiMode === "Supervised AI" && draft.config.governanceRules.length === 0)
-    issues.push("Supervised AI requires at least one governance rule");
   if (draft.supervisors.length === 0) issues.push("Assign at least one supervisor");
 
   const buildClient = (status: Client["status"]): Client => ({
@@ -277,7 +275,7 @@ function AddClientPage() {
                           `${draft.config.governanceRules.length} Rules Applied`,
                           ...draft.config.governanceRules,
                         ]
-                      : ["No rules applied"]
+                      : ["No client-specific governance rules configured"]
                 }
               />
               <ReviewBlock
