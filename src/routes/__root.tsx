@@ -10,6 +10,8 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import { RoleProvider } from "../lib/role-context";
+import { AppShell } from "../components/app-shell";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
@@ -77,11 +79,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "PayFlow — AI Collections Operations Platform" },
+      {
+        name: "description",
+        content:
+          "PayFlow manages collections operations for multiple clients, their customer accounts and collection cases.",
+      },
+      { name: "author", content: "PayFlow" },
+      { property: "og:title", content: "PayFlow — AI Collections Operations Platform" },
+      {
+        property: "og:description",
+        content: "Collections operations for clients, customer accounts and collection cases.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
@@ -119,8 +128,12 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <RoleProvider>
+        <AppShell>
+          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+          <Outlet />
+        </AppShell>
+      </RoleProvider>
     </QueryClientProvider>
   );
 }
