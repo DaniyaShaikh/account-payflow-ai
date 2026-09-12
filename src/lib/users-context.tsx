@@ -147,15 +147,26 @@ export function UsersProvider({ children }: { children: ReactNode }) {
         return created;
       },
       updateUser: (id, patch) =>
-        patchUser(id, (u) => ({
-          ...u,
-          ...patch,
-          ...(patch.name ? { shortName: shortNameFor(patch.name) } : {}),
-          history:
-            patch.status && patch.status !== u.status
-              ? log(u, patch.status === "Active" ? "User activated" : "User deactivated")
-              : u.history,
-        })),
+        patchUser(id, (u) => {
+          const roleChanged = Boolean(patch.role && patch.role !== u.role);
+          const statusChanged = Boolean(patch.status && patch.status !== u.status);
+          let history = u.history;
+          if (statusChanged)
+            history = log(
+              { ...u, history },
+              patch.status === "Active" ? "User activated" : "User deactivated",
+            );
+          if (roleChanged) history = log({ ...u, history }, `Role changed to ${patch.role}`);
+          return {
+            ...u,
+            ...patch,
+            ...(patch.name ? { shortName: shortNameFor(patch.name) } : {}),
+            /** A platform-wide role needs no client assignments. */
+            assignments:
+              roleChanged && patch.role && platform(patch.role) ? [] : u.assignments,
+            history,
+          };
+        }),
       setUserStatus: (id, status) =>
         patchUser(id, (u) =>
           u.status === status
@@ -174,7 +185,7 @@ export function UsersProvider({ children }: { children: ReactNode }) {
                 ...u,
                 assignments: [
                   ...u.assignments,
-                  { clientId, permissions: [...standardSupervisorPermissions] },
+                  { clientId, permissions: defaultPermissionsForRole(u.role, roles) },
                 ],
                 history: log(u, `${clientName} assigned`),
               },
