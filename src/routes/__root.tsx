@@ -133,21 +133,31 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+function SessionGate({ children }: { children: ReactNode }) {
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!isSignedIn()) navigate({ to: "/login" });
+  }, [navigate]);
+  return <>{children}</>;
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  // The customer-facing payment experience is an external, client-branded
-  // surface: it renders without the internal PayFlow application shell.
-  const isCustomerPaymentExperience = useRouterState({
-    select: (s) => s.location.pathname.startsWith("/pay/"),
+  // The customer-facing payment experience and the sign-in screen are
+  // standalone surfaces: they render without the internal application shell.
+  const isBareSurface = useRouterState({
+    select: (s) =>
+      s.location.pathname.startsWith("/pay/") || s.location.pathname.startsWith("/login"),
   });
 
-  if (isCustomerPaymentExperience) {
+  if (isBareSurface) {
     return (
       <QueryClientProvider client={queryClient}>
         <Outlet />
       </QueryClientProvider>
     );
   }
+
 
   return (
     <QueryClientProvider client={queryClient}>
