@@ -185,6 +185,7 @@ export const clients: Client[] = [
       senderName: "PayPal Collections",
       emailFrom: "collections@paypal.com",
       smsSenderId: "PAYPAL",
+      permissions: [...defaultPermissions, "Approve Human Reviews"],
     }),
   },
   {
@@ -210,6 +211,7 @@ export const clients: Client[] = [
       emailFrom: "billing@canadiantire.ca",
       smsSenderId: "CDNTIRE",
       governanceRules: ["High Balance Human Review", "Repeated Attempts Escalation"],
+      permissions: [...defaultPermissions, "Approve Human Reviews"],
     }),
   },
   {

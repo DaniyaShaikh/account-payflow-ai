@@ -10,9 +10,12 @@ import {
   Users,
   Plug,
   ChevronsUpDown,
+  Bell,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useRole } from "@/lib/role-context";
+import { useReviews } from "@/lib/reviews-context";
+import { formatWaiting } from "@/lib/review-data";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -102,6 +105,63 @@ function UserMenu({ compact = false }: { compact?: boolean }) {
   );
 }
 
+function ReviewBell() {
+  const { notifications, counts } = useReviews();
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          aria-label={`Human reviews awaiting decision: ${counts.awaiting}`}
+          className="relative flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        >
+          <Bell className="size-[17px]" />
+          {counts.awaiting > 0 && (
+            <span className="absolute top-1.5 right-1.5 flex min-w-[15px] justify-center rounded-full bg-danger px-1 text-[9px] leading-[15px] font-semibold text-white">
+              {counts.awaiting}
+            </span>
+          )}
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-[280px]">
+        <DropdownMenuLabel className="text-[11px] tracking-wide text-muted-foreground uppercase">
+          Awaiting your review
+        </DropdownMenuLabel>
+        {notifications.length === 0 ? (
+          <DropdownMenuLabel className="text-[12px] font-normal text-muted-foreground">
+            Nothing needs a decision. Automation is running within governance.
+          </DropdownMenuLabel>
+        ) : (
+          notifications.map((r) => (
+            <DropdownMenuItem key={r.id} asChild>
+              <Link
+                to="/human-review/$reviewId"
+                params={{ reviewId: r.id }}
+                className="flex flex-col items-start gap-0.5"
+              >
+                <span className="text-[12px] font-medium">
+                  {r.customer} · {r.reason}
+                </span>
+                <span className="text-[11px] text-muted-foreground">
+                  {r.ruleName} · waiting {formatWaiting(r.waitingMinutes)}
+                </span>
+              </Link>
+            </DropdownMenuItem>
+          ))
+        )}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link to="/human-review" className="text-[12px] font-medium">
+            View all human reviews
+          </Link>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+
 export function AppShell({ children }: { children: ReactNode }) {
   const { role, visibleClients } = useRole();
 
@@ -162,8 +222,11 @@ export function AppShell({ children }: { children: ReactNode }) {
             Collections operations · {visibleClients.length} client
             {visibleClients.length === 1 ? "" : "s"} in view
           </p>
-          <div className="lg:hidden">
-            <UserMenu compact />
+          <div className="flex items-center gap-2">
+            <ReviewBell />
+            <div className="lg:hidden">
+              <UserMenu compact />
+            </div>
           </div>
         </header>
 

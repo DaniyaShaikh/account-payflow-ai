@@ -10,6 +10,8 @@ import {
 import { RuleSummaryCard } from "@/components/rule-builder";
 import { useRole } from "@/lib/role-context";
 import { useRules } from "@/lib/rules-context";
+import { useReviews } from "@/lib/reviews-context";
+import { formatWaiting, reviewStatusTone } from "@/lib/review-data";
 import { conditionSummary, statusToneForRule } from "@/lib/rules-data";
 
 export const Route = createFileRoute("/rules/$ruleId")({
@@ -37,8 +39,10 @@ function RuleDetail() {
   const { ruleId } = Route.useParams();
   const { visibleClients, userName } = useRole();
   const { visibleRules, updateRule, canEditRule } = useRules();
+  const { reviewsForRule } = useReviews();
 
   const rule = visibleRules.find((r) => r.id === ruleId);
+  const triggers = reviewsForRule(ruleId);
 
   if (!rule) {
     return (
@@ -146,6 +150,49 @@ function RuleDetail() {
               executing the proposed action. Under Autopilot routine actions proceed within the
               configured boundaries.
             </p>
+          </Panel>
+
+          <Panel
+            title="Recent Triggers"
+            description="Human reviews this rule has created"
+            bodyClassName="p-0"
+            action={
+              triggers.length > 0 ? (
+                <Link
+                  to="/human-review"
+                  className="text-[12px] font-medium text-primary hover:underline"
+                >
+                  Open queue
+                </Link>
+              ) : undefined
+            }
+          >
+            {triggers.length === 0 ? (
+              <div className="px-4 py-4">
+                <EmptyState title="No human reviews created by this rule yet" />
+              </div>
+            ) : (
+              <ul className="divide-y divide-border">
+                {triggers.map((r) => (
+                  <li key={r.id} className="px-4 py-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <Link
+                        to="/human-review/$reviewId"
+                        params={{ reviewId: r.id }}
+                        className="text-[13px] font-semibold text-primary hover:underline"
+                      >
+                        {r.customer} · {r.reference}
+                      </Link>
+                      <StatusPill tone={reviewStatusTone(r.status)}>{r.status}</StatusPill>
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {clientName(r.clientId)} · {r.observedValue} · waiting{" "}
+                      {formatWaiting(r.waitingMinutes)}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            )}
           </Panel>
         </div>
 

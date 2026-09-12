@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { RoleProvider } from "../lib/role-context";
 import { RulesProvider } from "../lib/rules-context";
+import { ReviewsProvider } from "../lib/reviews-context";
 import { AppShell } from "../components/app-shell";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
@@ -131,10 +132,12 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <RoleProvider>
         <RulesProvider>
-          <AppShell>
-            {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-            <Outlet />
-          </AppShell>
+          <ReviewsProvider>
+            <AppShell>
+              {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+              <Outlet />
+            </AppShell>
+          </ReviewsProvider>
         </RulesProvider>
       </RoleProvider>
     </QueryClientProvider>

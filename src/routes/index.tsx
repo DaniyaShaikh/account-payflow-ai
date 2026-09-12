@@ -8,6 +8,7 @@ import {
   FilterSelect,
 } from "@/components/payflow-ui";
 import { useRole, useVisibleAccounts, useVisibleActivity } from "@/lib/role-context";
+import { useReviews } from "@/lib/reviews-context";
 import { formatCurrency, formatNumber, journeys } from "@/lib/payflow-data";
 
 export const Route = createFileRoute("/")({
@@ -204,7 +205,7 @@ function Dashboard() {
   const totalAccounts = scoped.reduce((sum, c) => sum + c.accounts, 0);
   const totalCases = scoped.reduce((sum, c) => sum + c.activeCases, 0);
   const recovered = scoped.reduce((sum, c) => sum + c.recovered, 0);
-  const reviews = scoped.reduce((sum, c) => sum + c.reviewsPending, 0);
+  const { counts: reviewCounts } = useReviews();
 
   const scopedIds = scoped.map((c) => c.id);
   const scopedActivity = activity.filter((a) => scopedIds.includes(a.clientId));
@@ -255,11 +256,16 @@ function Dashboard() {
           tone="primary"
           trend={{ direction: "up", text: "8.4% vs previous period" }}
         />
-        <KpiCard
-          label="Human Reviews Pending"
-          value={formatNumber(reviews)}
-          trend={{ direction: "flat", text: "steady week over week" }}
-        />
+        <Link to="/human-review" search={{ status: "Awaiting Review" }} className="block">
+          <KpiCard
+            label="Human Reviews Pending"
+            value={formatNumber(reviewCounts.awaiting)}
+            trend={{
+              direction: "flat",
+              text: `${reviewCounts.highPriority} high priority · open queue`,
+            }}
+          />
+        </Link>
       </div>
 
       <CommunicationFunnel />
