@@ -77,6 +77,7 @@ function today() {
 
 export function UsersProvider({ children }: { children: ReactNode }) {
   const [users, setUsers] = useState<PayflowUser[]>(usersSeed);
+  const [roles, setRoles] = useState<RoleDefinition[]>(rolesSeed);
 
   const value = useMemo<UsersContextValue>(() => {
     const log = (user: PayflowUser, event: string): AccessHistoryEntry[] => [
@@ -87,16 +88,42 @@ export function UsersProvider({ children }: { children: ReactNode }) {
     const patchUser = (id: string, fn: (u: PayflowUser) => PayflowUser) =>
       setUsers((prev) => prev.map((u) => (u.id === id ? fn(u) : u)));
 
+    const platform = (roleName: string) => isPlatformRole(roleName, roles);
+
     return {
       users,
+      roles,
+      roleNames: roles.map((r) => r.name),
+      roleByName: (name) => roles.find((r) => r.name === name),
+      isPlatformRoleName: platform,
+      defaultPermissions: (roleName) => defaultPermissionsForRole(roleName, roles),
+      usersWithRole: (roleName) => users.filter((u) => u.role === roleName),
+      addRole: (input) => {
+        const created: RoleDefinition = {
+          id: `r-${input.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${roles.length + 1}`,
+          name: input.name.trim(),
+          scope: input.scope,
+          description: input.description.trim(),
+          permissions:
+            input.scope === "Platform-wide" ? [...allPermissions] : [...input.permissions],
+          builtIn: false,
+        };
+        setRoles((prev) => [...prev, created]);
+        return created;
+      },
+      updateRole: (id, patch) =>
+        setRoles((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } : r))),
+      deleteRole: (id) =>
+        setRoles((prev) => prev.filter((r) => r.id === id ? r.builtIn : true)),
       adminUserId: ADMIN_USER_ID,
       demoSupervisorId: DEMO_SUPERVISOR_ID,
       userById: (id) => users.find((u) => u.id === id),
       supervisorsForClient: (clientId) =>
         users.filter(
-          (u) => u.role === "Supervisor" && u.assignments.some((a) => a.clientId === clientId),
+          (u) => !platform(u.role) && u.assignments.some((a) => a.clientId === clientId),
         ),
       addUser: (input) => {
+        const platformRole = platform(input.role);
         const created: PayflowUser = {
           id: `u-${input.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${users.length + 1}`,
           name: input.name,
@@ -105,14 +132,13 @@ export function UsersProvider({ children }: { children: ReactNode }) {
           role: input.role,
           status: input.status,
           lastActive: "Never",
-          assignments: input.role === "Supervisor" ? input.assignments : [],
+          assignments: platformRole ? [] : input.assignments,
           history: [
             {
               at: today(),
-              event:
-                input.role === "Operations Admin"
-                  ? "Operations Admin access granted"
-                  : "Supervisor account created",
+              event: platformRole
+                ? `${input.role} access granted`
+                : `${input.role} account created`,
               by: "Daniya Shaikh",
             },
           ],
