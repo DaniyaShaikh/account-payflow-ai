@@ -133,15 +133,38 @@ export const clientBranding: Record<
   },
 };
 
+/** Branding used when a Client is Third Party — the collection operator represents the client. */
+export const payflowBranding = {
+  name: "PayFlow Collections",
+  headerClass: "bg-[#0b1b3a] text-white",
+  accentClass: "bg-primary text-primary-foreground",
+  signature: "PayFlow Collections",
+};
+
+/**
+ * Single source of truth for customer-facing branding.
+ * First Party  -> Client branding.
+ * Third Party  -> PayFlow / collection-operator branding, on behalf of the client.
+ */
 export function brandingFor(clientId: string) {
-  return (
+  const client = clients.find((c) => c.id === clientId);
+  const clientBrand =
     clientBranding[clientId] ?? {
-      name: "Client",
+      name: client?.name ?? "Client",
       headerClass: "bg-secondary text-secondary-foreground",
       accentClass: "bg-primary text-primary-foreground",
-      signature: "Collections",
-    }
-  );
+      signature: `${client?.name ?? "Client"} Collections`,
+    };
+
+  if (client?.config.clientType === "Third Party") {
+    return {
+      ...payflowBranding,
+      mode: "Third Party" as const,
+      onBehalfOf: client.name,
+    };
+  }
+
+  return { ...clientBrand, mode: "First Party" as const, onBehalfOf: client?.name ?? clientBrand.name };
 }
 
 export const communications: Communication[] = [
