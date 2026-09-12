@@ -1,4 +1,5 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import { useContext, useMemo, useState, type ReactNode } from "react";
+import { createStableContext } from "./stable-context";
 import {
   usersSeed,
   rolesSeed,
@@ -66,7 +67,7 @@ interface UsersContextValue {
   permissionsFor: (id: string, clientId: string) => string[];
 }
 
-const UsersContext = createContext<UsersContextValue | null>(null);
+const UsersContext = createStableContext<UsersContextValue | null>("users", null);
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 

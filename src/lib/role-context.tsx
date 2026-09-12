@@ -1,4 +1,5 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createStableContext } from "./stable-context";
 import { clients as seedClients, accounts, activity, type Client } from "./payflow-data";
 import { useUsers } from "./users-context";
 import type { PayflowUser } from "./users-data";
@@ -26,7 +27,7 @@ interface RoleContextValue {
   updateClient: (clientId: string, patch: Partial<Client>) => void;
 }
 
-const RoleContext = createContext<RoleContextValue | null>(null);
+const RoleContext = createStableContext<RoleContextValue | null>("role", null);
 
 export function RoleProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<Role>("admin");

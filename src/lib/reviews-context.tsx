@@ -1,4 +1,5 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import { useContext, useMemo, useState, type ReactNode } from "react";
+import { createStableContext } from "./stable-context";
 import {
   reviewsSeed,
   type HumanReview,
@@ -44,7 +45,7 @@ interface ReviewsContextValue {
   hold: (id: string, input: { until: string; reason: string }) => void;
 }
 
-const ReviewsContext = createContext<ReviewsContextValue | null>(null);
+const ReviewsContext = createStableContext<ReviewsContextValue | null>("reviews", null);
 
 export function ReviewsProvider({ children }: { children: ReactNode }) {
   const [allReviews, setAllReviews] = useState<HumanReview[]>(reviewsSeed);
