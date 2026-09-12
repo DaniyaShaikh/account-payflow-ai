@@ -162,8 +162,11 @@ export function AppShell({ children }: { children: ReactNode }) {
             Collections operations · {visibleClients.length} client
             {visibleClients.length === 1 ? "" : "s"} in view
           </p>
-          <div className="lg:hidden">
-            <UserMenu compact />
+          <div className="flex items-center gap-2">
+            <ReviewBell />
+            <div className="lg:hidden">
+              <UserMenu compact />
+            </div>
           </div>
         </header>
 
