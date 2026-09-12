@@ -32,6 +32,8 @@ import {
   formatCurrency,
   formatNumber,
   type ClientConfig,
+  type Client,
+  type CustomerAccount,
 } from "@/lib/payflow-data";
 import { cn } from "@/lib/utils";
 
@@ -214,7 +216,7 @@ function ClientOverview({
   activityItems,
   reviewCount,
 }: {
-  client: (typeof import("@/lib/payflow-data"))["clients"][number];
+  client: Client;
   activityItems: { text: string; at: string }[];
   reviewCount: number;
 }) {
@@ -338,7 +340,7 @@ function ClientAccounts({
   accounts,
 }: {
   clientName: string;
-  accounts: (typeof import("@/lib/payflow-data"))["accounts"];
+  accounts: CustomerAccount[];
 }) {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("All Statuses");
