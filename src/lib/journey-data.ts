@@ -1,6 +1,6 @@
 import type { Tone } from "@/components/payflow-ui";
 
-export type JourneyType = "Approved Journey" | "AI-Adapted Journey" | "AI-Created Journey";
+export type JourneyType = "Approved Collection Workflow" | "AI-Adapted Collection Workflow" | "AI-Created Collection Workflow";
 
 export type JourneyStatus = "Draft" | "Active" | "Awaiting Approval" | "Inactive" | "Archived";
 
@@ -45,7 +45,7 @@ export interface Journey {
   recoveryNote: string;
   source: string;
   lastUpdated: string;
-  /** Business-readable reason this journey exists / is used */
+  /** Business-readable reason this collection workflow exists / is used */
   reasoning: string;
   steps: JourneyStep[];
   versions: JourneyVersion[];
@@ -54,9 +54,9 @@ export interface Journey {
 }
 
 export const journeyTypes: JourneyType[] = [
-  "Approved Journey",
-  "AI-Adapted Journey",
-  "AI-Created Journey",
+  "Approved Collection Workflow",
+  "AI-Adapted Collection Workflow",
+  "AI-Created Collection Workflow",
 ];
 
 export const journeyStatuses: JourneyStatus[] = [
@@ -70,8 +70,8 @@ export const journeyStatuses: JourneyStatus[] = [
 export const journeySources = ["Collections Policy Team", "PayFlow AI", "Supervisor"];
 
 export function journeyTypeTone(type: JourneyType): Tone {
-  if (type === "AI-Adapted Journey") return "info";
-  if (type === "AI-Created Journey") return "ai";
+  if (type === "AI-Adapted Collection Workflow") return "info";
+  if (type === "AI-Created Collection Workflow") return "ai";
   return "neutral";
 }
 
@@ -106,7 +106,7 @@ export function journeyStepTone(kind: JourneyStepKind): Tone {
 }
 
 const earlyStageSteps: JourneyStep[] = [
-  { kind: "Entry", title: "Account enters journey", detail: "Early-stage overdue balance" },
+  { kind: "Entry", title: "Account enters collection workflow", detail: "Early-stage overdue balance" },
   {
     kind: "Communication",
     title: "Initial reminder",
@@ -129,7 +129,7 @@ const earlyStageSteps: JourneyStep[] = [
 ];
 
 const progressiveSteps: JourneyStep[] = [
-  { kind: "Entry", title: "Account enters journey", detail: "Overdue after early-stage contact" },
+  { kind: "Entry", title: "Account enters collection workflow", detail: "Overdue after early-stage contact" },
   { kind: "Communication", title: "First reminder", channel: "Email", timing: "Day 0" },
   { kind: "Wait", title: "Wait / observe", timing: "3 days" },
   { kind: "Reassess", title: "Reassess customer", detail: "Channel preference and engagement" },
@@ -146,7 +146,7 @@ const promiseSteps: JourneyStep[] = [
   { kind: "Wait", title: "Wait until promise date", timing: "Per commitment" },
   { kind: "Communication", title: "Promise reminder", channel: "SMS", timing: "1 day before" },
   { kind: "Reassess", title: "Reassess on promise date", detail: "Kept, partial or broken promise" },
-  { kind: "Payment", title: "Payment received", detail: "Balance updated, journey stops" },
+  { kind: "Payment", title: "Payment received", detail: "Balance updated, collection workflow stops" },
   { kind: "Condition", title: "Broken promise", detail: "Update context and reassess treatment" },
 ];
 
@@ -159,7 +159,7 @@ const paymentPlanSteps: JourneyStep[] = [
 ];
 
 const escalatedSteps: JourneyStep[] = [
-  { kind: "Entry", title: "Account enters journey", detail: "No response after repeated attempts" },
+  { kind: "Entry", title: "Account enters collection workflow", detail: "No response after repeated attempts" },
   { kind: "Reassess", title: "Assess situation", detail: "Balance, contactability, dispute signals" },
   { kind: "Governance", title: "Governance check", detail: "High balance and escalation rules" },
   { kind: "Escalation", title: "Human review", detail: "Supervisor decision required" },
@@ -168,7 +168,7 @@ const escalatedSteps: JourneyStep[] = [
 ];
 
 const highEngagementSteps: JourneyStep[] = [
-  { kind: "Entry", title: "Account enters journey", detail: "Consistent SMS engagement observed" },
+  { kind: "Entry", title: "Account enters collection workflow", detail: "Consistent SMS engagement observed" },
   { kind: "Communication", title: "Short SMS reminder", channel: "SMS", timing: "Day 0" },
   { kind: "Wait", title: "Wait / observe", timing: "1 day" },
   { kind: "Reassess", title: "Reassess customer", detail: "Click and payment behaviour" },
@@ -178,12 +178,12 @@ const highEngagementSteps: JourneyStep[] = [
 ];
 
 const ctVariationSteps: JourneyStep[] = [
-  { kind: "Entry", title: "Account enters journey", detail: "Retail seasonal balances" },
+  { kind: "Entry", title: "Account enters collection workflow", detail: "Retail seasonal balances" },
   { kind: "Communication", title: "Soft reminder", channel: "Email", timing: "Day 0" },
   { kind: "Wait", title: "Wait / observe", timing: "4 days" },
-  { kind: "Reassess", title: "Reassess customer", detail: "No existing journey fitted this segment" },
+  { kind: "Reassess", title: "Reassess customer", detail: "No existing collection workflow fitted this segment" },
   { kind: "Communication", title: "SMS reminder", channel: "SMS", timing: "Day 4" },
-  { kind: "Governance", title: "Governance check", detail: "Client requires approval of AI-created journeys" },
+  { kind: "Governance", title: "Governance check", detail: "Client requires approval of AI-created collection workflows" },
   { kind: "Outcome", title: "Observe outcome", detail: "Recovery measured against baseline" },
 ];
 
@@ -193,7 +193,7 @@ export const journeyLibrary: Journey[] = [
     name: "Early Stage Collection",
     scope: "Global",
     clientId: null,
-    type: "Approved Journey",
+    type: "Approved Collection Workflow",
     version: "v2.0",
     status: "Active",
     accountsAssigned: 4820,
@@ -202,12 +202,12 @@ export const journeyLibrary: Journey[] = [
     source: "Collections Policy Team",
     lastUpdated: "10 Sep 2026",
     reasoning:
-      "This journey is commonly used for early-stage overdue accounts with no previous failed collection attempts. Contact is light, email-first and stops as soon as payment is received.",
+      "This collection workflow is commonly used for early-stage overdue accounts with no previous failed collection attempts. Contact is light, email-first and stops as soon as payment is received.",
     steps: earlyStageSteps,
     versions: [
       { version: "v2.0", date: "10 Sep 2026", note: "Added reassessment before the follow-up reminder" },
       { version: "v1.1", date: "18 Jul 2026", note: "Observation window extended to 2 days" },
-      { version: "v1.0", date: "02 Apr 2026", note: "Initial approved journey" },
+      { version: "v1.0", date: "02 Apr 2026", note: "Initial approved collection workflow" },
     ],
   },
   {
@@ -215,7 +215,7 @@ export const journeyLibrary: Journey[] = [
     name: "Progressive Collection",
     scope: "Global",
     clientId: null,
-    type: "Approved Journey",
+    type: "Approved Collection Workflow",
     version: "v1.1",
     status: "Active",
     accountsAssigned: 2410,
@@ -228,7 +228,7 @@ export const journeyLibrary: Journey[] = [
     steps: progressiveSteps,
     versions: [
       { version: "v1.1", date: "04 Sep 2026", note: "Governance check added before the firm reminder" },
-      { version: "v1.0", date: "12 May 2026", note: "Initial approved journey" },
+      { version: "v1.0", date: "12 May 2026", note: "Initial approved collection workflow" },
     ],
   },
   {
@@ -236,7 +236,7 @@ export const journeyLibrary: Journey[] = [
     name: "Progressive Reminder",
     scope: "Global",
     clientId: null,
-    type: "Approved Journey",
+    type: "Approved Collection Workflow",
     version: "v1.0",
     status: "Active",
     accountsAssigned: 1180,
@@ -247,14 +247,14 @@ export const journeyLibrary: Journey[] = [
     reasoning:
       "A lighter reminder sequence for accounts that engage but have not yet paid. Reminder volume is deliberately limited.",
     steps: progressiveSteps.slice(0, 6),
-    versions: [{ version: "v1.0", date: "28 Aug 2026", note: "Initial approved journey" }],
+    versions: [{ version: "v1.0", date: "28 Aug 2026", note: "Initial approved collection workflow" }],
   },
   {
     id: "promise-to-pay-follow-up",
     name: "Promise-to-Pay Follow-Up",
     scope: "Global",
     clientId: null,
-    type: "Approved Journey",
+    type: "Approved Collection Workflow",
     version: "v1.2",
     status: "Active",
     accountsAssigned: 740,
@@ -267,7 +267,7 @@ export const journeyLibrary: Journey[] = [
     steps: promiseSteps,
     versions: [
       { version: "v1.2", date: "01 Sep 2026", note: "Broken promise now reassesses instead of escalating" },
-      { version: "v1.0", date: "20 Mar 2026", note: "Initial approved journey" },
+      { version: "v1.0", date: "20 Mar 2026", note: "Initial approved collection workflow" },
     ],
   },
   {
@@ -275,7 +275,7 @@ export const journeyLibrary: Journey[] = [
     name: "Payment Plan Monitoring",
     scope: "Global",
     clientId: null,
-    type: "Approved Journey",
+    type: "Approved Collection Workflow",
     version: "v1.0",
     status: "Active",
     accountsAssigned: 610,
@@ -286,14 +286,14 @@ export const journeyLibrary: Journey[] = [
     reasoning:
       "Monitors accounts on an agreed installment plan. Only installment reminders are sent while the plan remains on schedule.",
     steps: paymentPlanSteps,
-    versions: [{ version: "v1.0", date: "22 Aug 2026", note: "Initial approved journey" }],
+    versions: [{ version: "v1.0", date: "22 Aug 2026", note: "Initial approved collection workflow" }],
   },
   {
     id: "escalated-collection",
     name: "Escalated Collection",
     scope: "Global",
     clientId: null,
-    type: "Approved Journey",
+    type: "Approved Collection Workflow",
     version: "v1.1",
     status: "Active",
     accountsAssigned: 265,
@@ -306,7 +306,7 @@ export const journeyLibrary: Journey[] = [
     steps: escalatedSteps,
     versions: [
       { version: "v1.1", date: "15 Aug 2026", note: "Dispute signals now block automated outreach" },
-      { version: "v1.0", date: "09 Feb 2026", note: "Initial approved journey" },
+      { version: "v1.0", date: "09 Feb 2026", note: "Initial approved collection workflow" },
     ],
   },
   {
@@ -314,7 +314,7 @@ export const journeyLibrary: Journey[] = [
     name: "PayPal High Engagement Recovery",
     scope: "PayPal",
     clientId: "paypal",
-    type: "AI-Adapted Journey",
+    type: "AI-Adapted Collection Workflow",
     version: "v1.1",
     status: "Active",
     accountsAssigned: 380,
@@ -335,7 +335,7 @@ export const journeyLibrary: Journey[] = [
     name: "Canadian Tire Recovery Variation",
     scope: "Canadian Tire",
     clientId: "canadian-tire",
-    type: "AI-Created Journey",
+    type: "AI-Created Collection Workflow",
     version: "v1.0",
     status: "Awaiting Approval",
     accountsAssigned: 120,
@@ -344,7 +344,7 @@ export const journeyLibrary: Journey[] = [
     source: "PayFlow AI",
     lastUpdated: "12 Sep 2026",
     reasoning:
-      "Created because no existing journey suited seasonal retail balances with low early engagement. Canadian Tire governance requires supervisor approval before an AI-created journey becomes active.",
+      "Created because no existing collection workflow suited seasonal retail balances with low early engagement. Canadian Tire governance requires supervisor approval before an AI-created collection workflow becomes active.",
     steps: ctVariationSteps,
     versions: [{ version: "v1.0", date: "12 Sep 2026", note: "Created by PayFlow AI, awaiting approval" }],
     reviewId: "rev-1042",
@@ -354,7 +354,7 @@ export const journeyLibrary: Journey[] = [
     name: "Northstar Winter Arrears",
     scope: "Northstar Utilities",
     clientId: "northstar-utilities",
-    type: "AI-Adapted Journey",
+    type: "AI-Adapted Collection Workflow",
     version: "v1.0",
     status: "Draft",
     accountsAssigned: 0,

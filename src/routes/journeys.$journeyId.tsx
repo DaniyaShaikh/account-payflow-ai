@@ -15,13 +15,13 @@ import { communicationsForJourney } from "@/lib/communication-data";
 export const Route = createFileRoute("/journeys/$journeyId")({
   head: () => ({
     meta: [
-      { title: "Journey detail — PayFlow Collections" },
+      { title: "Collection Workflow detail — PayFlow Collections" },
       {
         name: "description",
         content:
-          "Collection journey detail with its stages, timing, reassessment points, version history and the accounts currently assigned to it.",
+          "Collection collection workflow detail with its stages, timing, reassessment points, version history and the accounts currently assigned to it.",
       },
-      { property: "og:title", content: "Journey detail — PayFlow Collections" },
+      { property: "og:title", content: "Collection Workflow detail — PayFlow Collections" },
       {
         property: "og:description",
         content: "Stages, timing and reassessment points of a PayFlow collection strategy.",
@@ -45,12 +45,12 @@ function JourneyDetail() {
 
   if (journey.clientId && !canSeeClient(journey.clientId)) {
     return (
-      <Panel title="No access to this journey">
+      <Panel title="No access to this collection workflow">
         <p className="text-sm text-muted-foreground">
           This journey belongs to a client that is not assigned to your supervisor account.
         </p>
         <Link to="/journeys" className="mt-3 inline-block text-[13px] font-medium text-primary">
-          Back to journeys
+          Back to collection workflows
         </Link>
       </Panel>
     );
@@ -68,7 +68,7 @@ function JourneyDetail() {
     { label: "Type", value: journey.type },
     { label: "Current Version", value: journey.version },
     { label: "Status", value: journey.status },
-    { label: "Accounts Assigned", value: `${formatNumber(journey.accountsAssigned)} accounts` },
+    { label: "Accounts Assigned", value: `${formatNumber(collection workflow.accountsAssigned)} accounts` },
     { label: "Created By / Source", value: journey.source },
     { label: "Recovery / Outcome", value: journey.recoveryNote },
     { label: "Last Updated", value: journey.lastUpdated },
@@ -77,9 +77,9 @@ function JourneyDetail() {
   return (
     <>
       <PageHeader
-        breadcrumb={[{ label: "Journeys", to: "/journeys" }, { label: journey.name }]}
+        breadcrumb={[{ label: "Collection Workflows", to: "/journeys" }, { label: journey.name }]}
         title={journey.name}
-        description={`${journey.scope} · ${journey.type}`}
+        description={`${collection workflow.scope} · ${collection workflow.type}`}
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <StatusPill tone={journeyTypeTone(journey.type)}>{journey.type}</StatusPill>
@@ -92,7 +92,7 @@ function JourneyDetail() {
       {journey.status === "Awaiting Approval" && (
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-warning/30 bg-warning/10 px-4 py-3">
           <p className="text-[13px] text-foreground">
-            This journey requires supervisor approval under the client's governance configuration
+            This collection workflow requires supervisor approval under the client's governance configuration
             before it can be used.
           </p>
           {journey.reviewId && (
@@ -105,7 +105,7 @@ function JourneyDetail() {
 
       <div className="grid gap-5 lg:grid-cols-[1fr_1.15fr]">
         <div className="space-y-5">
-          <Panel title="Journey Summary" bodyClassName="p-0">
+          <Panel title="Collection Workflow Summary" bodyClassName="p-0">
             <dl className="divide-y divide-border">
               {facts.map((f) => (
                 <div key={f.label} className="flex items-center justify-between gap-4 px-4 py-2.5">
@@ -116,7 +116,7 @@ function JourneyDetail() {
             </dl>
           </Panel>
 
-          <Panel title="Why PayFlow uses this Journey">
+          <Panel title="Why PayFlow uses this Collection Workflow">
             <button
               onClick={() => setShowReasoning((v) => !v)}
               className="text-[13px] font-medium text-primary hover:underline"
@@ -182,13 +182,13 @@ function JourneyDetail() {
           </Panel>
 
           <Panel
-            title="Accounts on this Journey"
+            title="Accounts on this Collection Workflow"
             description="Collection cases currently following this strategy"
             bodyClassName="p-0"
           >
             {assignments.length === 0 ? (
               <p className="px-4 py-6 text-center text-[13px] text-muted-foreground">
-                No visible accounts are currently assigned to this journey.
+                No visible accounts are currently assigned to this collection workflow.
               </p>
             ) : (
               <ul className="divide-y divide-border">
@@ -223,7 +223,7 @@ function JourneyDetail() {
           >
             {journeyComms.length === 0 ? (
               <p className="px-4 py-6 text-center text-[13px] text-muted-foreground">
-                No communications recorded for this journey yet.
+                No communications recorded for this collection workflow yet.
               </p>
             ) : (
               <ul className="divide-y divide-border">

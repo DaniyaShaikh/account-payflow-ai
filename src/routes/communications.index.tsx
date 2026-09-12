@@ -31,7 +31,7 @@ export const Route = createFileRoute("/communications/")({
   } => {
     const pick = (key: string) =>
       typeof search[key] === "string" ? (search[key] as string) : undefined;
-    return { status: pick("status"), channel: pick("channel"), client: pick("client"), journey: pick("journey") };
+    return { status: pick("status"), channel: pick("channel"), client: pick("client"), journey: pick("collection workflow") };
   },
 
   component: CommunicationsPage,
@@ -70,14 +70,14 @@ function CommunicationsPage() {
 
       <Panel
         title="Communication Log"
-        description="Every communication belongs to a client, customer account, collection case and journey."
+        description="Every communication belongs to a client, customer account, collection case and collection workflow."
       >
         <CommunicationTable
           rows={rows}
           initialStatus={search.status ?? "All Statuses"}
           initialChannel={search.channel ?? "All Channels"}
           initialClient={search.client ?? "All Clients"}
-          initialJourney={search.journey ?? "All Journeys"}
+          initialJourney={search.journey ?? "All Collection Workflows"}
         />
       </Panel>
     </>

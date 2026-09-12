@@ -73,7 +73,7 @@ export const Route = createFileRoute("/clients/$clientId")({
 const tabs = [
   "Overview",
   "Accounts",
-  "Journeys",
+  "Collection Workflows",
   "Communications",
   "Rules",
   "Human Reviews",
@@ -166,10 +166,10 @@ function ClientDetail() {
 
       {tab === "Accounts" && <ClientAccounts clientName={client.name} accounts={accounts} />}
 
-      {tab === "Journeys" && (
+      {tab === "Collection Workflows" && (
         <Panel
-          title="Journeys"
-          description={`Global journeys in use by ${client.name} and ${client.name}-specific journeys`}
+          title="Collection Workflows"
+          description={`Global collection workflows in use by ${client.name} and ${client.name}-specific collection workflows`}
         >
           <JourneyLibrary journeys={journeysForClient(client.id)} showClientFilter={false} />
         </Panel>
@@ -337,14 +337,14 @@ function ClientAccounts({
 }) {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("All Statuses");
-  const [journey, setJourney] = useState("All Journeys");
+  const [journey, setJourney] = useState("All Collection Workflows");
   const [review, setReview] = useState("All Accounts");
 
   const rows = accounts.filter((a) => {
     const q = search.trim().toLowerCase();
     if (q && !`${a.customer} ${a.reference}`.toLowerCase().includes(q)) return false;
     if (status !== "All Statuses" && a.status !== status) return false;
-    if (journey !== "All Journeys" && a.journey !== journey) return false;
+    if (journey !== "All Collection Workflows" && a.journey !== journey) return false;
     if (review === "Human Review Only" && !a.humanReview) return false;
     if (review === "No Human Review" && a.humanReview) return false;
     return true;
@@ -370,10 +370,10 @@ function ClientAccounts({
           options={["All Statuses", ...collectionStatuses]}
         />
         <FilterSelect
-          label="Journey"
+          label="Collection Workflow"
           value={journey}
           onChange={setJourney}
-          options={["All Journeys", ...journeys]}
+          options={["All Collection Workflows", ...journeys]}
         />
         <FilterSelect
           label="Human Review"
@@ -388,7 +388,7 @@ function ClientAccounts({
           "Account Reference",
           "Outstanding",
           "Status",
-          "Journey",
+          "Collection Workflow",
           "Last Action",
           "Next Action",
           "Human Review",

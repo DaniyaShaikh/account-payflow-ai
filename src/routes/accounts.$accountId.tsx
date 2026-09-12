@@ -19,7 +19,7 @@ export const Route = createFileRoute("/accounts/$accountId")({
       {
         name: "description",
         content:
-          "Customer account detail with balances, collection status, current journey and full collection activity timeline.",
+          "Customer account detail with balances, collection status, current collection workflow and full collection activity timeline.",
       },
       { property: "og:title", content: "Customer account & collection case — PayFlow" },
       {
@@ -113,11 +113,11 @@ function AccountDetail() {
 
           {journeyState?.journey && (
             <Panel
-              title="Current Journey"
+              title="Current Collection Workflow"
               description="The collection strategy currently applied to this case"
               action={
                 <Link to="/journeys/$journeyId" params={{ journeyId: journeyState.journey.id }}>
-                  <Btn>View Journey</Btn>
+                  <Btn>View Collection Workflow</Btn>
                 </Link>
               }
             >
@@ -152,7 +152,7 @@ function AccountDetail() {
               </dl>
               <p className="mt-3 text-[12px] leading-relaxed text-muted-foreground">
                 <span className="font-medium text-foreground">
-                  Why this journey was selected for this account:{" "}
+                  Why this collection workflow was selected for this account:{" "}
                 </span>
                 {journeyState.whySelected}
               </p>

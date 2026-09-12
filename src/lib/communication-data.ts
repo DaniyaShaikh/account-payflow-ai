@@ -175,7 +175,7 @@ export const communications: Communication[] = [
     whyChannel:
       "The customer previously engaged with SMS and a valid mobile number is available on the account.",
     whyTiming:
-      "The current journey scheduled a reassessment after the previous reminder period, and that period has now completed.",
+      "The current collection workflow scheduled a reassessment after the previous reminder period, and that period has now completed.",
     events: [
       { at: "12 Sep · 09:40", label: "Communication prepared", detail: "SMS reminder drafted from case context" },
       { at: "12 Sep · 09:41", label: "Governance check passed", detail: "No applicable rule required human review" },
@@ -216,7 +216,7 @@ export const communications: Communication[] = [
     whyMessage:
       "The balance remains outstanding after the initial reminder and no dispute or payment arrangement is recorded.",
     whyChannel: "Email is the customer's confirmed contact channel and previous emails were opened.",
-    whyTiming: "The journey's observation period after the initial reminder has completed.",
+    whyTiming: "The collection workflow's observation period after the initial reminder has completed.",
     events: [
       { at: "12 Sep · 09:28", label: "Communication prepared" },
       { at: "12 Sep · 09:30", label: "Governance check passed" },
@@ -253,7 +253,7 @@ export const communications: Communication[] = [
     paymentLink: true,
     whyMessage: "A promise to pay is recorded and the agreed date is approaching.",
     whyChannel: "The customer responds reliably on SMS and confirmed the promise by SMS reply.",
-    whyTiming: "The journey sends a single reminder shortly before the promised payment date.",
+    whyTiming: "The collection workflow sends a single reminder shortly before the promised payment date.",
     events: [
       { at: "12 Sep · 09:14", label: "Communication prepared" },
       { at: "12 Sep · 09:15", label: "Governance check passed" },
@@ -290,7 +290,7 @@ export const communications: Communication[] = [
     paymentLink: true,
     whyMessage: "An installment plan is active and the next installment date is approaching.",
     whyChannel: "Email is the channel used for all plan correspondence on this account.",
-    whyTiming: "The journey sends installment reminders two days before each due date.",
+    whyTiming: "The collection workflow sends installment reminders two days before each due date.",
     events: [
       { at: "12 Sep · 08:52", label: "Communication prepared" },
       { at: "12 Sep · 08:54", label: "Governance check passed" },
@@ -356,7 +356,7 @@ export const communications: Communication[] = [
     paymentLink: true,
     whyMessage: "The account remained overdue after the previous reminder.",
     whyChannel: "SMS was selected because the customer had not opened the previous email at that time.",
-    whyTiming: "The journey's observation period had completed.",
+    whyTiming: "The collection workflow's observation period had completed.",
     events: [
       { at: "11 Sep · 16:18", label: "Communication prepared" },
       { at: "11 Sep · 16:20", label: "SMS sent" },
@@ -394,7 +394,7 @@ export const communications: Communication[] = [
     paymentLink: true,
     whyMessage: "First-time delinquency with no previous collection contact on the account.",
     whyChannel: "Email is the only confirmed contact channel for this customer.",
-    whyTiming: "Sent on entry to the journey.",
+    whyTiming: "Sent on entry to the collection workflow.",
     events: [
       { at: "11 Sep · 11:02", label: "Communication prepared" },
       { at: "11 Sep · 11:04", label: "Governance check passed" },
@@ -433,7 +433,7 @@ export const communications: Communication[] = [
     whyMessage:
       "The account has a high balance with no response after repeated attempts, so a settlement option was prepared.",
     whyChannel: "Email is the only channel with a deliverable contact point on this account.",
-    whyTiming: "Prepared once the escalation point in the journey was reached.",
+    whyTiming: "Prepared once the escalation point in the collection workflow was reached.",
     events: [
       { at: "09 Sep · 14:12", label: "Communication prepared" },
       { at: "09 Sep · 14:13", label: "Governance check", detail: "High balance rule requires supervisor approval" },
@@ -469,7 +469,7 @@ export const communications: Communication[] = [
     paymentLink: true,
     whyMessage: "A routine reminder was prepared before the dispute was recorded on the case.",
     whyChannel: "Email is the customer's recorded contact channel.",
-    whyTiming: "Would have followed the journey's observation period.",
+    whyTiming: "Would have followed the collection workflow's observation period.",
     events: [
       { at: "08 Sep · 10:30", label: "Communication prepared" },
       { at: "08 Sep · 10:31", label: "Dispute detected", detail: "Customer disputed the charge by reply" },
@@ -502,9 +502,9 @@ export const communications: Communication[] = [
       "You can pay securely online at any time using the link below.",
     ],
     paymentLink: true,
-    whyMessage: "First reminder on entry to the early-stage journey.",
+    whyMessage: "First reminder on entry to the early-stage collection workflow.",
     whyChannel: "Email was the customer's preferred channel at the time of assessment.",
-    whyTiming: "Sent on day 0 of the journey.",
+    whyTiming: "Sent on day 0 of the collection workflow.",
     events: [
       { at: "05 Sep · 09:08", label: "Communication prepared" },
       { at: "05 Sep · 09:10", label: "Email sent" },
