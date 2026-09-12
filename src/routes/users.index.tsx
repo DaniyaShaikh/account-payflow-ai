@@ -199,6 +199,10 @@ function UsersPage() {
           ))}
         </DataTable>
       )}
+
+      <div className="mt-5">
+        <RolesPanel />
+      </div>
     </>
   );
 }
@@ -216,17 +220,24 @@ function AddUserForm({
     assignments: { clientId: string; permissions: string[] }[];
   }) => void;
 }) {
+  const { roleNames, isPlatformRoleName, defaultPermissions } = useUsers();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState<UserRole>("Supervisor");
+  const [role, setRole] = useState<UserRole>(roleNames[1] ?? roleNames[0] ?? "Supervisor");
   const [status, setStatus] = useState<UserStatus>("Active");
   const [clientIds, setClientIds] = useState<string[]>([]);
-  const [permissions, setPermissions] = useState<string[]>([...standardSupervisorPermissions]);
+  const [permissions, setPermissions] = useState<string[]>(() => defaultPermissions(role));
+  const platform = isPlatformRoleName(role);
+
+  /** Switching role loads that role's default permission set. */
+  const pickRole = (next: string) => {
+    setRole(next);
+    setPermissions(defaultPermissions(next));
+    if (isPlatformRoleName(next)) setClientIds([]);
+  };
 
   const valid =
-    name.trim().length > 1 &&
-    /.+@.+\..+/.test(email) &&
-    (role === "Operations Admin" || clientIds.length > 0);
+    name.trim().length > 1 && /.+@.+\..+/.test(email) && (platform || clientIds.length > 0);
 
   return (
     <Panel title="Add User" description="Client assignment decides where. Permissions decide what.">
