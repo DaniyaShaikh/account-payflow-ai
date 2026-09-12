@@ -261,7 +261,9 @@ export function MappingSection({ draft, patchConfig }: SectionProps) {
         ))}
       </DataTable>
       <p className="text-[11px] text-muted-foreground">
-        Default mappings are prefilled where the source field name matches a PayFlow field.
+        These illustrative mappings define how operational data is interpreted, not a finalized
+        mandatory schema. Default mappings are prefilled where the source field name matches a
+        PayFlow field.
       </p>
     </div>
   );
