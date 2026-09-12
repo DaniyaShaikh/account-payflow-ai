@@ -52,8 +52,8 @@ const navGroups = [
   {
     label: "Administration",
     items: [
-      { to: "/users", label: "Users & Permissions", icon: Users },
-      { to: "/integrations", label: "Integrations", icon: Plug },
+      { to: "/users", label: "Users & Permissions", icon: Users, adminOnly: true },
+      { to: "/integrations", label: "Integrations", icon: Plug, adminOnly: true },
     ],
   },
 ] as const;
