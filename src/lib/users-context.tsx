@@ -219,11 +219,11 @@ export function UsersProvider({ children }: { children: ReactNode }) {
       permissionsFor: (id, clientId) => {
         const user = users.find((u) => u.id === id);
         if (!user) return [];
-        if (user.role === "Operations Admin") return [...standardSupervisorPermissions];
+        if (platform(user.role)) return [...allPermissions];
         return user.assignments.find((a) => a.clientId === clientId)?.permissions ?? [];
       },
     };
-  }, [users]);
+  }, [users, roles]);
 
   return <UsersContext.Provider value={value}>{children}</UsersContext.Provider>;
 }
