@@ -216,3 +216,189 @@ export function PlaceholderSection({
     </Panel>
   );
 }
+
+export function Field({
+  label,
+  hint,
+  children,
+  className,
+}: {
+  label: string;
+  hint?: string;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <label className={cn("block", className)}>
+      <span className="mb-1.5 block text-[12px] font-medium text-foreground">{label}</span>
+      {children}
+      {hint && <span className="mt-1 block text-[11px] text-muted-foreground">{hint}</span>}
+    </label>
+  );
+}
+
+const controlClass =
+  "w-full rounded-md border border-border bg-card px-2.5 py-1.5 text-[13px] text-foreground outline-none transition-colors focus:border-primary disabled:opacity-60";
+
+export function TextInput({
+  value,
+  onChange,
+  placeholder,
+  disabled,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  disabled?: boolean;
+}) {
+  return (
+    <input
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      disabled={disabled}
+      className={controlClass}
+    />
+  );
+}
+
+export function SelectInput({
+  value,
+  options,
+  onChange,
+  disabled,
+}: {
+  value: string;
+  options: string[];
+  onChange: (v: string) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      disabled={disabled}
+      className={controlClass}
+    >
+      {options.map((o) => (
+        <option key={o} value={o}>
+          {o}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+export function ChoiceCard({
+  title,
+  description,
+  selected,
+  disabled,
+  badge,
+  onSelect,
+}: {
+  title: string;
+  description: string;
+  selected?: boolean;
+  disabled?: boolean;
+  badge?: string;
+  onSelect?: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      disabled={disabled}
+      className={cn(
+        "rounded-lg border bg-card p-4 text-left transition-colors",
+        selected ? "border-primary ring-1 ring-primary/30" : "border-border hover:border-border-strong",
+        disabled && "cursor-not-allowed opacity-60",
+      )}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[13px] font-semibold text-foreground">{title}</span>
+        {badge && <StatusPill>{badge}</StatusPill>}
+        {selected && !badge && <StatusPill tone="info">Selected</StatusPill>}
+      </div>
+      <p className="mt-1.5 text-[12px] leading-relaxed text-muted-foreground">{description}</p>
+    </button>
+  );
+}
+
+export function ToggleRow({
+  label,
+  description,
+  checked,
+  disabled,
+  badge,
+  onChange,
+}: {
+  label: string;
+  description?: string;
+  checked: boolean;
+  disabled?: boolean;
+  badge?: string;
+  onChange?: (v: boolean) => void;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-4 py-2.5">
+      <div>
+        <div className="flex items-center gap-2">
+          <p className="text-[13px] font-medium text-foreground">{label}</p>
+          {badge && <StatusPill>{badge}</StatusPill>}
+        </div>
+        {description && <p className="text-[11px] text-muted-foreground">{description}</p>}
+      </div>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => onChange?.(!checked)}
+        className={cn(
+          "relative h-5 w-9 shrink-0 rounded-full transition-colors",
+          checked ? "bg-primary" : "bg-secondary border border-border",
+          disabled && "cursor-not-allowed opacity-50",
+        )}
+        aria-pressed={checked}
+        aria-label={label}
+      >
+        <span
+          className={cn(
+            "absolute top-0.5 size-4 rounded-full bg-card shadow-sm transition-all",
+            checked ? "left-[18px]" : "left-0.5",
+          )}
+        />
+      </button>
+    </div>
+  );
+}
+
+export function Btn({
+  children,
+  onClick,
+  variant = "secondary",
+  disabled,
+  className,
+}: {
+  children: ReactNode;
+  onClick?: () => void;
+  variant?: "primary" | "secondary" | "ghost";
+  disabled?: boolean;
+  className?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[13px] font-medium transition-colors disabled:opacity-50",
+        variant === "primary" && "bg-primary text-primary-foreground hover:opacity-90",
+        variant === "secondary" && "border border-border bg-card text-foreground hover:bg-surface",
+        variant === "ghost" && "text-muted-foreground hover:text-foreground",
+        className,
+      )}
+    >
+      {children}
+    </button>
+  );
+}
