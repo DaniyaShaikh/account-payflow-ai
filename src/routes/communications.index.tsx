@@ -31,7 +31,12 @@ export const Route = createFileRoute("/communications/")({
   } => {
     const pick = (key: string) =>
       typeof search[key] === "string" ? (search[key] as string) : undefined;
-    return { status: pick("status"), channel: pick("channel"), client: pick("client"), journey: pick("collection workflow") };
+    return {
+      status: pick("status"),
+      channel: pick("channel"),
+      client: pick("client"),
+      journey: pick("journey"),
+    };
   },
 
   component: CommunicationsPage,
