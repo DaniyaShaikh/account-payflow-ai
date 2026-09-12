@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as IntegrationsRouteImport } from './routes/integrations'
 import { Route as AccountsIndexRouteImport } from './routes/accounts.index'
 import { Route as AccountsAccountIdRouteImport } from './routes/accounts.$accountId'
 import { Route as ClientsIndexRouteImport } from './routes/clients.index'
@@ -32,11 +31,6 @@ import { Route as UsersUserIdRouteImport } from './routes/users.$userId'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IntegrationsRoute = IntegrationsRouteImport.update({
-  id: '/integrations',
-  path: '/integrations',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AccountsIndexRoute = AccountsIndexRouteImport.update({
@@ -128,7 +122,6 @@ const UsersUserIdRoute = UsersUserIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/integrations': typeof IntegrationsRoute
   '/accounts/$accountId': typeof AccountsAccountIdRoute
   '/clients/$clientId': typeof ClientsClientIdRoute
   '/clients/new': typeof ClientsNewRoute
@@ -149,7 +142,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/integrations': typeof IntegrationsRoute
   '/accounts/$accountId': typeof AccountsAccountIdRoute
   '/clients/$clientId': typeof ClientsClientIdRoute
   '/clients/new': typeof ClientsNewRoute
@@ -171,7 +163,6 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/integrations': typeof IntegrationsRoute
   '/accounts/$accountId': typeof AccountsAccountIdRoute
   '/clients/$clientId': typeof ClientsClientIdRoute
   '/clients/new': typeof ClientsNewRoute
@@ -194,7 +185,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/integrations'
     | '/accounts/$accountId'
     | '/clients/$clientId'
     | '/clients/new'
@@ -215,7 +205,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/integrations'
     | '/accounts/$accountId'
     | '/clients/$clientId'
     | '/clients/new'
@@ -236,7 +225,6 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/integrations'
     | '/accounts/$accountId'
     | '/clients/$clientId'
     | '/clients/new'
@@ -258,7 +246,6 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  IntegrationsRoute: typeof IntegrationsRoute
   AccountsAccountIdRoute: typeof AccountsAccountIdRoute
   ClientsClientIdRoute: typeof ClientsClientIdRoute
   ClientsNewRoute: typeof ClientsNewRoute
@@ -285,13 +272,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/integrations': {
-      id: '/integrations'
-      path: '/integrations'
-      fullPath: '/integrations'
-      preLoaderRoute: typeof IntegrationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/accounts/': {
@@ -418,7 +398,6 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  IntegrationsRoute: IntegrationsRoute,
   AccountsAccountIdRoute: AccountsAccountIdRoute,
   ClientsClientIdRoute: ClientsClientIdRoute,
   ClientsNewRoute: ClientsNewRoute,
