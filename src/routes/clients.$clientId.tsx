@@ -176,9 +176,10 @@ function ClientDetail() {
       )}
       {tab === "Rules" && <ClientRules clientId={client.id} clientName={client.name} />}
       {tab === "Human Reviews" && (
-        <PlaceholderSection
+        <ReviewQueue
+          clientId={client.id}
           title="Human Reviews"
-          description={`${client.reviewsPending} items currently queued for supervisor decision`}
+          description={`Exceptions from ${client.name} awaiting a supervisor decision`}
         />
       )}
 
