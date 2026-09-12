@@ -1,9 +1,16 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { PageHeader, Panel, StatusPill, statusTone } from "@/components/payflow-ui";
+import { PageHeader, Panel, StatusPill, statusTone, Btn } from "@/components/payflow-ui";
 import { useRole } from "@/lib/role-context";
 import { useReviews } from "@/lib/reviews-context";
 import { reviewStatusTone } from "@/lib/review-data";
 import { accounts, clientName, formatCurrency } from "@/lib/payflow-data";
+import { journeyStateForAccount, journeyStatusTone, journeyTypeTone } from "@/lib/journey-data";
+import {
+  commStatusTone,
+  communicationTimelineEvents,
+  communicationsForAccount,
+  engagementLabel,
+} from "@/lib/communication-data";
 
 export const Route = createFileRoute("/accounts/$accountId")({
   head: () => ({
@@ -28,14 +35,25 @@ export const Route = createFileRoute("/accounts/$accountId")({
   component: AccountDetail,
 });
 
+interface TimelineEvent {
+  at: string;
+  label: string;
+  detail: string;
+  reviewId?: string;
+  communicationId?: string;
+}
+
 function AccountDetail() {
   const { accountId } = Route.useParams();
   const { canSeeClient } = useRole();
   const { reviewsForAccount, accountReviewEvents } = useReviews();
   const account = accounts.find((a) => a.id === accountId)!;
   const caseReviews = reviewsForAccount(accountId);
-  const timeline: { at: string; label: string; detail: string; reviewId?: string }[] = [
+  const journeyState = journeyStateForAccount(accountId, account.journey);
+  const accountComms = communicationsForAccount(accountId);
+  const timeline: TimelineEvent[] = [
     ...account.timeline,
+    ...communicationTimelineEvents(accountId),
     ...accountReviewEvents(accountId),
   ];
 
@@ -58,7 +76,6 @@ function AccountDetail() {
     { label: "Original Balance", value: formatCurrency(account.originalBalance) },
     { label: "Outstanding Balance", value: formatCurrency(account.outstanding) },
     { label: "Amount Recovered", value: formatCurrency(account.recovered) },
-    { label: "Current Journey", value: account.journey },
     { label: "Last Action", value: account.lastAction },
     { label: "Next Action", value: account.nextAction },
   ];
@@ -82,16 +99,94 @@ function AccountDetail() {
       />
 
       <div className="grid gap-5 lg:grid-cols-[1.1fr_1fr]">
-        <Panel title="Case Summary" bodyClassName="p-0">
-          <dl className="divide-y divide-border">
-            {facts.map((f) => (
-              <div key={f.label} className="flex items-center justify-between gap-4 px-4 py-2.5">
-                <dt className="text-[13px] text-muted-foreground">{f.label}</dt>
-                <dd className="tabular text-[13px] font-medium text-foreground">{f.value}</dd>
+        <div className="space-y-5">
+          <Panel title="Case Summary" bodyClassName="p-0">
+            <dl className="divide-y divide-border">
+              {facts.map((f) => (
+                <div key={f.label} className="flex items-center justify-between gap-4 px-4 py-2.5">
+                  <dt className="text-[13px] text-muted-foreground">{f.label}</dt>
+                  <dd className="tabular text-[13px] font-medium text-foreground">{f.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </Panel>
+
+          {journeyState?.journey && (
+            <Panel
+              title="Current Journey"
+              description="The collection strategy currently applied to this case"
+              action={
+                <Link to="/journeys/$journeyId" params={{ journeyId: journeyState.journey.id }}>
+                  <Btn>View Journey</Btn>
+                </Link>
+              }
+            >
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[14px] font-semibold text-foreground">
+                  {journeyState.journey.name}
+                </span>
+                <StatusPill tone={journeyTypeTone(journeyState.journey.type)}>
+                  {journeyState.journey.type}
+                </StatusPill>
+                <StatusPill tone={journeyStatusTone(journeyState.journey.status)}>
+                  {journeyState.journey.status}
+                </StatusPill>
               </div>
-            ))}
-          </dl>
-        </Panel>
+              <dl className="mt-3 divide-y divide-border border-t border-border">
+                <div className="flex items-center justify-between gap-4 py-2">
+                  <dt className="text-[13px] text-muted-foreground">Current Stage</dt>
+                  <dd className="text-[13px] font-medium text-foreground">{journeyState.stage}</dd>
+                </div>
+                <div className="flex items-center justify-between gap-4 py-2">
+                  <dt className="text-[13px] text-muted-foreground">Journey Started</dt>
+                  <dd className="text-[13px] font-medium text-foreground">
+                    {journeyState.startedAt}
+                  </dd>
+                </div>
+                <div className="flex items-center justify-between gap-4 py-2">
+                  <dt className="text-[13px] text-muted-foreground">Next Planned Action</dt>
+                  <dd className="text-[13px] font-medium text-foreground">
+                    {journeyState.nextAction}
+                  </dd>
+                </div>
+              </dl>
+              <p className="mt-3 text-[12px] leading-relaxed text-muted-foreground">
+                <span className="font-medium text-foreground">
+                  Why this journey was selected for this account:{" "}
+                </span>
+                {journeyState.whySelected}
+              </p>
+            </Panel>
+          )}
+
+          {accountComms.length > 0 && (
+            <Panel
+              title="Communications"
+              description="Actions executed as part of the current strategy"
+              bodyClassName="p-0"
+            >
+              <ul className="divide-y divide-border">
+                {accountComms.map((c) => (
+                  <li key={c.id} className="px-4 py-2.5">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <Link
+                        to="/communications/$communicationId"
+                        params={{ communicationId: c.id }}
+                        className="text-[13px] font-semibold text-primary hover:underline"
+                      >
+                        {c.channel} · {c.purpose}
+                      </Link>
+                      <StatusPill tone={commStatusTone(c.status)}>{c.status}</StatusPill>
+                    </div>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {c.dateLabel} {c.time} · {c.journeyStage} · {engagementLabel(c)}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </Panel>
+          )}
+        </div>
 
         <div className="space-y-5">
           {caseReviews.length > 0 && (
@@ -125,21 +220,30 @@ function AccountDetail() {
           <Panel title="Activity Timeline">
             <ol className="relative space-y-4 pl-5">
               <span className="absolute top-1.5 bottom-1.5 left-[5px] w-px bg-border" />
-              {timeline.map((event) => (
-                <li key={event.label + event.at} className="relative">
+              {timeline.map((event, i) => (
+                <li key={`${event.label}-${event.at}-${i}`} className="relative">
                   <span className="absolute top-1 -left-5 size-[11px] rounded-full border-2 border-card bg-primary/70" />
                   <div className="flex items-baseline justify-between gap-3">
                     <p className="text-[13px] font-medium text-foreground">{event.label}</p>
                     <span className="shrink-0 text-xs text-muted-foreground">{event.at}</span>
                   </div>
                   <p className="text-xs text-muted-foreground">{event.detail}</p>
-                  {"reviewId" in event && event.reviewId && (
+                  {event.reviewId && (
                     <Link
                       to="/human-review/$reviewId"
                       params={{ reviewId: event.reviewId }}
                       className="mt-0.5 inline-block text-[11px] font-medium text-primary hover:underline"
                     >
                       Open review
+                    </Link>
+                  )}
+                  {event.communicationId && (
+                    <Link
+                      to="/communications/$communicationId"
+                      params={{ communicationId: event.communicationId }}
+                      className="mt-0.5 inline-block text-[11px] font-medium text-primary hover:underline"
+                    >
+                      Open communication
                     </Link>
                   )}
                 </li>
