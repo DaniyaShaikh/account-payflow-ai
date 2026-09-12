@@ -275,7 +275,7 @@ function AddClientPage() {
                           `${draft.config.governanceRules.length} Rules Applied`,
                           ...draft.config.governanceRules,
                         ]
-                      : ["No rules applied"]
+                      : ["No client-specific governance rules configured"]
                 }
               />
               <ReviewBlock
