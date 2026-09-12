@@ -111,7 +111,7 @@ function AccountDetail() {
           { label: account.customer },
         ]}
         title={account.customer}
-        description={`${account.reference} · collection case`}
+        description={`Account ${account.reference} · Case ${account.caseReference}`}
         actions={
           <div className="flex items-center gap-2">
             <StatusPill tone={statusTone(account.status)}>{account.status}</StatusPill>
