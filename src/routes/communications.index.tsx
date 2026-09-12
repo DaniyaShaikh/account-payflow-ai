@@ -75,7 +75,7 @@ function CommunicationsPage() {
 
       <Panel
         title="Communication Log"
-        description="Every communication belongs to a client, customer account, collection case and collection workflow."
+        description="Every communication belongs to a client, customer account, collection case and workflow."
       >
         <CommunicationTable
           rows={rows}

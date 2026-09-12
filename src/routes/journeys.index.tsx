@@ -44,19 +44,19 @@ function JourneysPage() {
         <KpiCard
           label="Accounts Currently Assigned"
           value={formatNumber(assigned)}
-          hint="Across all visible collection workflows"
+          hint="Across all visible workflows"
         />
         <KpiCard label="AI-Adapted Workflows" value={String(adapted)} hint="Adapted from approved strategies" />
         <KpiCard
           label="AI-Created Workflows"
           value={String(created)}
-          hint="Created where no collection workflow fitted"
+          hint="Created where no workflow fitted"
         />
       </div>
 
       <Panel
         title="Workflow Library"
-        description="Reusable collection strategies. Existing collection workflows are reused or adapted before a new one is created."
+        description="Reusable collection strategies. Existing workflows are reused or adapted before a new one is created."
       >
         <JourneyLibrary journeys={journeys} />
       </Panel>

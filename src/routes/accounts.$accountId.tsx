@@ -19,7 +19,7 @@ export const Route = createFileRoute("/accounts/$accountId")({
       {
         name: "description",
         content:
-          "Customer account detail with balances, collection status, current collection workflow and full collection activity timeline.",
+          "Customer account detail with balances, collection status, current workflow and full collection activity timeline.",
       },
       { property: "og:title", content: "Customer account & collection case — PayFlow" },
       {
@@ -152,7 +152,7 @@ function AccountDetail() {
               </dl>
               <p className="mt-3 text-[12px] leading-relaxed text-muted-foreground">
                 <span className="font-medium text-foreground">
-                  Why this collection workflow was selected for this account:{" "}
+                  Why this workflow was selected for this account:{" "}
                 </span>
                 {journeyState.whySelected}
               </p>

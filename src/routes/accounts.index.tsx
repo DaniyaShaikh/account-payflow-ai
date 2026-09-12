@@ -24,7 +24,7 @@ export const Route = createFileRoute("/accounts/")({
       {
         property: "og:description",
         content:
-          "Filter customer accounts by client, collection status, collection workflow and human review state.",
+          "Filter customer accounts by client, collection status, workflow and human review state.",
       },
     ],
   }),

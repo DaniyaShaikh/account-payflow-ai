@@ -169,7 +169,7 @@ function ClientDetail() {
       {tab === "Workflows" && (
         <Panel
           title="Workflows"
-          description={`Global collection workflows in use by ${client.name} and ${client.name}-specific collection workflows`}
+          description={`Global workflows in use by ${client.name} and ${client.name}-specific workflows`}
         >
           <JourneyLibrary journeys={journeysForClient(client.id)} showClientFilter={false} />
         </Panel>

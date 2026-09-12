@@ -341,7 +341,7 @@ function ReviewDetail() {
             </dl>
             <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
               Approved, modified and rejected decisions are recorded as feedback for later analytics
-              and collection workflow evaluation. A single decision does not retrain the model.
+              and workflow evaluation. A single decision does not retrain the model.
             </p>
           </Panel>
         </div>

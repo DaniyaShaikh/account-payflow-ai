@@ -156,7 +156,7 @@ function CommunicationDetail() {
                     params={{ journeyId: journey.id }}
                     className="font-medium text-primary hover:underline"
                   >
-                    View collection workflow · {journey.name}
+                    View workflow · {journey.name}
                   </Link>
                 </li>
               )}

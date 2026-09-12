@@ -19,7 +19,7 @@ export const Route = createFileRoute("/journeys/$journeyId")({
       {
         name: "description",
         content:
-          "Collection collection workflow detail with its stages, timing, reassessment points, version history and the accounts currently assigned to it.",
+          "Collection workflow detail with its stages, timing, reassessment points, version history and the accounts currently assigned to it.",
       },
       { property: "og:title", content: "Workflow detail — PayFlow Collections" },
       {
@@ -45,12 +45,12 @@ function JourneyDetail() {
 
   if (journey.clientId && !canSeeClient(journey.clientId)) {
     return (
-      <Panel title="No access to this collection workflow">
+      <Panel title="No access to this workflow">
         <p className="text-sm text-muted-foreground">
           This journey belongs to a client that is not assigned to your supervisor account.
         </p>
         <Link to="/journeys" className="mt-3 inline-block text-[13px] font-medium text-primary">
-          Back to collection workflows
+          Back to workflows
         </Link>
       </Panel>
     );
@@ -92,7 +92,7 @@ function JourneyDetail() {
       {journey.status === "Awaiting Approval" && (
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-warning/30 bg-warning/10 px-4 py-3">
           <p className="text-[13px] text-foreground">
-            This collection workflow requires supervisor approval under the client's governance configuration
+            This workflow requires supervisor approval under the client's governance configuration
             before it can be used.
           </p>
           {journey.reviewId && (
@@ -188,7 +188,7 @@ function JourneyDetail() {
           >
             {assignments.length === 0 ? (
               <p className="px-4 py-6 text-center text-[13px] text-muted-foreground">
-                No visible accounts are currently assigned to this collection workflow.
+                No visible accounts are currently assigned to this workflow.
               </p>
             ) : (
               <ul className="divide-y divide-border">
@@ -223,7 +223,7 @@ function JourneyDetail() {
           >
             {journeyComms.length === 0 ? (
               <p className="px-4 py-6 text-center text-[13px] text-muted-foreground">
-                No communications recorded for this collection workflow yet.
+                No communications recorded for this workflow yet.
               </p>
             ) : (
               <ul className="divide-y divide-border">
