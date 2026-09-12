@@ -145,7 +145,7 @@ function ReviewBell() {
         >
           <Bell className="size-[17px]" />
           {counts.awaiting > 0 && (
-            <span className="absolute top-1.5 right-1.5 flex min-w-[15px] justify-center rounded-full bg-danger px-1 text-[9px] leading-[15px] font-semibold text-white">
+            <span className="absolute top-1.5 right-1.5 flex min-w-[15px] justify-center rounded-full bg-destructive px-1 text-[9px] leading-[15px] font-semibold text-white">
               {counts.awaiting}
             </span>
           )}
