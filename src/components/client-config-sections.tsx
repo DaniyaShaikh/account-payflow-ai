@@ -13,8 +13,6 @@ import {
 import {
   payflowFields,
   governanceRuleLibrary,
-  clientPermissions,
-  supervisorDirectory,
   type AiMode,
   type ClientConfig,
   type ClientType,
