@@ -10,6 +10,7 @@ import {
   communicationById,
   engagementLabel,
 } from "@/lib/communication-data";
+import { paymentTokenForAccount } from "@/lib/payment-data";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/communications/$communicationId")({
@@ -74,6 +75,8 @@ function CommunicationDetail() {
   const account = accounts.find((a) => a.id === comm.accountId);
   const journey = journeyById(comm.journeyId);
   const brand = brandingFor(comm.clientId);
+  // Secure payment link into the external, client-branded customer experience.
+  const payLink = account ? `/pay/${paymentTokenForAccount(account)}` : null;
 
   const facts = [
     { label: "Client", value: clientName(comm.clientId) },
