@@ -451,9 +451,11 @@ function CustomerPaymentExperience() {
             </div>
             <dl className="overflow-hidden rounded-xl border border-border bg-card text-left">
               <RowPlain label="Plan Amount" value={formatCurrency(outstanding)} />
+              <RowPlain label="Frequency" value={frequencyMeta[frequency].label} />
+              <RowPlain label="Instalment Amount" value={formatCurrency(installment)} />
               <RowPlain label="Number of Payments" value={String(planPayments)} />
-              <RowPlain label="Estimated Payment" value={formatCurrency(installment)} />
-              <RowPlain label="Next Payment" value={firstPaymentDate} />
+              <RowPlain label="First Payment" value={firstPaymentDate} />
+              <RowPlain label="Final Payment" value={finalPaymentDate} />
               <RowPlain label="Payment Method" value={method} last />
             </dl>
             <p className="text-[12px] leading-relaxed text-muted-foreground">{planIllustrativeNote}</p>
