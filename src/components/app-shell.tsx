@@ -52,8 +52,8 @@ const navGroups = [
   {
     label: "Administration",
     items: [
-      { to: "/users", label: "Users & Permissions", icon: Users },
-      { to: "/integrations", label: "Integrations", icon: Plug },
+      { to: "/users", label: "Users & Permissions", icon: Users, adminOnly: true },
+      { to: "/integrations", label: "Integrations", icon: Plug, adminOnly: true },
     ],
   },
 ] as const;
@@ -178,7 +178,15 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
 
         <nav className="flex-1 overflow-y-auto px-3 pb-4">
-          {navGroups.map((group) => (
+          {navGroups
+            .map((group) => ({
+              ...group,
+              items: group.items.filter(
+                (item) => role === "admin" || !("adminOnly" in item && item.adminOnly),
+              ),
+            }))
+            .filter((group) => group.items.length > 0)
+            .map((group) => (
             <div key={group.label} className="mb-4">
               <p className="text-eyebrow px-2 pb-1.5">{group.label}</p>
               <ul className="space-y-0.5">

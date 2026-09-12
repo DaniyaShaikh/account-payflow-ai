@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as IntegrationsRouteImport } from './routes/integrations'
-import { Route as UsersRouteImport } from './routes/users'
 import { Route as AccountsIndexRouteImport } from './routes/accounts.index'
 import { Route as AccountsAccountIdRouteImport } from './routes/accounts.$accountId'
 import { Route as ClientsIndexRouteImport } from './routes/clients.index'
@@ -27,6 +26,8 @@ import { Route as PayTokenRouteImport } from './routes/pay.$token'
 import { Route as RulesIndexRouteImport } from './routes/rules.index'
 import { Route as RulesRuleIdRouteImport } from './routes/rules.$ruleId'
 import { Route as RulesNewRouteImport } from './routes/rules.new'
+import { Route as UsersIndexRouteImport } from './routes/users.index'
+import { Route as UsersUserIdRouteImport } from './routes/users.$userId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -36,11 +37,6 @@ const IndexRoute = IndexRouteImport.update({
 const IntegrationsRoute = IntegrationsRouteImport.update({
   id: '/integrations',
   path: '/integrations',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const UsersRoute = UsersRouteImport.update({
-  id: '/users',
-  path: '/users',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AccountsIndexRoute = AccountsIndexRouteImport.update({
@@ -119,11 +115,20 @@ const RulesNewRoute = RulesNewRouteImport.update({
   path: '/rules/new',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UsersIndexRoute = UsersIndexRouteImport.update({
+  id: '/users/',
+  path: '/users/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UsersUserIdRoute = UsersUserIdRouteImport.update({
+  id: '/users/$userId',
+  path: '/users/$userId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/integrations': typeof IntegrationsRoute
-  '/users': typeof UsersRoute
   '/accounts/$accountId': typeof AccountsAccountIdRoute
   '/clients/$clientId': typeof ClientsClientIdRoute
   '/clients/new': typeof ClientsNewRoute
@@ -133,17 +138,18 @@ export interface FileRoutesByFullPath {
   '/pay/$token': typeof PayTokenRoute
   '/rules/$ruleId': typeof RulesRuleIdRoute
   '/rules/new': typeof RulesNewRoute
+  '/users/$userId': typeof UsersUserIdRoute
   '/accounts/': typeof AccountsIndexRoute
   '/clients/': typeof ClientsIndexRoute
   '/communications/': typeof CommunicationsIndexRoute
   '/human-review/': typeof HumanReviewIndexRoute
   '/journeys/': typeof JourneysIndexRoute
   '/rules/': typeof RulesIndexRoute
+  '/users/': typeof UsersIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/integrations': typeof IntegrationsRoute
-  '/users': typeof UsersRoute
   '/accounts/$accountId': typeof AccountsAccountIdRoute
   '/clients/$clientId': typeof ClientsClientIdRoute
   '/clients/new': typeof ClientsNewRoute
@@ -153,18 +159,19 @@ export interface FileRoutesByTo {
   '/pay/$token': typeof PayTokenRoute
   '/rules/$ruleId': typeof RulesRuleIdRoute
   '/rules/new': typeof RulesNewRoute
+  '/users/$userId': typeof UsersUserIdRoute
   '/accounts': typeof AccountsIndexRoute
   '/clients': typeof ClientsIndexRoute
   '/communications': typeof CommunicationsIndexRoute
   '/human-review': typeof HumanReviewIndexRoute
   '/journeys': typeof JourneysIndexRoute
   '/rules': typeof RulesIndexRoute
+  '/users': typeof UsersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/integrations': typeof IntegrationsRoute
-  '/users': typeof UsersRoute
   '/accounts/$accountId': typeof AccountsAccountIdRoute
   '/clients/$clientId': typeof ClientsClientIdRoute
   '/clients/new': typeof ClientsNewRoute
@@ -174,19 +181,20 @@ export interface FileRoutesById {
   '/pay/$token': typeof PayTokenRoute
   '/rules/$ruleId': typeof RulesRuleIdRoute
   '/rules/new': typeof RulesNewRoute
+  '/users/$userId': typeof UsersUserIdRoute
   '/accounts/': typeof AccountsIndexRoute
   '/clients/': typeof ClientsIndexRoute
   '/communications/': typeof CommunicationsIndexRoute
   '/human-review/': typeof HumanReviewIndexRoute
   '/journeys/': typeof JourneysIndexRoute
   '/rules/': typeof RulesIndexRoute
+  '/users/': typeof UsersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/integrations'
-    | '/users'
     | '/accounts/$accountId'
     | '/clients/$clientId'
     | '/clients/new'
@@ -196,17 +204,18 @@ export interface FileRouteTypes {
     | '/pay/$token'
     | '/rules/$ruleId'
     | '/rules/new'
+    | '/users/$userId'
     | '/accounts/'
     | '/clients/'
     | '/communications/'
     | '/human-review/'
     | '/journeys/'
     | '/rules/'
+    | '/users/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/integrations'
-    | '/users'
     | '/accounts/$accountId'
     | '/clients/$clientId'
     | '/clients/new'
@@ -216,17 +225,18 @@ export interface FileRouteTypes {
     | '/pay/$token'
     | '/rules/$ruleId'
     | '/rules/new'
+    | '/users/$userId'
     | '/accounts'
     | '/clients'
     | '/communications'
     | '/human-review'
     | '/journeys'
     | '/rules'
+    | '/users'
   id:
     | '__root__'
     | '/'
     | '/integrations'
-    | '/users'
     | '/accounts/$accountId'
     | '/clients/$clientId'
     | '/clients/new'
@@ -236,18 +246,19 @@ export interface FileRouteTypes {
     | '/pay/$token'
     | '/rules/$ruleId'
     | '/rules/new'
+    | '/users/$userId'
     | '/accounts/'
     | '/clients/'
     | '/communications/'
     | '/human-review/'
     | '/journeys/'
     | '/rules/'
+    | '/users/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   IntegrationsRoute: typeof IntegrationsRoute
-  UsersRoute: typeof UsersRoute
   AccountsAccountIdRoute: typeof AccountsAccountIdRoute
   ClientsClientIdRoute: typeof ClientsClientIdRoute
   ClientsNewRoute: typeof ClientsNewRoute
@@ -257,12 +268,14 @@ export interface RootRouteChildren {
   PayTokenRoute: typeof PayTokenRoute
   RulesRuleIdRoute: typeof RulesRuleIdRoute
   RulesNewRoute: typeof RulesNewRoute
+  UsersUserIdRoute: typeof UsersUserIdRoute
   AccountsIndexRoute: typeof AccountsIndexRoute
   ClientsIndexRoute: typeof ClientsIndexRoute
   CommunicationsIndexRoute: typeof CommunicationsIndexRoute
   HumanReviewIndexRoute: typeof HumanReviewIndexRoute
   JourneysIndexRoute: typeof JourneysIndexRoute
   RulesIndexRoute: typeof RulesIndexRoute
+  UsersIndexRoute: typeof UsersIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -279,13 +292,6 @@ declare module '@tanstack/react-router' {
       path: '/integrations'
       fullPath: '/integrations'
       preLoaderRoute: typeof IntegrationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/users': {
-      id: '/users'
-      path: '/users'
-      fullPath: '/users'
-      preLoaderRoute: typeof UsersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/accounts/': {
@@ -393,13 +399,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RulesNewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/users/': {
+      id: '/users/'
+      path: '/users'
+      fullPath: '/users/'
+      preLoaderRoute: typeof UsersIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/users/$userId': {
+      id: '/users/$userId'
+      path: '/users/$userId'
+      fullPath: '/users/$userId'
+      preLoaderRoute: typeof UsersUserIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   IntegrationsRoute: IntegrationsRoute,
-  UsersRoute: UsersRoute,
   AccountsAccountIdRoute: AccountsAccountIdRoute,
   ClientsClientIdRoute: ClientsClientIdRoute,
   ClientsNewRoute: ClientsNewRoute,
@@ -409,12 +428,14 @@ const rootRouteChildren: RootRouteChildren = {
   PayTokenRoute: PayTokenRoute,
   RulesRuleIdRoute: RulesRuleIdRoute,
   RulesNewRoute: RulesNewRoute,
+  UsersUserIdRoute: UsersUserIdRoute,
   AccountsIndexRoute: AccountsIndexRoute,
   ClientsIndexRoute: ClientsIndexRoute,
   CommunicationsIndexRoute: CommunicationsIndexRoute,
   HumanReviewIndexRoute: HumanReviewIndexRoute,
   JourneysIndexRoute: JourneysIndexRoute,
   RulesIndexRoute: RulesIndexRoute,
+  UsersIndexRoute: UsersIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

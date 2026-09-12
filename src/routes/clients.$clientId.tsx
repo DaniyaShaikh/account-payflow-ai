@@ -32,12 +32,13 @@ import {
   MappingSection,
   BrandingSection,
   AiGovernanceSection,
-  SupervisorSection,
   mappingSummary,
   connectionTone,
   type ClientDraft,
 } from "@/components/client-config-sections";
 import { useRole } from "@/lib/role-context";
+import { useUsers } from "@/lib/users-context";
+import { ClientSupervisorAccess } from "@/components/user-access";
 import {
   accounts as allAccounts,
   activity,
@@ -92,6 +93,8 @@ const configSections = [
 function ClientDetail() {
   const { clientId } = Route.useParams();
   const { canSeeClient, allClients, updateClient, isAdmin } = useRole();
+  const { supervisorsForClient } = useUsers();
+  const assignedSupervisors = supervisorsForClient(clientId);
   const [tab, setTab] = useState<(typeof tabs)[number]>("Overview");
 
   const client = allClients.find((c) => c.id === clientId);
@@ -149,7 +152,10 @@ function ClientDetail() {
             <StatusPill tone={connectionTone(client.config.connection)}>
               {client.config.dataSource ?? "No data source"}
             </StatusPill>
-            <StatusPill>Supervisor: {client.supervisors.join(", ") || "None"}</StatusPill>
+            <StatusPill>
+              Supervisor:{" "}
+              {assignedSupervisors.map((s) => s.name).join(", ") || "None assigned"}
+            </StatusPill>
           </div>
         }
       />
@@ -195,6 +201,7 @@ function ClientDetail() {
       {tab === "Configuration" && (
         <ClientConfiguration
           readOnly={!isAdmin}
+          clientId={clientId}
           draft={draft}
           patch={patch}
           patchConfig={patchConfig}
@@ -434,32 +441,47 @@ function ClientAccounts({
 
 function ClientConfiguration({
   readOnly,
+  clientId,
   draft,
   patch,
   patchConfig,
 }: {
   readOnly: boolean;
+  clientId: string;
   draft: ClientDraft;
   patch: (p: Partial<ClientDraft>) => void;
   patchConfig: (p: Partial<ClientConfig>) => void;
 }) {
   const [section, setSection] = useState<(typeof configSections)[number]>("General");
+  const { permissionsForClient } = useRole();
+  const myPermissions = permissionsForClient(clientId);
   const summary = mappingSummary(draft.config);
   const props = { draft, patch, patchConfig };
 
   if (readOnly) {
     return (
-      <Panel title="Configuration is read-only">
-        <p className="text-sm text-muted-foreground">
-          Supervisors can view client operations but not change client configuration. Switch the role
-          preview to Operations Admin to edit.
-        </p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          <StatusPill>{draft.config.dataSource ?? "No data source"}</StatusPill>
-          <StatusPill>{draft.aiMode}</StatusPill>
-          <StatusPill>{summary.mapped} fields mapped</StatusPill>
-        </div>
-      </Panel>
+      <div className="space-y-4">
+        <Panel title="Configuration is read-only">
+          <p className="text-sm text-muted-foreground">
+            Supervisors can view client operations but not change client configuration. Switch the
+            role preview to Operations Admin to edit.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <StatusPill>{draft.config.dataSource ?? "No data source"}</StatusPill>
+            <StatusPill>{draft.aiMode}</StatusPill>
+            <StatusPill>{summary.mapped} fields mapped</StatusPill>
+          </div>
+        </Panel>
+        <Panel title="Your access for this client" description="What you may do for this client">
+          <div className="flex flex-wrap gap-1.5">
+            {myPermissions.length === 0 ? (
+              <p className="text-[12px] text-muted-foreground">No permissions granted.</p>
+            ) : (
+              myPermissions.map((p) => <StatusPill key={p}>{p}</StatusPill>)
+            )}
+          </div>
+        </Panel>
+      </div>
     );
   }
 
@@ -491,7 +513,9 @@ function ClientConfiguration({
         {section === "Data Mapping" && <MappingSection {...props} />}
         {section === "Branding & Channels" && <BrandingSection {...props} />}
         {section === "AI & Governance" && <AiGovernanceSection {...props} />}
-        {section === "Supervisors & Permissions" && <SupervisorSection {...props} />}
+        {section === "Supervisors & Permissions" && (
+          <ClientSupervisorAccess clientId={clientId} clientName={draft.name} editable />
+        )}
       </Panel>
     </div>
   );

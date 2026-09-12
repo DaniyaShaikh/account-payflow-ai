@@ -17,14 +17,13 @@ const RulesContext = createContext<RulesContextValue | null>(null);
 
 export function RulesProvider({ children }: { children: ReactNode }) {
   const [allRules, setAllRules] = useState<Rule[]>(rulesSeed);
-  const { isAdmin, visibleClients, visibleClientIds } = useRole();
+  const { isAdmin, visibleClientIds, can } = useRole();
 
   const value = useMemo<RulesContextValue>(() => {
     const supervisorCanEdit = (clientId: string | null) =>
       clientId !== null &&
-      visibleClients.some(
-        (c) => c.id === clientId && c.config.permissions.includes("Create / Edit Client Rules"),
-      );
+      visibleClientIds.includes(clientId) &&
+      can("Create / Edit Client Rules", clientId);
 
     const visibleRules = isAdmin
       ? allRules
@@ -51,7 +50,7 @@ export function RulesProvider({ children }: { children: ReactNode }) {
       canEditRule: (rule) => (isAdmin ? true : supervisorCanEdit(rule.clientId)),
       canCreateRuleForClient: (clientId) => (isAdmin ? true : supervisorCanEdit(clientId)),
     };
-  }, [allRules, isAdmin, visibleClientIds, visibleClients]);
+  }, [allRules, isAdmin, visibleClientIds, can]);
 
   return <RulesContext.Provider value={value}>{children}</RulesContext.Provider>;
 }

@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { RoleProvider } from "../lib/role-context";
+import { UsersProvider } from "../lib/users-context";
 import { RulesProvider } from "../lib/rules-context";
 import { ReviewsProvider } from "../lib/reviews-context";
 import { AppShell } from "../components/app-shell";
@@ -144,16 +145,18 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <RoleProvider>
-        <RulesProvider>
-          <ReviewsProvider>
-            <AppShell>
-              {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-              <Outlet />
-            </AppShell>
-          </ReviewsProvider>
-        </RulesProvider>
-      </RoleProvider>
+      <UsersProvider>
+        <RoleProvider>
+          <RulesProvider>
+            <ReviewsProvider>
+              <AppShell>
+                {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+                <Outlet />
+              </AppShell>
+            </ReviewsProvider>
+          </RulesProvider>
+        </RoleProvider>
+      </UsersProvider>
     </QueryClientProvider>
   );
 }
