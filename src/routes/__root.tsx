@@ -162,7 +162,9 @@ function RootComponent() {
   // standalone surfaces: they render without the internal application shell.
   const isBareSurface = useRouterState({
     select: (s) =>
-      s.location.pathname.startsWith("/pay/") || s.location.pathname.startsWith("/login"),
+      s.location.pathname.startsWith("/pay/") ||
+      s.location.pathname.startsWith("/login") ||
+      s.location.pathname.startsWith("/activate"),
   });
 
   if (isBareSurface) {
