@@ -97,7 +97,7 @@ function IntegrationDetail() {
       />
 
       {integration.status === "Attention Required" && (
-        <div className="mb-5 rounded-lg border border-danger/30 bg-danger/10 p-4">
+        <div className="mb-5 rounded-lg border border-destructive/25 bg-destructive/8 p-4">
           <p className="text-[13px] font-semibold text-foreground">
             {integration.name} connection requires attention
           </p>
