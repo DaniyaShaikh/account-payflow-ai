@@ -12,8 +12,9 @@ import {
   ChevronsUpDown,
   Bell,
   LogOut,
+  UserRound,
 } from "lucide-react";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { PayflowWordmark } from "@/components/brand";
 import { useRole } from "@/lib/role-context";
 import { useReviews } from "@/lib/reviews-context";
@@ -69,6 +70,14 @@ function UserMenu({ compact = false }: { compact?: boolean }) {
     .map((part) => part[0])
     .join("")
     .slice(0, 2);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const refresh = () => setProfileImage(window.localStorage.getItem("payflow.profileImage"));
+    refresh();
+    window.addEventListener("payflow-profile-updated", refresh);
+    return () => window.removeEventListener("payflow-profile-updated", refresh);
+  }, []);
 
   const handleLogout = () => {
     markSignedOut();
@@ -94,7 +103,11 @@ function UserMenu({ compact = false }: { compact?: boolean }) {
               : "flex size-8 shrink-0 items-center justify-center rounded-full bg-sidebar-primary/25 text-[11px] font-bold text-sidebar-foreground"
           }
         >
-          {initials}
+          {profileImage ? (
+            <img src={profileImage} alt="" className="size-full rounded-full object-cover" />
+          ) : (
+            initials
+          )}
         </span>
         <span className="hidden min-w-0 leading-tight sm:block">
           <span
@@ -125,6 +138,13 @@ function UserMenu({ compact = false }: { compact?: boolean }) {
         />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" side="top" className="w-60">
+        <DropdownMenuItem asChild>
+          <Link to="/profile">
+            <UserRound className="mr-2 size-4" />
+            <span className="flex-1">My Profile</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
         <DropdownMenuLabel className="text-eyebrow">Preview role</DropdownMenuLabel>
         <DropdownMenuItem onClick={() => setRole("admin")}>
           <span className="flex-1">Operations Admin</span>
@@ -213,7 +233,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-screen bg-surface">
-      <aside className="sticky top-0 hidden h-screen w-[244px] shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:flex">
+      <aside className="sticky top-0 z-30 hidden h-screen w-[244px] shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground shadow-[8px_0_32px_-24px_var(--brand-navy)] lg:flex">
         <div className="flex h-[68px] items-center px-4">
           <PayflowWordmark tagline invert />
         </div>
@@ -238,7 +258,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                     <Link
                       to={item.to}
                       activeOptions={{ exact: "exact" in item ? item.exact : false }}
-                      className="group relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-medium text-sidebar-muted transition-colors hover:bg-sidebar-accent/70 hover:text-sidebar-foreground data-[status=active]:bg-sidebar-accent data-[status=active]:text-sidebar-accent-foreground"
+                       className="group relative flex items-center gap-2.5 rounded-lg border border-transparent px-2.5 py-2 text-[13px] font-medium text-sidebar-muted transition-all duration-150 hover:bg-sidebar-accent/70 hover:text-sidebar-foreground data-[status=active]:border-sidebar-border data-[status=active]:bg-sidebar-accent data-[status=active]:text-sidebar-accent-foreground data-[status=active]:shadow-[0_8px_20px_-14px_var(--sidebar-primary)]"
                       activeProps={{ className: "font-semibold" }}
                     >
                       <span className="absolute top-1.5 bottom-1.5 -left-1 w-[3px] rounded-full bg-sidebar-primary opacity-0 transition-opacity group-data-[status=active]:opacity-100" />
@@ -263,7 +283,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 flex h-[68px] items-center justify-between gap-4 border-b border-border bg-background/85 px-5 backdrop-blur lg:px-9">
+        <header className="sticky top-0 z-20 flex h-[68px] items-center justify-between gap-4 border-b border-border/80 bg-background/90 px-5 shadow-subtle backdrop-blur-xl lg:px-9">
           <div className="lg:hidden">
             <PayflowWordmark />
           </div>
@@ -281,7 +301,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <main className="flex-1 px-5 py-7 lg:px-9 lg:py-8">
+        <main className="relative flex-1 px-5 py-7 lg:px-9 lg:py-8">
           <div className="mx-auto w-full max-w-[1220px]">{children}</div>
         </main>
       </div>
