@@ -38,6 +38,7 @@ import {
 } from "@/components/client-config-sections";
 import { useRole } from "@/lib/role-context";
 import { buildIntegrations, integrationTone } from "@/lib/integration-data";
+import { intakeForClient } from "@/lib/intake-data";
 import { useUsers } from "@/lib/users-context";
 import { ClientSupervisorAccess } from "@/components/user-access";
 import {
@@ -229,9 +230,49 @@ function ClientOverview({
     { label: "Paid", value: Math.round(client.activeCases * 0.68) },
   ];
   const max = funnel[0]?.value || 1;
+  const intake = intakeForClient(client);
 
   return (
     <>
+      <Panel
+        title="Latest Source File"
+        description="Every figure on this page is based on the most recently received and assigned file"
+        className="mb-5"
+      >
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div>
+            <p className="text-eyebrow">File Received</p>
+            <p className="text-[13px] font-semibold text-foreground">{intake.receivedAt}</p>
+            <p className="mt-0.5 text-[11.5px] text-muted-foreground">
+              {intake.fileName} · {intake.source}
+            </p>
+          </div>
+          <div>
+            <p className="text-eyebrow">Assigned To Collections</p>
+            <p className="text-[13px] font-semibold text-foreground">{intake.assignedAt}</p>
+          </div>
+          <div>
+            <p className="text-eyebrow">Accounts In This File</p>
+            <p className="tabular text-[13px] font-semibold text-foreground">
+              {formatNumber(intake.accountsInFile)}
+            </p>
+            <p className="mt-0.5 text-[11.5px] text-muted-foreground">
+              Previous file {formatNumber(intake.previousAccounts)}
+            </p>
+          </div>
+          <div>
+            <p className="text-eyebrow">Change Since Previous File</p>
+            <p className="tabular text-[13px] font-semibold text-foreground">
+              +{formatNumber(intake.newAccounts)} new · −{formatNumber(intake.removedAccounts)}{" "}
+              removed
+            </p>
+            <p className="mt-0.5 text-[11.5px] text-muted-foreground">
+              Removed accounts were paid or closed at the client
+            </p>
+          </div>
+        </div>
+      </Panel>
+
       <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <KpiCard label="Customer Accounts" value={formatNumber(client.accounts)} />
         <KpiCard label="Active Cases" value={formatNumber(client.activeCases)} />
@@ -241,7 +282,10 @@ function ClientOverview({
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <Panel title="Collection Summary" description={`Current position for ${client.name}`}>
+        <Panel
+          title="Collection Summary"
+          description={`Based on the file received ${intake.receivedAt}`}
+        >
           <dl className="divide-y divide-border">
             {[
               ["Accounts under collection", formatNumber(client.activeCases)],
