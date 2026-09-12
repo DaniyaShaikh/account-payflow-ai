@@ -9,7 +9,14 @@ import {
   FilterSelect,
 } from "@/components/payflow-ui";
 import { useRole, useVisibleAccounts } from "@/lib/role-context";
-import { clientName, collectionStatuses, journeys, formatCurrency } from "@/lib/payflow-data";
+import {
+  clientName,
+  collectionStatuses,
+  journeys,
+  formatCurrency,
+  formatNumber,
+} from "@/lib/payflow-data";
+import { intakeSummary } from "@/lib/intake-data";
 
 export const Route = createFileRoute("/accounts/")({
   head: () => ({
@@ -49,12 +56,37 @@ function AccountsPage() {
     return true;
   });
 
+  const scopedClients =
+    client === "All Clients" ? visibleClients : visibleClients.filter((c) => c.name === client);
+  const intake = intakeSummary(scopedClients);
+
   return (
     <>
       <PageHeader
         title="Accounts / Cases"
         description="Customer accounts under collection across all clients in your access scope."
       />
+
+      <div className="mb-4 flex flex-wrap items-center gap-x-6 gap-y-2 rounded-lg border border-border bg-card px-4 py-3">
+        <div>
+          <p className="text-eyebrow">File Received</p>
+          <p className="text-[13px] font-semibold text-foreground">{intake.latestReceivedAt}</p>
+        </div>
+        <div>
+          <p className="text-eyebrow">Assigned To Collections</p>
+          <p className="text-[13px] font-semibold text-foreground">{intake.latestAssignedAt}</p>
+        </div>
+        <div>
+          <p className="text-eyebrow">Accounts In Current File</p>
+          <p className="tabular text-[13px] font-semibold text-foreground">
+            {formatNumber(intake.accountsInFiles)}
+          </p>
+        </div>
+        <p className="text-[11.5px] text-muted-foreground">
+          Figures below reflect the most recently received source-system file
+          {intake.files > 1 ? `s (${intake.files} clients)` : ""}.
+        </p>
+      </div>
 
       <div className="mb-4 flex flex-wrap gap-2">
         <FilterSelect
@@ -67,7 +99,7 @@ function AccountsPage() {
           label="Status"
           value={status}
           onChange={setStatus}
-          options={["All Statuses", ...collectionStatuses]}
+          options={["All Statuses", ...collectionStatuses.filter((s) => s !== "Promise to Pay")]}
         />
         <FilterSelect
           label="Workflow"
