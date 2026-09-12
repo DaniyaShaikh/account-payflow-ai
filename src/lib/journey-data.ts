@@ -1,6 +1,6 @@
 import type { Tone } from "@/components/payflow-ui";
 
-export type JourneyType = "Approved Collection Workflow" | "AI-Adapted Collection Workflow" | "AI-Created Collection Workflow";
+export type JourneyType = "Approved Workflow" | "AI-Adapted Workflow" | "AI-Created Workflow";
 
 export type JourneyStatus = "Draft" | "Active" | "Awaiting Approval" | "Inactive" | "Archived";
 
@@ -54,9 +54,9 @@ export interface Journey {
 }
 
 export const journeyTypes: JourneyType[] = [
-  "Approved Collection Workflow",
-  "AI-Adapted Collection Workflow",
-  "AI-Created Collection Workflow",
+  "Approved Workflow",
+  "AI-Adapted Workflow",
+  "AI-Created Workflow",
 ];
 
 export const journeyStatuses: JourneyStatus[] = [
@@ -70,8 +70,8 @@ export const journeyStatuses: JourneyStatus[] = [
 export const journeySources = ["Collections Policy Team", "PayFlow AI", "Supervisor"];
 
 export function journeyTypeTone(type: JourneyType): Tone {
-  if (type === "AI-Adapted Collection Workflow") return "info";
-  if (type === "AI-Created Collection Workflow") return "ai";
+  if (type === "AI-Adapted Workflow") return "info";
+  if (type === "AI-Created Workflow") return "ai";
   return "neutral";
 }
 
@@ -193,7 +193,7 @@ export const journeyLibrary: Journey[] = [
     name: "Early Stage Collection",
     scope: "Global",
     clientId: null,
-    type: "Approved Collection Workflow",
+    type: "Approved Workflow",
     version: "v2.0",
     status: "Active",
     accountsAssigned: 4820,
@@ -215,7 +215,7 @@ export const journeyLibrary: Journey[] = [
     name: "Progressive Collection",
     scope: "Global",
     clientId: null,
-    type: "Approved Collection Workflow",
+    type: "Approved Workflow",
     version: "v1.1",
     status: "Active",
     accountsAssigned: 2410,
@@ -236,7 +236,7 @@ export const journeyLibrary: Journey[] = [
     name: "Progressive Reminder",
     scope: "Global",
     clientId: null,
-    type: "Approved Collection Workflow",
+    type: "Approved Workflow",
     version: "v1.0",
     status: "Active",
     accountsAssigned: 1180,
@@ -254,7 +254,7 @@ export const journeyLibrary: Journey[] = [
     name: "Promise-to-Pay Follow-Up",
     scope: "Global",
     clientId: null,
-    type: "Approved Collection Workflow",
+    type: "Approved Workflow",
     version: "v1.2",
     status: "Active",
     accountsAssigned: 740,
@@ -275,7 +275,7 @@ export const journeyLibrary: Journey[] = [
     name: "Payment Plan Monitoring",
     scope: "Global",
     clientId: null,
-    type: "Approved Collection Workflow",
+    type: "Approved Workflow",
     version: "v1.0",
     status: "Active",
     accountsAssigned: 610,
@@ -293,7 +293,7 @@ export const journeyLibrary: Journey[] = [
     name: "Escalated Collection",
     scope: "Global",
     clientId: null,
-    type: "Approved Collection Workflow",
+    type: "Approved Workflow",
     version: "v1.1",
     status: "Active",
     accountsAssigned: 265,
@@ -314,7 +314,7 @@ export const journeyLibrary: Journey[] = [
     name: "PayPal High Engagement Recovery",
     scope: "PayPal",
     clientId: "paypal",
-    type: "AI-Adapted Collection Workflow",
+    type: "AI-Adapted Workflow",
     version: "v1.1",
     status: "Active",
     accountsAssigned: 380,
@@ -335,7 +335,7 @@ export const journeyLibrary: Journey[] = [
     name: "Canadian Tire Recovery Variation",
     scope: "Canadian Tire",
     clientId: "canadian-tire",
-    type: "AI-Created Collection Workflow",
+    type: "AI-Created Workflow",
     version: "v1.0",
     status: "Awaiting Approval",
     accountsAssigned: 120,
@@ -354,7 +354,7 @@ export const journeyLibrary: Journey[] = [
     name: "Northstar Winter Arrears",
     scope: "Northstar Utilities",
     clientId: "northstar-utilities",
-    type: "AI-Adapted Collection Workflow",
+    type: "AI-Adapted Workflow",
     version: "v1.0",
     status: "Draft",
     accountsAssigned: 0,

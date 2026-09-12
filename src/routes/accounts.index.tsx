@@ -37,13 +37,13 @@ function AccountsPage() {
 
   const [client, setClient] = useState("All Clients");
   const [status, setStatus] = useState("All Statuses");
-  const [journey, setJourney] = useState("All Collection Workflows");
+  const [journey, setJourney] = useState("All Workflows");
   const [review, setReview] = useState("All");
 
   const rows = accounts.filter((a) => {
     if (client !== "All Clients" && clientName(a.clientId) !== client) return false;
     if (status !== "All Statuses" && a.status !== status) return false;
-    if (journey !== "All Collection Workflows" && a.journey !== journey) return false;
+    if (journey !== "All Workflows" && a.journey !== journey) return false;
     if (review === "Yes" && !a.humanReview) return false;
     if (review === "No" && a.humanReview) return false;
     return true;
@@ -70,10 +70,10 @@ function AccountsPage() {
           options={["All Statuses", ...collectionStatuses]}
         />
         <FilterSelect
-          label="Collection Workflow"
+          label="Workflow"
           value={journey}
           onChange={setJourney}
-          options={["All Collection Workflows", ...journeys]}
+          options={["All Workflows", ...journeys]}
         />
         <FilterSelect
           label="Human Review"
@@ -90,7 +90,7 @@ function AccountsPage() {
           "Account Reference",
           "Outstanding Balance",
           "Collection Status",
-          "Current Collection Workflow",
+          "Current Workflow",
           "Last Action",
           "Next Action",
           "Human Review",

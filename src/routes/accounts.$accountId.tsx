@@ -113,11 +113,11 @@ function AccountDetail() {
 
           {journeyState?.journey && (
             <Panel
-              title="Current Collection Workflow"
+              title="Current Workflow"
               description="The collection strategy currently applied to this case"
               action={
                 <Link to="/journeys/$journeyId" params={{ journeyId: journeyState.journey.id }}>
-                  <Btn>View Collection Workflow</Btn>
+                  <Btn>View Workflow</Btn>
                 </Link>
               }
             >
@@ -138,7 +138,7 @@ function AccountDetail() {
                   <dd className="text-[13px] font-medium text-foreground">{journeyState.stage}</dd>
                 </div>
                 <div className="flex items-center justify-between gap-4 py-2">
-                  <dt className="text-[13px] text-muted-foreground">Collection Workflow Started</dt>
+                  <dt className="text-[13px] text-muted-foreground">Workflow Started</dt>
                   <dd className="text-[13px] font-medium text-foreground">
                     {journeyState.startedAt}
                   </dd>

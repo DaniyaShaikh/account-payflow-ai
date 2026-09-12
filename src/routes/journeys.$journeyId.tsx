@@ -15,13 +15,13 @@ import { communicationsForJourney } from "@/lib/communication-data";
 export const Route = createFileRoute("/journeys/$journeyId")({
   head: () => ({
     meta: [
-      { title: "Collection Workflow detail — PayFlow Collections" },
+      { title: "Workflow detail — PayFlow Collections" },
       {
         name: "description",
         content:
           "Collection collection workflow detail with its stages, timing, reassessment points, version history and the accounts currently assigned to it.",
       },
-      { property: "og:title", content: "Collection Workflow detail — PayFlow Collections" },
+      { property: "og:title", content: "Workflow detail — PayFlow Collections" },
       {
         property: "og:description",
         content: "Stages, timing and reassessment points of a PayFlow collection strategy.",
@@ -77,7 +77,7 @@ function JourneyDetail() {
   return (
     <>
       <PageHeader
-        breadcrumb={[{ label: "Collection Workflows", to: "/journeys" }, { label: journey.name }]}
+        breadcrumb={[{ label: "Workflows", to: "/journeys" }, { label: journey.name }]}
         title={journey.name}
         description={`${journey.scope} · ${journey.type}`}
         actions={
@@ -105,7 +105,7 @@ function JourneyDetail() {
 
       <div className="grid gap-5 lg:grid-cols-[1fr_1.15fr]">
         <div className="space-y-5">
-          <Panel title="Collection Workflow Summary" bodyClassName="p-0">
+          <Panel title="Workflow Summary" bodyClassName="p-0">
             <dl className="divide-y divide-border">
               {facts.map((f) => (
                 <div key={f.label} className="flex items-center justify-between gap-4 px-4 py-2.5">
@@ -116,7 +116,7 @@ function JourneyDetail() {
             </dl>
           </Panel>
 
-          <Panel title="Why PayFlow uses this Collection Workflow">
+          <Panel title="Why PayFlow uses this Workflow">
             <button
               onClick={() => setShowReasoning((v) => !v)}
               className="text-[13px] font-medium text-primary hover:underline"
@@ -182,7 +182,7 @@ function JourneyDetail() {
           </Panel>
 
           <Panel
-            title="Accounts on this Collection Workflow"
+            title="Accounts on this Workflow"
             description="Collection cases currently following this strategy"
             bodyClassName="p-0"
           >

@@ -104,7 +104,7 @@ export function JourneyLibrary({
         <DataTable
           minWidth={980}
           head={[
-            "Collection Workflow",
+            "Workflow",
             "Scope",
             "Type",
             "Accounts Assigned",
