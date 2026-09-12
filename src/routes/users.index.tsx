@@ -18,14 +18,10 @@ import {
   EmptyState,
 } from "@/components/payflow-ui";
 import { ClientAssignmentPicker, PermissionPicker } from "@/components/user-access";
+import { RolesPanel } from "@/components/role-manager";
 import { useRole } from "@/lib/role-context";
 import { useUsers } from "@/lib/users-context";
-import {
-  standardSupervisorPermissions,
-  userProfile,
-  type UserRole,
-  type UserStatus,
-} from "@/lib/users-data";
+import { userProfile, type UserRole, type UserStatus } from "@/lib/users-data";
 
 export const Route = createFileRoute("/users/")({
   head: () => ({
