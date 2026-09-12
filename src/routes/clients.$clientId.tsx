@@ -16,7 +16,7 @@ import {
   StatusPill,
   statusTone,
   FilterSelect,
-  PlaceholderSection,
+  
   Btn,
   EmptyState,
   PrimaryCell,
