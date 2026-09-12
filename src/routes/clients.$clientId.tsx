@@ -1,6 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { ReviewQueue } from "@/components/review-queue";
+import { JourneyLibrary } from "@/components/journey-library";
+import { CommunicationTable } from "@/components/communication-table";
+import { journeysForClient } from "@/lib/journey-data";
+import { communicationsForClient } from "@/lib/communication-data";
+
 import {
   PageHeader,
   Panel,

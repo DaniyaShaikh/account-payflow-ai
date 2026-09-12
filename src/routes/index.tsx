@@ -149,10 +149,17 @@ function CommunicationFunnel() {
           return (
             <Link
               key={row.stage}
-              to="/accounts"
+              to="/communications"
+              search={{
+                ...(client !== "All Clients" ? { client } : {}),
+                ...(channel !== "All Channels" ? { channel } : {}),
+                ...(journey !== "All Journeys" ? { journey } : {}),
+                ...(stageStatus(row.stage) ? { status: stageStatus(row.stage) } : {}),
+              }}
               className="group block rounded-lg px-3 py-2.5 transition-colors hover:bg-surface"
-              title={`View accounts at "${row.stage}" (drill-down coming soon)`}
+              title={`View communications at "${row.stage}"`}
             >
+
               <div className="flex items-baseline justify-between gap-4">
                 <span className="flex items-center gap-2 text-[13px] font-medium text-foreground">
                   <span className="tabular w-4 text-[11px] text-muted-foreground">{i + 1}</span>
