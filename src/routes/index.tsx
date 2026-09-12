@@ -241,6 +241,15 @@ function Dashboard() {
     accounts.filter((a) => scopedIds.includes(a.clientId)),
   );
 
+  const communications = useVisibleCommunications();
+  const failedComms = communications.filter(
+    (c) => c.status === "Failed" && scopedIds.includes(c.clientId),
+  ).length;
+  const integrationAttention = useMemo(
+    () => integrationSummary(buildIntegrations(scoped)).attention,
+    [scoped],
+  );
+
   return (
     <>
       <PageHeader
