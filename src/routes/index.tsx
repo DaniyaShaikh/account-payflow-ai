@@ -8,6 +8,7 @@ import {
   FilterSelect,
 } from "@/components/payflow-ui";
 import { useRole, useVisibleAccounts, useVisibleActivity } from "@/lib/role-context";
+import { useReviews } from "@/lib/reviews-context";
 import { formatCurrency, formatNumber, journeys } from "@/lib/payflow-data";
 
 export const Route = createFileRoute("/")({
