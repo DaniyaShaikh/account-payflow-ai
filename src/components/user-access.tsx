@@ -156,10 +156,12 @@ export function ClientSupervisorAccess({
   clientName: string;
   editable: boolean;
 }) {
-  const { users, supervisorsForClient, assignClient, removeAssignment } = useUsers();
+  const { users, supervisorsForClient, assignClient, removeAssignment, isPlatformRoleName } =
+    useUsers();
   const assigned = supervisorsForClient(clientId);
+  /** Only client-scoped roles can be assigned to a client. */
   const available = users.filter(
-    (u) => u.role === "Supervisor" && !assigned.some((a) => a.id === u.id),
+    (u) => !isPlatformRoleName(u.role) && !assigned.some((a) => a.id === u.id),
   );
   const [pick, setPick] = useState("");
 
@@ -189,6 +191,7 @@ export function ClientSupervisorAccess({
                 >
                   {u.name}
                 </Link>
+                <StatusPill>{u.role}</StatusPill>
                 <StatusPill tone={u.status === "Active" ? "success" : "neutral"}>
                   {u.status}
                 </StatusPill>
