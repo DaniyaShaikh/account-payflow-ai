@@ -308,6 +308,40 @@ function Dashboard() {
         </Link>
       </div>
 
+      <Panel
+        title="Attention Required"
+        description="Open items that need an operations decision or follow-up"
+        className="mb-5"
+      >
+        <div className="flex flex-wrap gap-2">
+          <Link to="/human-review" search={{ status: "Awaiting Review" }}>
+            <StatusPill tone={reviewCounts.awaiting ? "warning" : "neutral"}>
+              Human Reviews Pending · {reviewCounts.awaiting}
+            </StatusPill>
+          </Link>
+          <Link to="/communications" search={{ status: "Failed" }}>
+            <StatusPill tone={failedComms ? "warning" : "neutral"}>
+              Failed Communications · {failedComms}
+            </StatusPill>
+          </Link>
+          <Link to="/accounts">
+            <StatusPill tone={paymentTotals.failedPayments ? "warning" : "neutral"}>
+              Failed Payments · {paymentTotals.failedPayments}
+            </StatusPill>
+          </Link>
+          <Link to="/integrations" search={{ status: "Attention Required" }}>
+            <StatusPill tone={integrationAttention ? "danger" : "neutral"}>
+              Integration Issues · {integrationAttention}
+            </StatusPill>
+          </Link>
+        </div>
+        {!reviewCounts.awaiting && !failedComms && !paymentTotals.failedPayments && !integrationAttention && (
+          <p className="mt-3 text-[12px] text-muted-foreground">
+            Nothing requires attention right now.
+          </p>
+        )}
+      </Panel>
+
       <CommunicationFunnel />
 
       <Panel
