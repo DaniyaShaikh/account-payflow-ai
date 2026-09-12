@@ -13,6 +13,7 @@ import {
   type ClientDraft,
 } from "@/components/client-config-sections";
 import { useRole } from "@/lib/role-context";
+import { useUsers } from "@/lib/users-context";
 import { makeConfig, type Client, type ClientConfig } from "@/lib/payflow-data";
 import { cn } from "@/lib/utils";
 
