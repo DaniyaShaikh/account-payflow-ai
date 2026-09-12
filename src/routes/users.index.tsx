@@ -249,11 +249,7 @@ function AddUserForm({
           <TextInput value={email} onChange={setEmail} placeholder="name@payflow.io" />
         </Field>
         <Field label="Role">
-          <SelectInput
-            value={role}
-            options={["Operations Admin", "Supervisor"]}
-            onChange={(v) => setRole(v as UserRole)}
-          />
+          <SelectInput value={role} options={roleNames} onChange={pickRole} />
         </Field>
         <Field label="Status">
           <SelectInput
