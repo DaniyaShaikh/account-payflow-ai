@@ -29,7 +29,7 @@ export const Route = createFileRoute("/pay/$token")({
     if (!accountForPaymentToken(params.token)) throw notFound();
     return null;
   },
-  component: CustomerPaymentExperience;
+  component: CustomerPaymentExperience,
 });
 
 type Step =
