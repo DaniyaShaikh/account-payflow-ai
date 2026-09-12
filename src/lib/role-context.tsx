@@ -44,7 +44,7 @@ export function RoleProvider({ children }: { children: ReactNode }) {
         setRole(next);
         window.localStorage.setItem(STORAGE_KEY, next);
       },
-      userName: role === "admin" ? "Alex Morgan" : DEMO_SUPERVISOR,
+      userName: role === "admin" ? "Daniya Shaikh" : "Zeeshan Ahmed",
       roleLabel: role === "admin" ? "Operations Admin" : "Supervisor",
       isAdmin: role === "admin",
       allClients,

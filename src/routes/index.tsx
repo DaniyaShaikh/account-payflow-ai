@@ -140,25 +140,48 @@ function CommunicationFunnel() {
         )}
       </div>
 
-      <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
-        {rows.map((row) => (
-          <Link
-            key={row.stage}
-            to="/accounts"
-            className="group rounded-md border border-border bg-surface px-3 py-4 transition-colors hover:border-primary/40 hover:bg-card"
-            title={`View accounts at "${row.stage}" (drill-down coming soon)`}
-          >
-            <p className="text-[11px] font-medium text-muted-foreground group-hover:text-foreground">
-              {row.stage}
-            </p>
-            <p className="tabular mt-1 text-sm font-semibold text-foreground">
-              {formatNumber(row.volume)}
-            </p>
-            <p className="tabular mt-0.5 text-[11px] text-muted-foreground">
-              {row.rate === null ? "—" : `${(row.rate * 100).toFixed(1)}%`}
-            </p>
-          </Link>
-        ))}
+      <div className="space-y-1">
+        {rows.map((row, i) => {
+          const top = rows[0]?.volume || 1;
+          const width = Math.max(6, (row.volume / top) * 100);
+          const dropOff = row.rate === null ? null : 1 - row.rate;
+          return (
+            <Link
+              key={row.stage}
+              to="/accounts"
+              className="group block rounded-lg px-3 py-2.5 transition-colors hover:bg-surface"
+              title={`View accounts at "${row.stage}" (drill-down coming soon)`}
+            >
+              <div className="flex items-baseline justify-between gap-4">
+                <span className="flex items-center gap-2 text-[13px] font-medium text-foreground">
+                  <span className="tabular w-4 text-[11px] text-muted-foreground">{i + 1}</span>
+                  {row.stage}
+                </span>
+                <span className="flex items-baseline gap-3">
+                  <span className="tabular text-[15px] font-semibold text-foreground">
+                    {formatNumber(row.volume)}
+                  </span>
+                  <span className="tabular w-14 text-right text-[12px] font-medium text-muted-foreground">
+                    {row.rate === null ? "—" : `${(row.rate * 100).toFixed(1)}%`}
+                  </span>
+                </span>
+              </div>
+              <div className="mt-1.5 flex items-center gap-2">
+                <div className="h-2 flex-1 overflow-hidden rounded-full bg-secondary">
+                  <div
+                    className="h-full rounded-full bg-primary/80 transition-all group-hover:bg-primary"
+                    style={{ width: `${width}%` }}
+                  />
+                </div>
+                <span className="tabular w-24 text-right text-[11px] text-muted-foreground">
+                  {dropOff === null
+                    ? "start of funnel"
+                    : `−${formatNumber(Math.round((rows[i - 1]?.volume ?? 0) - row.volume))} lost`}
+                </span>
+              </div>
+            </Link>
+          );
+        })}
       </div>
     </Panel>
   );
@@ -214,12 +237,29 @@ function Dashboard() {
         />
       </div>
 
-      <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <KpiCard label="Active Clients" value={formatNumber(scoped.length)} />
-        <KpiCard label="Accounts Under Collection" value={formatNumber(totalAccounts)} />
-        <KpiCard label="Active Collection Cases" value={formatNumber(totalCases)} />
-        <KpiCard label="Amount Recovered" value={formatCurrency(recovered, true)} />
-        <KpiCard label="Human Reviews Pending" value={formatNumber(reviews)} />
+        <KpiCard
+          label="Accounts Under Collection"
+          value={formatNumber(totalAccounts)}
+          trend={{ direction: "up", text: "3.1% vs previous period" }}
+        />
+        <KpiCard
+          label="Active Collection Cases"
+          value={formatNumber(totalCases)}
+          trend={{ direction: "down", text: "1.8% vs previous period" }}
+        />
+        <KpiCard
+          label="Amount Recovered"
+          value={formatCurrency(recovered, true)}
+          tone="primary"
+          trend={{ direction: "up", text: "8.4% vs previous period" }}
+        />
+        <KpiCard
+          label="Human Reviews Pending"
+          value={formatNumber(reviews)}
+          trend={{ direction: "flat", text: "steady week over week" }}
+        />
       </div>
 
       <CommunicationFunnel />

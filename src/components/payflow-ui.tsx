@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { Search } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
@@ -9,7 +10,7 @@ export function PageHeader({
   breadcrumb,
 }: {
   title: string;
-  description?: string;
+  description?: string | undefined;
   actions?: ReactNode;
   breadcrumb?: { label: string; to?: string }[];
 }) {
@@ -19,25 +20,53 @@ export function PageHeader({
         <nav className="mb-2 flex items-center gap-1.5 text-xs text-muted-foreground">
           {breadcrumb.map((crumb, i) => (
             <span key={crumb.label} className="flex items-center gap-1.5">
-              {i > 0 && <span className="opacity-50">/</span>}
+              {i > 0 && <span className="opacity-40">/</span>}
               {crumb.to ? (
                 <Link to={crumb.to} className="transition-colors hover:text-foreground">
                   {crumb.label}
                 </Link>
               ) : (
-                <span>{crumb.label}</span>
+                <span className="text-foreground">{crumb.label}</span>
               )}
             </span>
           ))}
         </nav>
       )}
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-[22px] font-semibold text-foreground">{title}</h1>
-          {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-[24px] leading-tight font-semibold tracking-tight text-foreground">
+            {title}
+          </h1>
+          {description && (
+            <p className="mt-1.5 max-w-2xl text-[13px] leading-relaxed text-muted-foreground">
+              {description}
+            </p>
+          )}
         </div>
         {actions}
       </div>
+    </div>
+  );
+}
+
+export function SectionHeading({
+  title,
+  description,
+  action,
+  className,
+}: {
+  title: string;
+  description?: string | undefined;
+  action?: ReactNode | undefined;
+  className?: string | undefined;
+}) {
+  return (
+    <div className={cn("mb-3 flex flex-wrap items-end justify-between gap-3", className)}>
+      <div>
+        <h2 className="text-[15px] font-semibold tracking-tight text-foreground">{title}</h2>
+        {description && <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>}
+      </div>
+      {action}
     </div>
   );
 }
@@ -51,24 +80,26 @@ export function Panel({
   bodyClassName,
 }: {
   title?: string;
-  description?: string;
-  action?: ReactNode;
+  description?: string | undefined;
+  action?: ReactNode | undefined;
   children: ReactNode;
-  className?: string;
+  className?: string | undefined;
   bodyClassName?: string;
 }) {
   return (
     <section className={cn("panel overflow-hidden", className)}>
       {title && (
-        <header className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
+        <header className="flex flex-wrap items-center justify-between gap-3 px-5 pt-4 pb-3">
           <div>
-            <h2 className="text-[13px] font-semibold text-foreground">{title}</h2>
-            {description && <p className="text-xs text-muted-foreground">{description}</p>}
+            <h2 className="text-[14px] font-semibold tracking-tight text-foreground">{title}</h2>
+            {description && (
+              <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
+            )}
           </div>
           {action}
         </header>
       )}
-      <div className={cn("px-4 py-3", bodyClassName)}>{children}</div>
+      <div className={cn(title ? "px-5 pb-4" : "px-5 py-4", bodyClassName)}>{children}</div>
     </section>
   );
 }
@@ -77,16 +108,38 @@ export function KpiCard({
   label,
   value,
   hint,
+  trend,
+  tone = "neutral",
 }: {
   label: string;
   value: string;
-  hint?: string;
+  hint?: string | undefined;
+  trend?: { direction: "up" | "down" | "flat"; text: string };
+  tone?: "neutral" | "primary";
 }) {
+  const trendColor =
+    trend?.direction === "up"
+      ? "text-success"
+      : trend?.direction === "down"
+        ? "text-destructive"
+        : "text-muted-foreground";
   return (
-    <div className="panel px-4 py-3.5">
+    <div className="panel px-4 py-3.5 transition-shadow hover:shadow-panel">
       <p className="text-eyebrow">{label}</p>
-      <p className="tabular mt-1.5 text-xl font-semibold text-foreground">{value}</p>
-      {hint && <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p>}
+      <p
+        className={cn(
+          "tabular mt-2 text-[22px] leading-none font-semibold tracking-tight",
+          tone === "primary" ? "text-primary" : "text-foreground",
+        )}
+      >
+        {value}
+      </p>
+      {trend && (
+        <p className={cn("mt-2 text-[11px] font-medium", trendColor)}>
+          {trend.direction === "up" ? "↑" : trend.direction === "down" ? "↓" : "→"} {trend.text}
+        </p>
+      )}
+      {hint && !trend && <p className="mt-2 text-[11px] text-muted-foreground">{hint}</p>}
     </div>
   );
 }
@@ -97,6 +150,7 @@ const toneStyles = {
   warning: "bg-warning/15 text-warning-foreground border-warning/30",
   info: "bg-info/10 text-info border-info/20",
   danger: "bg-destructive/10 text-destructive border-destructive/20",
+  ai: "bg-ai/10 text-ai border-ai/20",
 } as const;
 
 export type Tone = keyof typeof toneStyles;
@@ -134,19 +188,21 @@ export function statusTone(status: string): Tone {
 export function DataTable({
   head,
   children,
+  minWidth = 720,
 }: {
   head: ReactNode[];
   children: ReactNode;
+  minWidth?: number;
 }) {
   return (
-    <div className="panel overflow-x-auto">
-      <table className="w-full min-w-[720px] border-collapse text-[13px]">
-        <thead>
+    <div className="panel max-h-[70vh] overflow-auto">
+      <table className="w-full border-collapse text-[13px]" style={{ minWidth }}>
+        <thead className="sticky top-0 z-10 bg-card">
           <tr className="border-b border-border">
             {head.map((h, i) => (
               <th
                 key={i}
-                className="text-eyebrow px-4 py-2.5 text-left font-semibold whitespace-nowrap"
+                className="text-eyebrow bg-card px-4 py-3 text-left font-semibold whitespace-nowrap"
               >
                 {h}
               </th>
@@ -159,8 +215,82 @@ export function DataTable({
   );
 }
 
+export function Tr({
+  children,
+  onClick,
+  className,
+}: {
+  children: ReactNode;
+  onClick?: () => void;
+  className?: string | undefined;
+}) {
+  return (
+    <tr
+      onClick={onClick}
+      className={cn(
+        "border-b border-border/70 transition-colors last:border-0 hover:bg-surface",
+        onClick && "cursor-pointer",
+        className,
+      )}
+    >
+      {children}
+    </tr>
+  );
+}
+
 export function Td({ children, className }: { children: ReactNode; className?: string }) {
-  return <td className={cn("px-4 py-3 align-middle whitespace-nowrap", className)}>{children}</td>;
+  return (
+    <td className={cn("px-4 py-3.5 align-middle whitespace-nowrap", className)}>{children}</td>
+  );
+}
+
+export function PrimaryCell({ title, subtitle }: { title: ReactNode; subtitle?: ReactNode }) {
+  return (
+    <div className="leading-tight">
+      <span className="block text-[13px] font-semibold text-foreground">{title}</span>
+      {subtitle && (
+        <span className="tabular mt-0.5 block text-[11px] text-muted-foreground">{subtitle}</span>
+      )}
+    </div>
+  );
+}
+
+export function EmptyState({ title, description }: { title: string; description?: string }) {
+  return (
+    <div className="rounded-lg border border-dashed border-border-strong bg-surface px-4 py-10 text-center">
+      <p className="text-[13px] font-medium text-foreground">{title}</p>
+      {description && <p className="mt-1 text-xs text-muted-foreground">{description}</p>}
+    </div>
+  );
+}
+
+export function SearchInput({
+  value,
+  onChange,
+  placeholder,
+  className,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string | undefined;
+  className?: string | undefined;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex h-8 items-center gap-2 rounded-md border border-border bg-card px-2.5 transition-colors focus-within:border-primary",
+        className,
+      )}
+    >
+      <Search className="size-3.5 shrink-0 text-muted-foreground" />
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="w-full bg-transparent text-[13px] outline-none placeholder:text-muted-foreground"
+      />
+    </div>
+  );
 }
 
 export function FilterSelect({
@@ -175,7 +305,7 @@ export function FilterSelect({
   onChange: (value: string) => void;
 }) {
   return (
-    <label className="flex items-center gap-2 rounded-md border border-border bg-card px-2.5 py-1.5">
+    <label className="flex h-8 items-center gap-2 rounded-md border border-border bg-card px-2.5 transition-colors hover:border-border-strong">
       <span className="text-[11px] font-medium text-muted-foreground">{label}</span>
       <select
         value={value}
@@ -192,6 +322,37 @@ export function FilterSelect({
   );
 }
 
+export function TabBar<T extends string>({
+  tabs,
+  active,
+  onChange,
+  className,
+}: {
+  tabs: readonly T[];
+  active: T;
+  onChange: (tab: T) => void;
+  className?: string | undefined;
+}) {
+  return (
+    <div className={cn("mb-5 flex gap-1 overflow-x-auto border-b border-border", className)}>
+      {tabs.map((t) => (
+        <button
+          key={t}
+          onClick={() => onChange(t)}
+          className={cn(
+            "-mb-px border-b-2 px-3 py-2.5 text-[13px] font-medium whitespace-nowrap transition-colors",
+            active === t
+              ? "border-primary text-foreground"
+              : "border-transparent text-muted-foreground hover:text-foreground",
+          )}
+        >
+          {t}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function PlaceholderSection({
   title,
   description,
@@ -203,8 +364,8 @@ export function PlaceholderSection({
 }) {
   return (
     <Panel title={title} description={description}>
-      <div className="rounded-md border border-dashed border-border-strong bg-surface px-4 py-8 text-center">
-        <p className="text-sm font-medium text-foreground">Coming in a later step</p>
+      <div className="rounded-lg border border-dashed border-border-strong bg-surface px-4 py-10 text-center">
+        <p className="text-[13px] font-medium text-foreground">Coming in a later step</p>
         {items && (
           <div className="mt-3 flex flex-wrap justify-center gap-1.5">
             {items.map((item) => (
@@ -224,9 +385,9 @@ export function Field({
   className,
 }: {
   label: string;
-  hint?: string;
+  hint?: string | undefined;
   children: ReactNode;
-  className?: string;
+  className?: string | undefined;
 }) {
   return (
     <label className={cn("block", className)}>
@@ -238,18 +399,20 @@ export function Field({
 }
 
 const controlClass =
-  "w-full rounded-md border border-border bg-card px-2.5 py-1.5 text-[13px] text-foreground outline-none transition-colors focus:border-primary disabled:opacity-60";
+  "h-9 w-full rounded-md border border-border bg-card px-2.5 text-[13px] text-foreground outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-ring/15 disabled:opacity-60";
 
 export function TextInput({
   value,
   onChange,
   placeholder,
   disabled,
+  className,
 }: {
   value: string;
   onChange: (v: string) => void;
-  placeholder?: string;
-  disabled?: boolean;
+  placeholder?: string | undefined;
+  disabled?: boolean | undefined;
+  className?: string | undefined;
 }) {
   return (
     <input
@@ -257,7 +420,32 @@ export function TextInput({
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       disabled={disabled}
-      className={controlClass}
+      className={cn(controlClass, className)}
+    />
+  );
+}
+
+export function TextArea({
+  value,
+  onChange,
+  placeholder,
+  disabled,
+  rows = 3,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string | undefined;
+  disabled?: boolean | undefined;
+  rows?: number | undefined;
+}) {
+  return (
+    <textarea
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      disabled={disabled}
+      rows={rows}
+      className="w-full rounded-md border border-border bg-card px-2.5 py-2 text-[13px] text-foreground outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-ring/15 disabled:opacity-60"
     />
   );
 }
@@ -267,18 +455,20 @@ export function SelectInput({
   options,
   onChange,
   disabled,
+  className,
 }: {
   value: string;
   options: string[];
   onChange: (v: string) => void;
-  disabled?: boolean;
+  disabled?: boolean | undefined;
+  className?: string | undefined;
 }) {
   return (
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
       disabled={disabled}
-      className={controlClass}
+      className={cn(controlClass, className)}
     >
       {options.map((o) => (
         <option key={o} value={o}>
@@ -300,8 +490,8 @@ export function ChoiceCard({
   title: string;
   description: string;
   selected?: boolean;
-  disabled?: boolean;
-  badge?: string;
+  disabled?: boolean | undefined;
+  badge?: string | undefined;
   onSelect?: () => void;
 }) {
   return (
@@ -310,8 +500,10 @@ export function ChoiceCard({
       onClick={onSelect}
       disabled={disabled}
       className={cn(
-        "rounded-lg border bg-card p-4 text-left transition-colors",
-        selected ? "border-primary ring-1 ring-primary/30" : "border-border hover:border-border-strong",
+        "rounded-lg border bg-card p-4 text-left transition-all",
+        selected
+          ? "border-primary bg-accent/40 ring-1 ring-primary/25"
+          : "border-border hover:border-border-strong hover:shadow-subtle",
         disabled && "cursor-not-allowed opacity-60",
       )}
     >
@@ -334,10 +526,10 @@ export function ToggleRow({
   onChange,
 }: {
   label: string;
-  description?: string;
+  description?: string | undefined;
   checked: boolean;
-  disabled?: boolean;
-  badge?: string;
+  disabled?: boolean | undefined;
+  badge?: string | undefined;
   onChange?: (v: boolean) => void;
 }) {
   return (
@@ -381,9 +573,9 @@ export function Btn({
 }: {
   children: ReactNode;
   onClick?: () => void;
-  variant?: "primary" | "secondary" | "ghost";
-  disabled?: boolean;
-  className?: string;
+  variant?: "primary" | "secondary" | "ghost" | "danger";
+  disabled?: boolean | undefined;
+  className?: string | undefined;
 }) {
   return (
     <button
@@ -391,10 +583,13 @@ export function Btn({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[13px] font-medium transition-colors disabled:opacity-50",
-        variant === "primary" && "bg-primary text-primary-foreground hover:opacity-90",
+        "inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-[13px] font-medium transition-all disabled:opacity-50",
+        variant === "primary" &&
+          "bg-primary text-primary-foreground shadow-subtle hover:bg-primary/90",
         variant === "secondary" && "border border-border bg-card text-foreground hover:bg-surface",
         variant === "ghost" && "text-muted-foreground hover:text-foreground",
+        variant === "danger" &&
+          "border border-destructive/30 text-destructive hover:bg-destructive/10",
         className,
       )}
     >
