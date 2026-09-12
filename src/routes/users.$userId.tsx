@@ -76,7 +76,8 @@ function UserDetail() {
   }
 
   const clientName = (id: string) => allClients.find((c) => c.id === id)?.name ?? id;
-  const isSupervisor = user.role === "Supervisor";
+  /** Client-scoped roles get assignments; platform-wide roles work everywhere. */
+  const isSupervisor = !isPlatformRoleName(user.role);
 
   return (
     <>
