@@ -32,18 +32,18 @@ export function PageHeader({
           ))}
         </nav>
       )}
-      <div className="flex flex-wrap items-end justify-between gap-4">
+      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-4">
         <div className="min-w-0">
-          <h1 className="text-[24px] leading-tight font-semibold tracking-tight text-foreground">
+          <h1 className="text-[21px] leading-tight font-bold tracking-tight text-foreground">
             {title}
           </h1>
           {description && (
-            <p className="mt-1.5 max-w-2xl text-[13px] leading-relaxed text-muted-foreground">
+            <p className="mt-1 max-w-2xl text-[13px] leading-relaxed text-muted-foreground">
               {description}
             </p>
           )}
         </div>
-        {actions}
+        <div className="flex flex-wrap items-center gap-2">{actions}</div>
       </div>
     </div>
   );
@@ -89,17 +89,17 @@ export function Panel({
   return (
     <section className={cn("panel overflow-hidden", className)}>
       {title && (
-        <header className="flex flex-wrap items-center justify-between gap-3 px-5 pt-4 pb-3">
+        <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border/70 px-5 py-3.5">
           <div>
-            <h2 className="text-[14px] font-semibold tracking-tight text-foreground">{title}</h2>
+            <h2 className="text-[13.5px] font-semibold tracking-tight text-foreground">{title}</h2>
             {description && (
-              <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
+              <p className="mt-0.5 text-[11.5px] text-muted-foreground">{description}</p>
             )}
           </div>
           {action}
         </header>
       )}
-      <div className={cn(title ? "px-5 pb-4" : "px-5 py-4", bodyClassName)}>{children}</div>
+      <div className={cn(title ? "px-5 py-4" : "px-5 py-4", bodyClassName)}>{children}</div>
     </section>
   );
 }
