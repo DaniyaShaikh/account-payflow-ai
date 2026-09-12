@@ -191,7 +191,7 @@ function IntegrationDetail() {
             <StatusPill tone={summary.attention ? "warning" : "neutral"}>
               {summary.attention} need attention
             </StatusPill>
-            <StatusPill>{summary.total} source fields</StatusPill>
+            <StatusPill>{client.config.mappings.length} source fields</StatusPill>
           </div>
           {showMapping ? (
             <DataTable
