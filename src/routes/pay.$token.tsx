@@ -195,7 +195,7 @@ function CustomerPaymentExperience() {
               <button className={outlineBtn} onClick={() => setStep("partial")}>
                 Make a Partial Payment
               </button>
-              <button className={outlineBtn} onClick={() => setStep("plan")}>
+              <button className={outlineBtn} onClick={() => setStep("plan-frequency")}>
                 Set Up a Payment Plan
               </button>
             </div>
