@@ -37,8 +37,10 @@ function RuleDetail() {
   const { ruleId } = Route.useParams();
   const { visibleClients, userName } = useRole();
   const { visibleRules, updateRule, canEditRule } = useRules();
+  const { reviewsForRule } = useReviews();
 
   const rule = visibleRules.find((r) => r.id === ruleId);
+  const triggers = reviewsForRule(ruleId);
 
   if (!rule) {
     return (
