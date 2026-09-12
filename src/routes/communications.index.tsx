@@ -21,12 +21,19 @@ export const Route = createFileRoute("/communications/")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  validateSearch: (search: Record<string, unknown>) => ({
-    status: typeof search["status"] === "string" ? (search["status"] as string) : undefined,
-    channel: typeof search["channel"] === "string" ? (search["channel"] as string) : undefined,
-    client: typeof search["client"] === "string" ? (search["client"] as string) : undefined,
-    journey: typeof search["journey"] === "string" ? (search["journey"] as string) : undefined,
-  }),
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): {
+    status?: string | undefined;
+    channel?: string | undefined;
+    client?: string | undefined;
+    journey?: string | undefined;
+  } => {
+    const pick = (key: string) =>
+      typeof search[key] === "string" ? (search[key] as string) : undefined;
+    return { status: pick("status"), channel: pick("channel"), client: pick("client"), journey: pick("journey") };
+  },
+
   component: CommunicationsPage,
 });
 
