@@ -103,9 +103,10 @@ export function AssignmentAccessEditor({
   editable: boolean;
   onRemove?: () => void;
 }) {
-  const { setAssignmentPermissions } = useUsers();
+  const { setAssignmentPermissions, roles } = useUsers();
   const permissions = user.assignments.find((a) => a.clientId === clientId)?.permissions ?? [];
   const [open, setOpen] = useState(false);
+  const profile = profileFor(permissions, roles);
 
   const toggle = (perm: string) =>
     setAssignmentPermissions(
@@ -121,9 +122,7 @@ export function AssignmentAccessEditor({
     <div className="rounded-lg border border-border bg-surface px-3.5 py-3">
       <div className="flex flex-wrap items-center gap-2">
         <p className="text-[13px] font-semibold text-foreground">{clientName}</p>
-        <StatusPill tone={profileFor(permissions) === "Custom" ? "neutral" : "info"}>
-          {profileFor(permissions)}
-        </StatusPill>
+        <StatusPill tone={profile === "Custom" ? "neutral" : "info"}>{profile}</StatusPill>
         <span className="text-[11px] text-muted-foreground">
           {permissions.length} permission{permissions.length === 1 ? "" : "s"}
         </span>
