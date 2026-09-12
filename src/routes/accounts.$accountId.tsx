@@ -29,7 +29,13 @@ export const Route = createFileRoute("/accounts/$accountId")({
 function AccountDetail() {
   const { accountId } = Route.useParams();
   const { canSeeClient } = useRole();
+  const { reviewsForAccount, accountReviewEvents } = useReviews();
   const account = accounts.find((a) => a.id === accountId)!;
+  const caseReviews = reviewsForAccount(accountId);
+  const timeline: { at: string; label: string; detail: string; reviewId?: string }[] = [
+    ...account.timeline,
+    ...accountReviewEvents(accountId),
+  ];
 
   if (!canSeeClient(account.clientId)) {
     return (
