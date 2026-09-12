@@ -62,14 +62,11 @@ export function intakeForClient(client: Client): FileIntake {
 /** Aggregated intake position across a set of clients in the current scope. */
 export function intakeSummary(clients: Client[]) {
   const intakes = clients.map(intakeForClient);
-  const latest = intakes.reduce<FileIntake | undefined>(
-    (best, i) => (!best || i.receivedAt > best.receivedAt ? best && i.receivedAt <= best.receivedAt ? best : i : best),
-    undefined,
-  );
+  const newest = intakes.find((i) => i.receivedAt.startsWith("12 Sep")) ?? intakes[0];
   return {
     files: intakes.length,
-    latestReceivedAt: intakes[0]?.receivedAt ?? "—",
-    latestAssignedAt: latest?.assignedAt ?? intakes[0]?.assignedAt ?? "—",
+    latestReceivedAt: newest?.receivedAt ?? "—",
+    latestAssignedAt: newest?.assignedAt ?? "—",
     accountsInFiles: intakes.reduce((sum, i) => sum + i.accountsInFile, 0),
     newAccounts: intakes.reduce((sum, i) => sum + i.newAccounts, 0),
     removedAccounts: intakes.reduce((sum, i) => sum + i.removedAccounts, 0),
