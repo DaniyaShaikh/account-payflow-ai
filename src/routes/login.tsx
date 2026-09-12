@@ -31,8 +31,7 @@ function LoginPage() {
   const [mode, setMode] = useState<"signIn" | "forgot">("signIn");
   const [sent, setSent] = useState(false);
 
-  const signIn = (e: React.FormEvent) => {
-    e.preventDefault();
+  const signIn = () => {
     markSignedIn();
     navigate({ to: "/" });
   };
@@ -77,7 +76,7 @@ function LoginPage() {
           </div>
 
           {mode === "signIn" ? (
-            <form onSubmit={signIn} className="mt-8 lg:mt-0">
+            <div className="mt-8 lg:mt-0">
               <h1 className="text-[24px] font-bold tracking-tight text-foreground">Sign in</h1>
               <p className="mt-1.5 text-[13px] text-muted-foreground">
                 Continue to your collections operations workspace.
@@ -115,7 +114,7 @@ function LoginPage() {
               </div>
 
               <div className="mt-6">
-                <Btn type="submit" variant="primary" className="w-full justify-center">
+                <Btn variant="primary" className="w-full justify-center" onClick={signIn}>
                   Sign In
                 </Btn>
               </div>
@@ -124,15 +123,9 @@ function LoginPage() {
                 Prototype sign-in — no credentials are verified. Role switching is available inside
                 the workspace.
               </p>
-            </form>
+            </div>
           ) : (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                setSent(true);
-              }}
-              className="mt-8 lg:mt-0"
-            >
+<div className="mt-8 lg:mt-0">
               <h1 className="text-[24px] font-bold tracking-tight text-foreground">
                 Reset password
               </h1>
@@ -153,18 +146,18 @@ function LoginPage() {
               )}
 
               <div className="mt-6 flex flex-col gap-2">
-                <Btn type="submit" variant="primary" className="w-full justify-center">
+                <Btn
+                  variant="primary"
+                  className="w-full justify-center"
+                  onClick={() => setSent(true)}
+                >
                   Send Reset Link
                 </Btn>
-                <Btn
-                  type="button"
-                  className="w-full justify-center"
-                  onClick={() => setMode("signIn")}
-                >
+                <Btn className="w-full justify-center" onClick={() => setMode("signIn")}>
                   Back To Sign In
                 </Btn>
               </div>
-            </form>
+            </div>
           )}
         </div>
       </div>
