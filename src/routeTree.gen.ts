@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ActivateRouteImport } from './routes/activate'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as AccountsIndexRouteImport } from './routes/accounts.index'
 import { Route as AccountsAccountIdRouteImport } from './routes/accounts.$accountId'
 import { Route as ClientsIndexRouteImport } from './routes/clients.index'
@@ -45,6 +46,11 @@ const ActivateRoute = ActivateRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AccountsIndexRoute = AccountsIndexRouteImport.update({
@@ -149,6 +155,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/activate': typeof ActivateRoute
   '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
   '/accounts/$accountId': typeof AccountsAccountIdRoute
   '/clients/$clientId': typeof ClientsClientIdRoute
   '/clients/new': typeof ClientsNewRoute
@@ -173,6 +180,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/activate': typeof ActivateRoute
   '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
   '/accounts/$accountId': typeof AccountsAccountIdRoute
   '/clients/$clientId': typeof ClientsClientIdRoute
   '/clients/new': typeof ClientsNewRoute
@@ -198,6 +206,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/activate': typeof ActivateRoute
   '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
   '/accounts/$accountId': typeof AccountsAccountIdRoute
   '/clients/$clientId': typeof ClientsClientIdRoute
   '/clients/new': typeof ClientsNewRoute
@@ -224,6 +233,7 @@ export interface FileRouteTypes {
     | '/'
     | '/activate'
     | '/login'
+    | '/profile'
     | '/accounts/$accountId'
     | '/clients/$clientId'
     | '/clients/new'
@@ -248,6 +258,7 @@ export interface FileRouteTypes {
     | '/'
     | '/activate'
     | '/login'
+    | '/profile'
     | '/accounts/$accountId'
     | '/clients/$clientId'
     | '/clients/new'
@@ -272,6 +283,7 @@ export interface FileRouteTypes {
     | '/'
     | '/activate'
     | '/login'
+    | '/profile'
     | '/accounts/$accountId'
     | '/clients/$clientId'
     | '/clients/new'
@@ -297,6 +309,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ActivateRoute: typeof ActivateRoute
   LoginRoute: typeof LoginRoute
+  ProfileRoute: typeof ProfileRoute
   AccountsAccountIdRoute: typeof AccountsAccountIdRoute
   ClientsClientIdRoute: typeof ClientsClientIdRoute
   ClientsNewRoute: typeof ClientsNewRoute
@@ -339,6 +352,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/accounts/': {
@@ -481,6 +501,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ActivateRoute: ActivateRoute,
   LoginRoute: LoginRoute,
+  ProfileRoute: ProfileRoute,
   AccountsAccountIdRoute: AccountsAccountIdRoute,
   ClientsClientIdRoute: ClientsClientIdRoute,
   ClientsNewRoute: ClientsNewRoute,
