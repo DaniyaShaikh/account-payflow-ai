@@ -377,12 +377,13 @@ function CustomerPaymentExperience() {
         )}
 
         {step === "review" && mode === "plan" && (
-          <StepCard title="Payment Plan Review" onBack={() => setStep("plan")}>
+          <StepCard title="Payment Plan Review" onBack={() => setStep("plan-amount")}>
             <Row label="Outstanding Balance" value={formatCurrency(outstanding)} />
+            <Row label="Frequency" value={frequencyMeta[frequency].label} />
+            <Row label="Instalment Amount" value={formatCurrency(installment)} emphasis />
             <Row label="Number of Payments" value={String(planPayments)} />
-            <Row label="Estimated Payment" value={formatCurrency(installment)} emphasis />
             <Row label="First Payment" value={firstPaymentDate} />
-            <Row label="Payment Method" value={method} />
+            <Row label="Final Payment" value={finalPaymentDate} />
             <MethodPicker method={method} setMethod={setMethod} />
             <DemoToggle checked={simulateDecline} onChange={setSimulateDecline} />
             <button className={accentBtn} onClick={confirmPayment}>
