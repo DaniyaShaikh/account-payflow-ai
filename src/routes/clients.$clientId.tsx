@@ -472,6 +472,9 @@ function ClientConfiguration({
             <StatusPill>{draft.aiMode}</StatusPill>
             <StatusPill>{summary.mapped} fields mapped</StatusPill>
           </div>
+          <div className="mt-3">
+            <ClientDataSourceIntegration clientId={clientId} />
+          </div>
         </Panel>
         <Panel title="Your access for this client" description="What you may do for this client">
           <div className="flex flex-wrap gap-1.5">
