@@ -10,9 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as CommunicationsRouteImport } from './routes/communications'
 import { Route as IntegrationsRouteImport } from './routes/integrations'
-import { Route as JourneysRouteImport } from './routes/journeys'
 import { Route as UsersRouteImport } from './routes/users'
 import { Route as AccountsIndexRouteImport } from './routes/accounts.index'
 import { Route as AccountsAccountIdRouteImport } from './routes/accounts.$accountId'
@@ -21,6 +19,7 @@ import { Route as ClientsClientIdRouteImport } from './routes/clients.$clientId'
 import { Route as ClientsNewRouteImport } from './routes/clients.new'
 import { Route as HumanReviewIndexRouteImport } from './routes/human-review.index'
 import { Route as HumanReviewReviewIdRouteImport } from './routes/human-review.$reviewId'
+import { Route as JourneysIndexRouteImport } from './routes/journeys.index'
 import { Route as RulesIndexRouteImport } from './routes/rules.index'
 import { Route as RulesRuleIdRouteImport } from './routes/rules.$ruleId'
 import { Route as RulesNewRouteImport } from './routes/rules.new'
@@ -30,19 +29,9 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CommunicationsRoute = CommunicationsRouteImport.update({
-  id: '/communications',
-  path: '/communications',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IntegrationsRoute = IntegrationsRouteImport.update({
   id: '/integrations',
   path: '/integrations',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const JourneysRoute = JourneysRouteImport.update({
-  id: '/journeys',
-  path: '/journeys',
   getParentRoute: () => rootRouteImport,
 } as any)
 const UsersRoute = UsersRouteImport.update({
@@ -85,6 +74,11 @@ const HumanReviewReviewIdRoute = HumanReviewReviewIdRouteImport.update({
   path: '/human-review/$reviewId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const JourneysIndexRoute = JourneysIndexRouteImport.update({
+  id: '/journeys/',
+  path: '/journeys/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RulesIndexRoute = RulesIndexRouteImport.update({
   id: '/rules/',
   path: '/rules/',
@@ -103,9 +97,7 @@ const RulesNewRoute = RulesNewRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/communications': typeof CommunicationsRoute
   '/integrations': typeof IntegrationsRoute
-  '/journeys': typeof JourneysRoute
   '/users': typeof UsersRoute
   '/accounts/$accountId': typeof AccountsAccountIdRoute
   '/clients/$clientId': typeof ClientsClientIdRoute
@@ -116,13 +108,12 @@ export interface FileRoutesByFullPath {
   '/accounts/': typeof AccountsIndexRoute
   '/clients/': typeof ClientsIndexRoute
   '/human-review/': typeof HumanReviewIndexRoute
+  '/journeys/': typeof JourneysIndexRoute
   '/rules/': typeof RulesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/communications': typeof CommunicationsRoute
   '/integrations': typeof IntegrationsRoute
-  '/journeys': typeof JourneysRoute
   '/users': typeof UsersRoute
   '/accounts/$accountId': typeof AccountsAccountIdRoute
   '/clients/$clientId': typeof ClientsClientIdRoute
@@ -133,14 +124,13 @@ export interface FileRoutesByTo {
   '/accounts': typeof AccountsIndexRoute
   '/clients': typeof ClientsIndexRoute
   '/human-review': typeof HumanReviewIndexRoute
+  '/journeys': typeof JourneysIndexRoute
   '/rules': typeof RulesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/communications': typeof CommunicationsRoute
   '/integrations': typeof IntegrationsRoute
-  '/journeys': typeof JourneysRoute
   '/users': typeof UsersRoute
   '/accounts/$accountId': typeof AccountsAccountIdRoute
   '/clients/$clientId': typeof ClientsClientIdRoute
@@ -151,15 +141,14 @@ export interface FileRoutesById {
   '/accounts/': typeof AccountsIndexRoute
   '/clients/': typeof ClientsIndexRoute
   '/human-review/': typeof HumanReviewIndexRoute
+  '/journeys/': typeof JourneysIndexRoute
   '/rules/': typeof RulesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/communications'
     | '/integrations'
-    | '/journeys'
     | '/users'
     | '/accounts/$accountId'
     | '/clients/$clientId'
@@ -170,13 +159,12 @@ export interface FileRouteTypes {
     | '/accounts/'
     | '/clients/'
     | '/human-review/'
+    | '/journeys/'
     | '/rules/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/communications'
     | '/integrations'
-    | '/journeys'
     | '/users'
     | '/accounts/$accountId'
     | '/clients/$clientId'
@@ -187,13 +175,12 @@ export interface FileRouteTypes {
     | '/accounts'
     | '/clients'
     | '/human-review'
+    | '/journeys'
     | '/rules'
   id:
     | '__root__'
     | '/'
-    | '/communications'
     | '/integrations'
-    | '/journeys'
     | '/users'
     | '/accounts/$accountId'
     | '/clients/$clientId'
@@ -204,14 +191,13 @@ export interface FileRouteTypes {
     | '/accounts/'
     | '/clients/'
     | '/human-review/'
+    | '/journeys/'
     | '/rules/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  CommunicationsRoute: typeof CommunicationsRoute
   IntegrationsRoute: typeof IntegrationsRoute
-  JourneysRoute: typeof JourneysRoute
   UsersRoute: typeof UsersRoute
   AccountsAccountIdRoute: typeof AccountsAccountIdRoute
   ClientsClientIdRoute: typeof ClientsClientIdRoute
@@ -222,6 +208,7 @@ export interface RootRouteChildren {
   AccountsIndexRoute: typeof AccountsIndexRoute
   ClientsIndexRoute: typeof ClientsIndexRoute
   HumanReviewIndexRoute: typeof HumanReviewIndexRoute
+  JourneysIndexRoute: typeof JourneysIndexRoute
   RulesIndexRoute: typeof RulesIndexRoute
 }
 
@@ -234,25 +221,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/communications': {
-      id: '/communications'
-      path: '/communications'
-      fullPath: '/communications'
-      preLoaderRoute: typeof CommunicationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/integrations': {
       id: '/integrations'
       path: '/integrations'
       fullPath: '/integrations'
       preLoaderRoute: typeof IntegrationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/journeys': {
-      id: '/journeys'
-      path: '/journeys'
-      fullPath: '/journeys'
-      preLoaderRoute: typeof JourneysRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/users': {
@@ -311,6 +284,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HumanReviewReviewIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/journeys/': {
+      id: '/journeys/'
+      path: '/journeys'
+      fullPath: '/journeys/'
+      preLoaderRoute: typeof JourneysIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/rules/': {
       id: '/rules/'
       path: '/rules'
@@ -337,9 +317,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  CommunicationsRoute: CommunicationsRoute,
   IntegrationsRoute: IntegrationsRoute,
-  JourneysRoute: JourneysRoute,
   UsersRoute: UsersRoute,
   AccountsAccountIdRoute: AccountsAccountIdRoute,
   ClientsClientIdRoute: ClientsClientIdRoute,
@@ -350,6 +328,7 @@ const rootRouteChildren: RootRouteChildren = {
   AccountsIndexRoute: AccountsIndexRoute,
   ClientsIndexRoute: ClientsIndexRoute,
   HumanReviewIndexRoute: HumanReviewIndexRoute,
+  JourneysIndexRoute: JourneysIndexRoute,
   RulesIndexRoute: RulesIndexRoute,
 }
 export const routeTree = rootRouteImport
