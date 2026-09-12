@@ -231,12 +231,12 @@ export function DataTable({
   return (
     <div className="panel max-h-[70vh] overflow-auto">
       <table className="w-full border-collapse text-[13px]" style={{ minWidth }}>
-        <thead className="sticky top-0 z-10 bg-card">
-          <tr className="border-b border-border">
+        <thead className="sticky top-0 z-10">
+          <tr>
             {head.map((h, i) => (
               <th
                 key={i}
-                className="text-eyebrow bg-card px-4 py-3 text-left font-semibold whitespace-nowrap"
+                className="text-eyebrow border-b border-border bg-surface px-4 py-2.5 text-left font-semibold whitespace-nowrap"
               >
                 {h}
               </th>
@@ -274,7 +274,7 @@ export function Tr({
 
 export function Td({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <td className={cn("px-4 py-3.5 align-middle whitespace-nowrap", className)}>{children}</td>
+    <td className={cn("px-4 py-3 align-middle whitespace-nowrap", className)}>{children}</td>
   );
 }
 
@@ -289,11 +289,25 @@ export function PrimaryCell({ title, subtitle }: { title: ReactNode; subtitle?: 
   );
 }
 
-export function EmptyState({ title, description }: { title: string; description?: string }) {
+export function EmptyState({
+  title,
+  description,
+  action,
+}: {
+  title: string;
+  description?: string;
+  action?: ReactNode;
+}) {
   return (
-    <div className="rounded-lg border border-dashed border-border-strong bg-surface px-4 py-10 text-center">
-      <p className="text-[13px] font-medium text-foreground">{title}</p>
-      {description && <p className="mt-1 text-xs text-muted-foreground">{description}</p>}
+    <div className="flex flex-col items-center rounded-lg border border-dashed border-border-strong bg-surface px-4 py-9 text-center">
+      <span className="mb-2.5 flex size-8 items-center justify-center rounded-full bg-card text-muted-foreground ring-1 ring-border">
+        <Inbox className="size-4" />
+      </span>
+      <p className="text-[13px] font-semibold text-foreground">{title}</p>
+      {description && (
+        <p className="mt-1 max-w-sm text-xs text-muted-foreground">{description}</p>
+      )}
+      {action && <div className="mt-3">{action}</div>}
     </div>
   );
 }
