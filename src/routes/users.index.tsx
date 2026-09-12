@@ -18,14 +18,10 @@ import {
   EmptyState,
 } from "@/components/payflow-ui";
 import { ClientAssignmentPicker, PermissionPicker } from "@/components/user-access";
+import { RolesPanel } from "@/components/role-manager";
 import { useRole } from "@/lib/role-context";
 import { useUsers } from "@/lib/users-context";
-import {
-  standardSupervisorPermissions,
-  userProfile,
-  type UserRole,
-  type UserStatus,
-} from "@/lib/users-data";
+import { userProfile, type UserRole, type UserStatus } from "@/lib/users-data";
 
 export const Route = createFileRoute("/users/")({
   head: () => ({
@@ -48,7 +44,7 @@ export const Route = createFileRoute("/users/")({
 
 function UsersPage() {
   const { isAdmin, allClients } = useRole();
-  const { users, addUser } = useUsers();
+  const { users, roles, roleNames, isPlatformRoleName, addUser } = useUsers();
   const navigate = useNavigate();
 
   const [query, setQuery] = useState("");
@@ -66,7 +62,7 @@ function UsersPage() {
       if (roleFilter !== "All Roles" && u.role !== roleFilter) return false;
       if (statusFilter !== "All Statuses" && u.status !== statusFilter) return false;
       if (clientFilter !== "All Clients") {
-        if (u.role === "Operations Admin") return true;
+        if (isPlatformRoleName(u.role)) return true;
         const target = allClients.find((c) => c.name === clientFilter);
         if (!target || !u.assignments.some((a) => a.clientId === target.id)) return false;
       }
@@ -90,15 +86,15 @@ function UsersPage() {
     );
   }
 
-  const admins = users.filter((u) => u.role === "Operations Admin").length;
-  const supervisors = users.filter((u) => u.role === "Supervisor").length;
+  const admins = users.filter((u) => isPlatformRoleName(u.role)).length;
+  const clientScoped = users.length - admins;
   const active = users.filter((u) => u.status === "Active").length;
 
   return (
     <>
       <PageHeader
         title="Users & Permissions"
-        description="Manage PayFlow users, Client assignments and operational access."
+        description="Manage PayFlow users, roles, Client assignments and operational access."
         actions={
           <Btn variant="primary" onClick={() => setAdding((v) => !v)}>
             {adding ? "Close" : "+ Add User"}
@@ -106,10 +102,11 @@ function UsersPage() {
         }
       />
 
-      <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <KpiCard label="Total Users" value={String(users.length)} />
-        <KpiCard label="Operations Admins" value={String(admins)} />
-        <KpiCard label="Supervisors" value={String(supervisors)} />
+        <KpiCard label="Roles" value={String(roles.length)} />
+        <KpiCard label="Platform-wide Access" value={String(admins)} />
+        <KpiCard label="Client-scoped Users" value={String(clientScoped)} />
         <KpiCard label="Active Users" value={String(active)} tone="primary" />
       </div>
 
@@ -136,7 +133,7 @@ function UsersPage() {
         <FilterSelect
           label="Role"
           value={roleFilter}
-          options={["All Roles", "Operations Admin", "Supervisor"]}
+          options={["All Roles", ...roleNames]}
           onChange={setRoleFilter}
         />
         <FilterSelect
@@ -177,18 +174,18 @@ function UsersPage() {
                 <PrimaryCell title={u.name} subtitle={u.email} />
               </Td>
               <Td>
-                <StatusPill tone={u.role === "Operations Admin" ? "info" : "neutral"}>
+                <StatusPill tone={isPlatformRoleName(u.role) ? "info" : "neutral"}>
                   {u.role}
                 </StatusPill>
               </Td>
               <Td className="text-muted-foreground">
-                {u.role === "Operations Admin"
+                {isPlatformRoleName(u.role)
                   ? "All Clients"
                   : u.assignments.length === 0
                     ? "None assigned"
                     : u.assignments.map((a) => clientName(a.clientId)).join(", ")}
               </Td>
-              <Td className="text-muted-foreground">{userProfile(u)}</Td>
+              <Td className="text-muted-foreground">{userProfile(u, roles)}</Td>
               <Td>
                 <StatusPill tone={u.status === "Active" ? "success" : "neutral"}>
                   {u.status}
@@ -202,6 +199,10 @@ function UsersPage() {
           ))}
         </DataTable>
       )}
+
+      <div className="mt-5">
+        <RolesPanel />
+      </div>
     </>
   );
 }
@@ -219,17 +220,24 @@ function AddUserForm({
     assignments: { clientId: string; permissions: string[] }[];
   }) => void;
 }) {
+  const { roleNames, isPlatformRoleName, defaultPermissions } = useUsers();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState<UserRole>("Supervisor");
+  const [role, setRole] = useState<UserRole>(roleNames[1] ?? roleNames[0] ?? "Supervisor");
   const [status, setStatus] = useState<UserStatus>("Active");
   const [clientIds, setClientIds] = useState<string[]>([]);
-  const [permissions, setPermissions] = useState<string[]>([...standardSupervisorPermissions]);
+  const [permissions, setPermissions] = useState<string[]>(() => defaultPermissions(role));
+  const platform = isPlatformRoleName(role);
+
+  /** Switching role loads that role's default permission set. */
+  const pickRole = (next: string) => {
+    setRole(next);
+    setPermissions(defaultPermissions(next));
+    if (isPlatformRoleName(next)) setClientIds([]);
+  };
 
   const valid =
-    name.trim().length > 1 &&
-    /.+@.+\..+/.test(email) &&
-    (role === "Operations Admin" || clientIds.length > 0);
+    name.trim().length > 1 && /.+@.+\..+/.test(email) && (platform || clientIds.length > 0);
 
   return (
     <Panel title="Add User" description="Client assignment decides where. Permissions decide what.">
@@ -241,11 +249,7 @@ function AddUserForm({
           <TextInput value={email} onChange={setEmail} placeholder="name@payflow.io" />
         </Field>
         <Field label="Role">
-          <SelectInput
-            value={role}
-            options={["Operations Admin", "Supervisor"]}
-            onChange={(v) => setRole(v as UserRole)}
-          />
+          <SelectInput value={role} options={roleNames} onChange={pickRole} />
         </Field>
         <Field label="Status">
           <SelectInput
@@ -256,9 +260,9 @@ function AddUserForm({
         </Field>
       </div>
 
-      {role === "Operations Admin" ? (
+      {platform ? (
         <p className="mt-4 rounded-lg border border-border bg-surface px-3.5 py-3 text-[12px] text-muted-foreground">
-          An Operations Admin has platform-wide access across every client. No client assignment is
+          {role} is a platform-wide role with access across every client. No client assignment is
           required.
         </p>
       ) : (
@@ -278,7 +282,7 @@ function AddUserForm({
           </div>
           <div>
             <p className="mb-1.5 text-[12px] font-medium text-foreground">
-              Permissions — what the supervisor may do
+              Permissions — what this user may do (defaults from {role})
             </p>
             <PermissionPicker
               selected={permissions}

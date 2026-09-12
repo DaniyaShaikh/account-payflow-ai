@@ -1,15 +1,33 @@
 /**
- * Phase 1 user model for PayFlow.
+ * User and role model for PayFlow.
  *
- * Two internal roles only: Operations Admin (platform-wide) and Supervisor
- * (client-scoped). Client assignment controls WHERE a supervisor works,
- * permissions control WHAT they may do there. Permissions can differ per
- * assigned client.
+ * Roles are definable: PayFlow ships Operations Admin (platform-wide) and
+ * Supervisor (client-scoped), and an admin can add further roles built from the
+ * same permission set. Client assignment controls WHERE a client-scoped user
+ * works, permissions control WHAT they may do there, and permissions can still
+ * differ per assigned client.
  */
 
-export type UserRole = "Operations Admin" | "Supervisor";
+/** A role name — built-in or admin-defined. */
+export type UserRole = string;
 export type UserStatus = "Active" | "Inactive";
-export type PermissionProfile = "Full Access" | "Standard Supervisor" | "Custom";
+export type PermissionProfile = string;
+
+export type RoleScope = "Platform-wide" | "Client-scoped";
+
+export interface RoleDefinition {
+  id: string;
+  name: string;
+  scope: RoleScope;
+  description: string;
+  /** Default permission set applied when the role is assigned to a client. */
+  permissions: string[];
+  /** Built-in roles cannot be deleted. */
+  builtIn: boolean;
+}
+
+export const ADMIN_ROLE_NAME = "Operations Admin";
+export const SUPERVISOR_ROLE_NAME = "Supervisor";
 
 /** Grouped so the UI stays scannable instead of a permission matrix. */
 export const permissionGroups = [
@@ -86,18 +104,63 @@ export function samePermissionSet(a: string[], b: string[]) {
   return a.length === b.length && a.every((p) => b.includes(p));
 }
 
-export function profileFor(permissions: string[]): PermissionProfile {
-  return samePermissionSet(permissions, standardSupervisorPermissions)
-    ? "Standard Supervisor"
-    : "Custom";
+/** Roles shipped with PayFlow. Admins can add more from the same permissions. */
+export const rolesSeed: RoleDefinition[] = [
+  {
+    id: "r-operations-admin",
+    name: ADMIN_ROLE_NAME,
+    scope: "Platform-wide",
+    description: "Full operational access across every client. No client assignment required.",
+    permissions: [...allPermissions],
+    builtIn: true,
+  },
+  {
+    id: "r-supervisor",
+    name: SUPERVISOR_ROLE_NAME,
+    scope: "Client-scoped",
+    description: "Works only inside assigned clients, with per-client permissions.",
+    permissions: [...standardSupervisorPermissions],
+    builtIn: true,
+  },
+  {
+    id: "r-collections-analyst",
+    name: "Collections Analyst",
+    scope: "Client-scoped",
+    description: "Read-only operational visibility and analytics for assigned clients.",
+    permissions: [
+      "View Client",
+      "View Customer Accounts",
+      "View Collection Cases",
+      "View Workflows",
+      "View Communications",
+      "View Analytics",
+    ],
+    builtIn: false,
+  },
+];
+
+/** Name a permission set: the matching role, that role's name, or Custom. */
+export function profileFor(permissions: string[], roles: RoleDefinition[]): PermissionProfile {
+  const match = roles.find((r) => samePermissionSet(permissions, r.permissions));
+  return match ? `${match.name} (standard)` : "Custom";
 }
 
 /** Profile shown on the users table — the profile across every assignment. */
-export function userProfile(user: PayflowUser): PermissionProfile {
-  if (user.role === "Operations Admin") return "Full Access";
+export function userProfile(user: PayflowUser, roles: RoleDefinition[]): PermissionProfile {
+  const role = roles.find((r) => r.name === user.role);
+  if (role?.scope === "Platform-wide") return "Full Access";
   if (user.assignments.length === 0) return "Custom";
-  const profiles = user.assignments.map((a) => profileFor(a.permissions));
-  return profiles.every((p) => p === "Standard Supervisor") ? "Standard Supervisor" : "Custom";
+  const profiles = user.assignments.map((a) => profileFor(a.permissions, roles));
+  const first = profiles[0]!;
+  return profiles.every((p) => p === first) ? first : "Custom";
+}
+
+export function isPlatformRole(roleName: string, roles: RoleDefinition[]) {
+  return roles.find((r) => r.name === roleName)?.scope === "Platform-wide";
+}
+
+export function defaultPermissionsForRole(roleName: string, roles: RoleDefinition[]) {
+  return [...(roles.find((r) => r.name === roleName)?.permissions ?? standardSupervisorPermissions)];
 }
 
 export function shortNameFor(fullName: string) {

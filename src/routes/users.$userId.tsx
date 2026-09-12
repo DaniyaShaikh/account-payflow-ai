@@ -40,7 +40,16 @@ export const Route = createFileRoute("/users/$userId")({
 function UserDetail() {
   const { userId } = Route.useParams();
   const { isAdmin, allClients } = useRole();
-  const { userById, updateUser, setUserStatus, assignClient, removeAssignment } = useUsers();
+  const {
+    userById,
+    updateUser,
+    setUserStatus,
+    assignClient,
+    removeAssignment,
+    roles,
+    roleNames,
+    isPlatformRoleName,
+  } = useUsers();
   const user = userById(userId);
   const [editing, setEditing] = useState(false);
   const [assigning, setAssigning] = useState(false);
@@ -67,7 +76,8 @@ function UserDetail() {
   }
 
   const clientName = (id: string) => allClients.find((c) => c.id === id)?.name ?? id;
-  const isSupervisor = user.role === "Supervisor";
+  /** Client-scoped roles get assignments; platform-wide roles work everywhere. */
+  const isSupervisor = !isPlatformRoleName(user.role);
 
   return (
     <>
@@ -77,7 +87,7 @@ function UserDetail() {
         description={user.email}
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            <StatusPill tone={user.role === "Operations Admin" ? "info" : "neutral"}>
+            <StatusPill tone={isPlatformRoleName(user.role) ? "info" : "neutral"}>
               {user.role}
             </StatusPill>
             <StatusPill tone={user.status === "Active" ? "success" : "neutral"}>
@@ -107,6 +117,8 @@ function UserDetail() {
               name={user.name}
               email={user.email}
               status={user.status}
+              role={user.role}
+              roleOptions={roleNames}
               onSave={(patch) => {
                 updateUser(user.id, patch);
                 setEditing(false);
@@ -163,7 +175,7 @@ function UserDetail() {
           ) : (
             <Panel title="Platform Access">
               <p className="text-[13px] text-foreground">
-                Operations Admins work across every client — clients, accounts, cases, workflows,
+                {user.role} works across every client — clients, accounts, cases, workflows,
                 communications, human review, rules and analytics. No client assignment is required.
               </p>
             </Panel>
@@ -178,9 +190,10 @@ function UserDetail() {
               <Row label="Name" value={user.name} />
               <Row label="Email" value={user.email} />
               <Row label="Role" value={user.role} />
+              <Row label="Access Scope" value={isSupervisor ? "Client-scoped" : "Platform-wide"} />
               <Row label="Status" value={user.status} />
               <Row label="Last Active" value={user.lastActive} />
-              <Row label="Permission Profile" value={userProfile(user)} />
+              <Row label="Permission Profile" value={userProfile(user, roles)} />
               {isSupervisor && (
                 <Row
                   label="Assigned Clients"
@@ -229,27 +242,35 @@ function EditUserForm({
   name: initialName,
   email: initialEmail,
   status: initialStatus,
+  role: initialRole,
+  roleOptions,
   onSave,
   onCancel,
 }: {
   name: string;
   email: string;
   status: UserStatus;
-  onSave: (patch: { name: string; email: string; status: UserStatus }) => void;
+  role: string;
+  roleOptions: string[];
+  onSave: (patch: { name: string; email: string; status: UserStatus; role: string }) => void;
   onCancel: () => void;
 }) {
   const [name, setName] = useState(initialName);
   const [email, setEmail] = useState(initialEmail);
   const [status, setStatus] = useState<UserStatus>(initialStatus);
+  const [role, setRole] = useState(initialRole);
 
   return (
     <>
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-4">
         <Field label="Full Name">
           <TextInput value={name} onChange={setName} />
         </Field>
         <Field label="Email">
           <TextInput value={email} onChange={setEmail} />
+        </Field>
+        <Field label="Role">
+          <SelectInput value={role} options={roleOptions} onChange={setRole} />
         </Field>
         <Field label="Status">
           <SelectInput
@@ -263,7 +284,7 @@ function EditUserForm({
         <Btn
           variant="primary"
           disabled={name.trim().length < 2 || !/.+@.+\..+/.test(email)}
-          onClick={() => onSave({ name: name.trim(), email: email.trim(), status })}
+          onClick={() => onSave({ name: name.trim(), email: email.trim(), status, role })}
         >
           Save Changes
         </Btn>

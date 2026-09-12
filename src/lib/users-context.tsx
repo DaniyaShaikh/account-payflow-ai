@@ -1,11 +1,17 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
 import {
   usersSeed,
+  rolesSeed,
+  allPermissions,
   standardSupervisorPermissions,
   shortNameFor,
+  isPlatformRole,
+  defaultPermissionsForRole,
   type AccessHistoryEntry,
   type ClientAssignment,
   type PayflowUser,
+  type RoleDefinition,
+  type RoleScope,
   type UserRole,
   type UserStatus,
 } from "./users-data";
@@ -21,14 +27,33 @@ export interface NewUserInput {
   assignments: ClientAssignment[];
 }
 
+export interface NewRoleInput {
+  name: string;
+  scope: RoleScope;
+  description: string;
+  permissions: string[];
+}
+
 interface UsersContextValue {
   users: PayflowUser[];
+  roles: RoleDefinition[];
+  roleNames: string[];
+  roleByName: (name: string) => RoleDefinition | undefined;
+  isPlatformRoleName: (name: string) => boolean;
+  defaultPermissions: (roleName: string) => string[];
+  addRole: (input: NewRoleInput) => RoleDefinition;
+  updateRole: (id: string, patch: Partial<Omit<RoleDefinition, "id" | "builtIn">>) => void;
+  deleteRole: (id: string) => void;
+  usersWithRole: (roleName: string) => PayflowUser[];
   adminUserId: string;
   demoSupervisorId: string;
   userById: (id: string) => PayflowUser | undefined;
   supervisorsForClient: (clientId: string) => PayflowUser[];
   addUser: (input: NewUserInput) => PayflowUser;
-  updateUser: (id: string, patch: Partial<Pick<PayflowUser, "name" | "email" | "status">>) => void;
+  updateUser: (
+    id: string,
+    patch: Partial<Pick<PayflowUser, "name" | "email" | "status" | "role">>,
+  ) => void;
   setUserStatus: (id: string, status: UserStatus) => void;
   assignClient: (id: string, clientId: string, clientName: string) => void;
   removeAssignment: (id: string, clientId: string, clientName: string) => void;
@@ -52,6 +77,7 @@ function today() {
 
 export function UsersProvider({ children }: { children: ReactNode }) {
   const [users, setUsers] = useState<PayflowUser[]>(usersSeed);
+  const [roles, setRoles] = useState<RoleDefinition[]>(rolesSeed);
 
   const value = useMemo<UsersContextValue>(() => {
     const log = (user: PayflowUser, event: string): AccessHistoryEntry[] => [
@@ -62,16 +88,42 @@ export function UsersProvider({ children }: { children: ReactNode }) {
     const patchUser = (id: string, fn: (u: PayflowUser) => PayflowUser) =>
       setUsers((prev) => prev.map((u) => (u.id === id ? fn(u) : u)));
 
+    const platform = (roleName: string) => isPlatformRole(roleName, roles);
+
     return {
       users,
+      roles,
+      roleNames: roles.map((r) => r.name),
+      roleByName: (name) => roles.find((r) => r.name === name),
+      isPlatformRoleName: platform,
+      defaultPermissions: (roleName) => defaultPermissionsForRole(roleName, roles),
+      usersWithRole: (roleName) => users.filter((u) => u.role === roleName),
+      addRole: (input) => {
+        const created: RoleDefinition = {
+          id: `r-${input.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${roles.length + 1}`,
+          name: input.name.trim(),
+          scope: input.scope,
+          description: input.description.trim(),
+          permissions:
+            input.scope === "Platform-wide" ? [...allPermissions] : [...input.permissions],
+          builtIn: false,
+        };
+        setRoles((prev) => [...prev, created]);
+        return created;
+      },
+      updateRole: (id, patch) =>
+        setRoles((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } : r))),
+      deleteRole: (id) =>
+        setRoles((prev) => prev.filter((r) => r.id === id ? r.builtIn : true)),
       adminUserId: ADMIN_USER_ID,
       demoSupervisorId: DEMO_SUPERVISOR_ID,
       userById: (id) => users.find((u) => u.id === id),
       supervisorsForClient: (clientId) =>
         users.filter(
-          (u) => u.role === "Supervisor" && u.assignments.some((a) => a.clientId === clientId),
+          (u) => !platform(u.role) && u.assignments.some((a) => a.clientId === clientId),
         ),
       addUser: (input) => {
+        const platformRole = platform(input.role);
         const created: PayflowUser = {
           id: `u-${input.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${users.length + 1}`,
           name: input.name,
@@ -80,14 +132,13 @@ export function UsersProvider({ children }: { children: ReactNode }) {
           role: input.role,
           status: input.status,
           lastActive: "Never",
-          assignments: input.role === "Supervisor" ? input.assignments : [],
+          assignments: platformRole ? [] : input.assignments,
           history: [
             {
               at: today(),
-              event:
-                input.role === "Operations Admin"
-                  ? "Operations Admin access granted"
-                  : "Supervisor account created",
+              event: platformRole
+                ? `${input.role} access granted`
+                : `${input.role} account created`,
               by: "Daniya Shaikh",
             },
           ],
@@ -96,15 +147,26 @@ export function UsersProvider({ children }: { children: ReactNode }) {
         return created;
       },
       updateUser: (id, patch) =>
-        patchUser(id, (u) => ({
-          ...u,
-          ...patch,
-          ...(patch.name ? { shortName: shortNameFor(patch.name) } : {}),
-          history:
-            patch.status && patch.status !== u.status
-              ? log(u, patch.status === "Active" ? "User activated" : "User deactivated")
-              : u.history,
-        })),
+        patchUser(id, (u) => {
+          const roleChanged = Boolean(patch.role && patch.role !== u.role);
+          const statusChanged = Boolean(patch.status && patch.status !== u.status);
+          let history = u.history;
+          if (statusChanged)
+            history = log(
+              { ...u, history },
+              patch.status === "Active" ? "User activated" : "User deactivated",
+            );
+          if (roleChanged) history = log({ ...u, history }, `Role changed to ${patch.role}`);
+          return {
+            ...u,
+            ...patch,
+            ...(patch.name ? { shortName: shortNameFor(patch.name) } : {}),
+            /** A platform-wide role needs no client assignments. */
+            assignments:
+              roleChanged && patch.role && platform(patch.role) ? [] : u.assignments,
+            history,
+          };
+        }),
       setUserStatus: (id, status) =>
         patchUser(id, (u) =>
           u.status === status
@@ -123,7 +185,7 @@ export function UsersProvider({ children }: { children: ReactNode }) {
                 ...u,
                 assignments: [
                   ...u.assignments,
-                  { clientId, permissions: [...standardSupervisorPermissions] },
+                  { clientId, permissions: defaultPermissionsForRole(u.role, roles) },
                 ],
                 history: log(u, `${clientName} assigned`),
               },
@@ -157,11 +219,11 @@ export function UsersProvider({ children }: { children: ReactNode }) {
       permissionsFor: (id, clientId) => {
         const user = users.find((u) => u.id === id);
         if (!user) return [];
-        if (user.role === "Operations Admin") return [...standardSupervisorPermissions];
+        if (platform(user.role)) return [...allPermissions];
         return user.assignments.find((a) => a.clientId === clientId)?.permissions ?? [];
       },
     };
-  }, [users]);
+  }, [users, roles]);
 
   return <UsersContext.Provider value={value}>{children}</UsersContext.Provider>;
 }
