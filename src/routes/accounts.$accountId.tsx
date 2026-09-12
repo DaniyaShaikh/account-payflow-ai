@@ -92,7 +92,9 @@ function AccountDetail() {
 
   const facts = [
     { label: "Client", value: clientName(account.clientId) },
+    { label: "Customer / Customer Account", value: account.customer },
     { label: "Account Reference", value: account.reference },
+    { label: "Collection Case", value: account.caseReference },
     { label: "Original Balance", value: formatCurrency(account.originalBalance) },
     { label: "Outstanding Balance", value: formatCurrency(account.outstanding) },
     { label: "Amount Recovered", value: formatCurrency(account.recovered) },
