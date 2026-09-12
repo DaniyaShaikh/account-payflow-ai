@@ -122,13 +122,22 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  const { queryClient } = Route.useRouteContext();
   return (
     <html lang="en">
       <head>
         <HeadContent />
       </head>
       <body>
-        {children}
+        <QueryClientProvider client={queryClient}>
+          <UsersProvider>
+            <RoleProvider>
+              <RulesProvider>
+                <ReviewsProvider>{children}</ReviewsProvider>
+              </RulesProvider>
+            </RoleProvider>
+          </UsersProvider>
+        </QueryClientProvider>
         <Scripts />
       </body>
     </html>
@@ -137,12 +146,13 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function SessionGate({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
-  const [ready, setReady] = useState(false);
+  const [mounted, setMounted] = useState(false);
   useEffect(() => {
-    if (isSignedIn()) setReady(true);
-    else navigate({ to: "/login", replace: true });
+    setMounted(true);
+    if (!isSignedIn()) navigate({ to: "/login", replace: true });
   }, [navigate]);
-  if (!ready) return <div className="min-h-screen bg-surface" />;
+  if (!mounted) return <div className="min-h-screen bg-surface" />;
+  if (!isSignedIn()) return <div className="min-h-screen bg-surface" />;
   return <>{children}</>;
 }
 
@@ -156,30 +166,15 @@ function RootComponent() {
   });
 
   if (isBareSurface) {
-    return (
-      <QueryClientProvider client={queryClient}>
-        <Outlet />
-      </QueryClientProvider>
-    );
+    return <Outlet />;
   }
 
-
   return (
-    <QueryClientProvider client={queryClient}>
-      <SessionGate>
-        <UsersProvider>
-          <RoleProvider>
-            <RulesProvider>
-              <ReviewsProvider>
-                <AppShell>
-                  {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-                  <Outlet />
-                </AppShell>
-              </ReviewsProvider>
-            </RulesProvider>
-          </RoleProvider>
-        </UsersProvider>
-      </SessionGate>
-    </QueryClientProvider>
+    <SessionGate>
+      <AppShell>
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <Outlet />
+      </AppShell>
+    </SessionGate>
   );
 }
