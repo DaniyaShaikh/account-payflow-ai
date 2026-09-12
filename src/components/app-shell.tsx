@@ -10,9 +10,12 @@ import {
   Users,
   Plug,
   ChevronsUpDown,
+  Bell,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useRole } from "@/lib/role-context";
+import { useReviews } from "@/lib/reviews-context";
+import { formatWaiting } from "@/lib/review-data";
 import {
   DropdownMenu,
   DropdownMenuContent,
