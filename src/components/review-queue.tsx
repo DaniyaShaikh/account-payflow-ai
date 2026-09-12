@@ -30,9 +30,17 @@ interface Props {
   clientId?: string;
   initialStatus?: string;
   initialPriority?: string;
+  title?: string;
+  description?: string;
 }
 
-export function ReviewQueue({ clientId, initialStatus, initialPriority }: Props) {
+export function ReviewQueue({
+  clientId,
+  initialStatus,
+  initialPriority,
+  title,
+  description,
+}: Props) {
   const { visibleReviews } = useReviews();
   const { visibleClients } = useRole();
 
