@@ -19,6 +19,7 @@ import { Route as AccountsAccountIdRouteImport } from './routes/accounts.$accoun
 import { Route as ClientsIndexRouteImport } from './routes/clients.index'
 import { Route as ClientsClientIdRouteImport } from './routes/clients.$clientId'
 import { Route as ClientsNewRouteImport } from './routes/clients.new'
+import { Route as HumanReviewIndexRouteImport } from './routes/human-review.index'
 import { Route as RulesIndexRouteImport } from './routes/rules.index'
 import { Route as RulesRuleIdRouteImport } from './routes/rules.$ruleId'
 import { Route as RulesNewRouteImport } from './routes/rules.new'
@@ -73,6 +74,11 @@ const ClientsNewRoute = ClientsNewRouteImport.update({
   path: '/clients/new',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HumanReviewIndexRoute = HumanReviewIndexRouteImport.update({
+  id: '/human-review/',
+  path: '/human-review/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RulesIndexRoute = RulesIndexRouteImport.update({
   id: '/rules/',
   path: '/rules/',
@@ -102,6 +108,7 @@ export interface FileRoutesByFullPath {
   '/rules/new': typeof RulesNewRoute
   '/accounts/': typeof AccountsIndexRoute
   '/clients/': typeof ClientsIndexRoute
+  '/human-review/': typeof HumanReviewIndexRoute
   '/rules/': typeof RulesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -117,6 +124,7 @@ export interface FileRoutesByTo {
   '/rules/new': typeof RulesNewRoute
   '/accounts': typeof AccountsIndexRoute
   '/clients': typeof ClientsIndexRoute
+  '/human-review': typeof HumanReviewIndexRoute
   '/rules': typeof RulesIndexRoute
 }
 export interface FileRoutesById {
@@ -133,6 +141,7 @@ export interface FileRoutesById {
   '/rules/new': typeof RulesNewRoute
   '/accounts/': typeof AccountsIndexRoute
   '/clients/': typeof ClientsIndexRoute
+  '/human-review/': typeof HumanReviewIndexRoute
   '/rules/': typeof RulesIndexRoute
 }
 export interface FileRouteTypes {
@@ -150,6 +159,7 @@ export interface FileRouteTypes {
     | '/rules/new'
     | '/accounts/'
     | '/clients/'
+    | '/human-review/'
     | '/rules/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -165,6 +175,7 @@ export interface FileRouteTypes {
     | '/rules/new'
     | '/accounts'
     | '/clients'
+    | '/human-review'
     | '/rules'
   id:
     | '__root__'
@@ -180,6 +191,7 @@ export interface FileRouteTypes {
     | '/rules/new'
     | '/accounts/'
     | '/clients/'
+    | '/human-review/'
     | '/rules/'
   fileRoutesById: FileRoutesById
 }
@@ -196,6 +208,7 @@ export interface RootRouteChildren {
   RulesNewRoute: typeof RulesNewRoute
   AccountsIndexRoute: typeof AccountsIndexRoute
   ClientsIndexRoute: typeof ClientsIndexRoute
+  HumanReviewIndexRoute: typeof HumanReviewIndexRoute
   RulesIndexRoute: typeof RulesIndexRoute
 }
 
@@ -271,6 +284,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClientsNewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/human-review/': {
+      id: '/human-review/'
+      path: '/human-review'
+      fullPath: '/human-review/'
+      preLoaderRoute: typeof HumanReviewIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/rules/': {
       id: '/rules/'
       path: '/rules'
@@ -308,6 +328,7 @@ const rootRouteChildren: RootRouteChildren = {
   RulesNewRoute: RulesNewRoute,
   AccountsIndexRoute: AccountsIndexRoute,
   ClientsIndexRoute: ClientsIndexRoute,
+  HumanReviewIndexRoute: HumanReviewIndexRoute,
   RulesIndexRoute: RulesIndexRoute,
 }
 export const routeTree = rootRouteImport

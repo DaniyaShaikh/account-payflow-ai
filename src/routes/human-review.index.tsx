@@ -12,8 +12,8 @@ interface ReviewSearch {
 
 export const Route = createFileRoute("/human-review/")({
   validateSearch: (search: Record<string, unknown>): ReviewSearch => ({
-    ...(typeof search.status === "string" ? { status: search.status } : {}),
-    ...(typeof search.priority === "string" ? { priority: search.priority } : {}),
+    ...(typeof search["status"] === "string" ? { status: search["status"] } : {}),
+    ...(typeof search["priority"] === "string" ? { priority: search["priority"] } : {}),
   }),
   head: () => ({
     meta: [
