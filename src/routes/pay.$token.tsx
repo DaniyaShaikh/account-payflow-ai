@@ -92,14 +92,29 @@ function CustomerPaymentExperience() {
   const [mode, setMode] = useState<Mode>("full");
   const [method, setMethod] = useState<Method>("Card");
   const [partialInput, setPartialInput] = useState("");
-  const [planPayments, setPlanPayments] = useState(planOptions[0]!.payments);
+  const [frequency, setFrequency] = useState<Frequency>("Weekly");
+  const [startMode, setStartMode] = useState<"today" | "custom">("today");
+  const [customStart, setCustomStart] = useState(demoToday);
+  const [installmentInput, setInstallmentInput] = useState("");
   const [simulateDecline, setSimulateDecline] = useState(false);
   const [paidAmount, setPaidAmount] = useState(0);
 
   const outstanding = account.outstanding;
   const partialAmount = Math.min(Math.max(Number(partialInput) || 0, 0), outstanding);
   const remainingAfterPartial = Math.max(outstanding - partialAmount, 0);
-  const installment = outstanding / planPayments;
+
+  const suggestedInstallment = Math.max(
+    5,
+    Math.round(outstanding / frequencyMeta[frequency].divisor / 5) * 5,
+  );
+  const installment = Math.min(
+    Math.max(Number(installmentInput) || suggestedInstallment, 1),
+    outstanding,
+  );
+  const planPayments = Math.max(1, Math.ceil(outstanding / installment));
+  const startDate = startMode === "today" ? parseISO(demoToday) : parseISO(customStart);
+  const firstPaymentDate = formatDate(startDate);
+  const finalPaymentDate = formatDate(addIntervals(startDate, frequency, planPayments - 1));
   const amountToPay = mode === "partial" ? partialAmount : outstanding;
   const firstName = account.customer.split(" ")[0];
 
