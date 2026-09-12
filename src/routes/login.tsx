@@ -119,10 +119,6 @@ function LoginPage() {
                 </Btn>
               </div>
 
-              <p className="mt-4 text-[11.5px] leading-relaxed text-muted-foreground">
-                Prototype sign-in — no credentials are verified. Role switching is available inside
-                the workspace.
-              </p>
             </div>
           ) : (
 <div className="mt-8 lg:mt-0">
