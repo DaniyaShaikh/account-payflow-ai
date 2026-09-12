@@ -7,8 +7,9 @@ import {
   HeadContent,
   Scripts,
   useRouterState,
+  useNavigate,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { RoleProvider } from "../lib/role-context";
@@ -16,6 +17,7 @@ import { UsersProvider } from "../lib/users-context";
 import { RulesProvider } from "../lib/rules-context";
 import { ReviewsProvider } from "../lib/reviews-context";
 import { AppShell } from "../components/app-shell";
+import { isSignedIn } from "../lib/session";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
@@ -133,15 +135,27 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+function SessionGate({ children }: { children: ReactNode }) {
+  const navigate = useNavigate();
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    if (isSignedIn()) setReady(true);
+    else navigate({ to: "/login", replace: true });
+  }, [navigate]);
+  if (!ready) return <div className="min-h-screen bg-surface" />;
+  return <>{children}</>;
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  // The customer-facing payment experience is an external, client-branded
-  // surface: it renders without the internal PayFlow application shell.
-  const isCustomerPaymentExperience = useRouterState({
-    select: (s) => s.location.pathname.startsWith("/pay/"),
+  // The customer-facing payment experience and the sign-in screen are
+  // standalone surfaces: they render without the internal application shell.
+  const isBareSurface = useRouterState({
+    select: (s) =>
+      s.location.pathname.startsWith("/pay/") || s.location.pathname.startsWith("/login"),
   });
 
-  if (isCustomerPaymentExperience) {
+  if (isBareSurface) {
     return (
       <QueryClientProvider client={queryClient}>
         <Outlet />
@@ -149,20 +163,23 @@ function RootComponent() {
     );
   }
 
+
   return (
     <QueryClientProvider client={queryClient}>
-      <UsersProvider>
-        <RoleProvider>
-          <RulesProvider>
-            <ReviewsProvider>
-              <AppShell>
-                {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-                <Outlet />
-              </AppShell>
-            </ReviewsProvider>
-          </RulesProvider>
-        </RoleProvider>
-      </UsersProvider>
+      <SessionGate>
+        <UsersProvider>
+          <RoleProvider>
+            <RulesProvider>
+              <ReviewsProvider>
+                <AppShell>
+                  {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+                  <Outlet />
+                </AppShell>
+              </ReviewsProvider>
+            </RulesProvider>
+          </RoleProvider>
+        </UsersProvider>
+      </SessionGate>
     </QueryClientProvider>
   );
 }

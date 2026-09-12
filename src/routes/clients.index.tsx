@@ -14,6 +14,7 @@ import {
 } from "@/components/payflow-ui";
 import { useRole } from "@/lib/role-context";
 import { formatCurrency, formatNumber, supervisorDirectory } from "@/lib/payflow-data";
+import { intakeForClient } from "@/lib/intake-data";
 
 export const Route = createFileRoute("/clients/")({
   head: () => ({
@@ -109,10 +110,12 @@ function ClientsPage() {
       </div>
 
       <DataTable
-        minWidth={980}
+        minWidth={1180}
         head={[
           "Client",
-          "Customer Accounts",
+          "Last File Received",
+          "File Assigned",
+          "Accounts In File",
           "Active Cases",
           "Outstanding",
           "Recovered",
@@ -121,28 +124,46 @@ function ClientsPage() {
           "Status",
         ]}
       >
-        {rows.map((c) => (
-          <Tr key={c.id}>
-            <Td>
-              <Link to="/clients/$clientId" params={{ clientId: c.id }} className="hover:underline">
-                <PrimaryCell title={c.name} subtitle={`${c.industry} · ${c.config.code || "—"}`} />
-              </Link>
-            </Td>
-            <Td className="tabular">{formatNumber(c.accounts)}</Td>
-            <Td className="tabular">{formatNumber(c.activeCases)}</Td>
-            <Td className="tabular font-medium">{formatCurrency(c.outstanding, true)}</Td>
-            <Td className="tabular font-medium text-success">
-              {formatCurrency(c.recovered, true)}
-            </Td>
-            <Td>
-              <StatusPill tone={c.aiMode === "Autopilot" ? "ai" : "neutral"}>{c.aiMode}</StatusPill>
-            </Td>
-            <Td className="text-muted-foreground">{c.supervisors.join(", ") || "—"}</Td>
-            <Td>
-              <StatusPill tone={clientStatusTone(c.status)}>{c.status}</StatusPill>
-            </Td>
-          </Tr>
-        ))}
+        {rows.map((c) => {
+          const intake = intakeForClient(c);
+          return (
+            <Tr key={c.id}>
+              <Td>
+                <Link
+                  to="/clients/$clientId"
+                  params={{ clientId: c.id }}
+                  className="hover:underline"
+                >
+                  <PrimaryCell title={c.name} subtitle={`${c.industry} · ${c.config.code || "—"}`} />
+                </Link>
+              </Td>
+              <Td className="text-muted-foreground">
+                <PrimaryCell title={intake.receivedAt} subtitle={intake.fileName} />
+              </Td>
+              <Td className="text-muted-foreground">{intake.assignedAt}</Td>
+              <Td className="tabular">
+                <PrimaryCell
+                  title={formatNumber(intake.accountsInFile)}
+                  subtitle={`+${formatNumber(intake.newAccounts)} new · −${formatNumber(intake.removedAccounts)} removed`}
+                />
+              </Td>
+              <Td className="tabular">{formatNumber(c.activeCases)}</Td>
+              <Td className="tabular font-medium">{formatCurrency(c.outstanding, true)}</Td>
+              <Td className="tabular font-medium text-success">
+                {formatCurrency(c.recovered, true)}
+              </Td>
+              <Td>
+                <StatusPill tone={c.aiMode === "Autopilot" ? "ai" : "neutral"}>
+                  {c.aiMode}
+                </StatusPill>
+              </Td>
+              <Td className="text-muted-foreground">{c.supervisors.join(", ") || "—"}</Td>
+              <Td>
+                <StatusPill tone={clientStatusTone(c.status)}>{c.status}</StatusPill>
+              </Td>
+            </Tr>
+          );
+        })}
         {rows.length === 0 && (
           <tr>
             <Td className="text-muted-foreground">No clients match these filters.</Td>
