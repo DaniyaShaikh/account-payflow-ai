@@ -239,6 +239,22 @@ export const clients: Client[] = [
   },
 ];
 
+export interface CustomerAccount {
+  id: string;
+  clientId: string;
+  customer: string;
+  reference: string;
+  originalBalance: number;
+  outstanding: number;
+  recovered: number;
+  status: CollectionStatus;
+  journey: string;
+  lastAction: string;
+  nextAction: string;
+  humanReview: boolean;
+  timeline: { label: string; detail: string; at: string }[];
+}
+
 export const accounts: CustomerAccount[] = [
   {
     id: "pp-10482",
