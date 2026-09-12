@@ -1,7 +1,7 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { useState } from "react";
 import { ShieldCheck, CheckCircle2, AlertCircle, CalendarClock, Lock } from "lucide-react";
-import { accountForPaymentToken, maskedReference, planOptions, planIllustrativeNote } from "@/lib/payment-data";
+import { accountForPaymentToken, maskedReference, planIllustrativeNote } from "@/lib/payment-data";
 import { brandingFor } from "@/lib/communication-data";
 import { clientName, formatCurrency } from "@/lib/payflow-data";
 import { cn } from "@/lib/utils";
