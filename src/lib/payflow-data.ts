@@ -185,6 +185,7 @@ export const clients: Client[] = [
       senderName: "PayPal Collections",
       emailFrom: "collections@paypal.com",
       smsSenderId: "PAYPAL",
+      permissions: [...defaultPermissions, "Approve Human Reviews"],
     }),
   },
   {
