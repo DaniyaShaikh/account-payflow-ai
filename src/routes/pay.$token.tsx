@@ -490,7 +490,9 @@ function CustomerPaymentExperience() {
                 onClick={() => {
                   setSimulateDecline(false);
                   setMethod(method === "Card" ? "Bank Account" : "Card");
-                  setStep(mode === "plan" ? "plan" : mode === "partial" ? "partial" : "full");
+                  setStep(
+                    mode === "plan" ? "plan-amount" : mode === "partial" ? "partial" : "full",
+                  );
                 }}
               >
                 Choose Another Payment Method
