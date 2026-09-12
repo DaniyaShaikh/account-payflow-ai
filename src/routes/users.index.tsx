@@ -282,7 +282,7 @@ function AddUserForm({
           </div>
           <div>
             <p className="mb-1.5 text-[12px] font-medium text-foreground">
-              Permissions — what the supervisor may do
+              Permissions — what this user may do (defaults from {role})
             </p>
             <PermissionPicker
               selected={permissions}
