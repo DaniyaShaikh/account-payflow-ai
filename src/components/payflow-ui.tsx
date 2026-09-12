@@ -352,16 +352,36 @@ export function FilterSelect({
   options: string[];
   onChange: (value: string) => void;
 }) {
+  // A filter left on its first / "All …" option reads as unset and stays quiet;
+  // an applied filter picks up a subtle PayFlow Blue emphasis.
+  const applied = value !== options[0] && !value.startsWith("All ");
   return (
-    <label className="flex h-8 items-center gap-2 rounded-md border border-border bg-card px-2.5 transition-colors hover:border-border-strong">
-      <span className="text-[11px] font-medium text-muted-foreground">{label}</span>
+    <label
+      className={cn(
+        "flex h-8 items-center gap-2 rounded-md border px-2.5 transition-colors",
+        applied
+          ? "border-primary/40 bg-primary/[0.06]"
+          : "border-border bg-card hover:border-border-strong",
+      )}
+    >
+      <span
+        className={cn(
+          "text-[11px] font-medium",
+          applied ? "text-primary" : "text-muted-foreground",
+        )}
+      >
+        {label}
+      </span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="bg-transparent text-[13px] font-medium text-foreground outline-none"
+        className={cn(
+          "bg-transparent text-[13px] font-medium outline-none",
+          applied ? "text-primary" : "text-foreground",
+        )}
       >
         {options.map((option) => (
-          <option key={option} value={option}>
+          <option key={option} value={option} className="text-foreground">
             {option}
           </option>
         ))}
@@ -388,10 +408,10 @@ export function TabBar<T extends string>({
           key={t}
           onClick={() => onChange(t)}
           className={cn(
-            "-mb-px border-b-2 px-3 py-2.5 text-[13px] font-medium whitespace-nowrap transition-colors",
+            "-mb-px border-b-2 px-3 py-2.5 text-[13px] whitespace-nowrap transition-colors",
             active === t
-              ? "border-primary text-foreground"
-              : "border-transparent text-muted-foreground hover:text-foreground",
+              ? "border-primary font-semibold text-primary"
+              : "border-transparent font-medium text-muted-foreground hover:border-border-strong hover:text-foreground",
           )}
         >
           {t}
