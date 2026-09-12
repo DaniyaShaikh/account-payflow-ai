@@ -10,17 +10,19 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as CommunicationsRouteImport } from './routes/communications'
 import { Route as IntegrationsRouteImport } from './routes/integrations'
-import { Route as JourneysRouteImport } from './routes/journeys'
 import { Route as UsersRouteImport } from './routes/users'
 import { Route as AccountsIndexRouteImport } from './routes/accounts.index'
 import { Route as AccountsAccountIdRouteImport } from './routes/accounts.$accountId'
 import { Route as ClientsIndexRouteImport } from './routes/clients.index'
 import { Route as ClientsClientIdRouteImport } from './routes/clients.$clientId'
 import { Route as ClientsNewRouteImport } from './routes/clients.new'
+import { Route as CommunicationsIndexRouteImport } from './routes/communications.index'
+import { Route as CommunicationsCommunicationIdRouteImport } from './routes/communications.$communicationId'
 import { Route as HumanReviewIndexRouteImport } from './routes/human-review.index'
 import { Route as HumanReviewReviewIdRouteImport } from './routes/human-review.$reviewId'
+import { Route as JourneysIndexRouteImport } from './routes/journeys.index'
+import { Route as JourneysJourneyIdRouteImport } from './routes/journeys.$journeyId'
 import { Route as RulesIndexRouteImport } from './routes/rules.index'
 import { Route as RulesRuleIdRouteImport } from './routes/rules.$ruleId'
 import { Route as RulesNewRouteImport } from './routes/rules.new'
@@ -30,19 +32,9 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CommunicationsRoute = CommunicationsRouteImport.update({
-  id: '/communications',
-  path: '/communications',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IntegrationsRoute = IntegrationsRouteImport.update({
   id: '/integrations',
   path: '/integrations',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const JourneysRoute = JourneysRouteImport.update({
-  id: '/journeys',
-  path: '/journeys',
   getParentRoute: () => rootRouteImport,
 } as any)
 const UsersRoute = UsersRouteImport.update({
@@ -75,6 +67,17 @@ const ClientsNewRoute = ClientsNewRouteImport.update({
   path: '/clients/new',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CommunicationsIndexRoute = CommunicationsIndexRouteImport.update({
+  id: '/communications/',
+  path: '/communications/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunicationsCommunicationIdRoute =
+  CommunicationsCommunicationIdRouteImport.update({
+    id: '/communications/$communicationId',
+    path: '/communications/$communicationId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const HumanReviewIndexRoute = HumanReviewIndexRouteImport.update({
   id: '/human-review/',
   path: '/human-review/',
@@ -83,6 +86,16 @@ const HumanReviewIndexRoute = HumanReviewIndexRouteImport.update({
 const HumanReviewReviewIdRoute = HumanReviewReviewIdRouteImport.update({
   id: '/human-review/$reviewId',
   path: '/human-review/$reviewId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JourneysIndexRoute = JourneysIndexRouteImport.update({
+  id: '/journeys/',
+  path: '/journeys/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JourneysJourneyIdRoute = JourneysJourneyIdRouteImport.update({
+  id: '/journeys/$journeyId',
+  path: '/journeys/$journeyId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RulesIndexRoute = RulesIndexRouteImport.update({
@@ -103,125 +116,139 @@ const RulesNewRoute = RulesNewRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/communications': typeof CommunicationsRoute
   '/integrations': typeof IntegrationsRoute
-  '/journeys': typeof JourneysRoute
   '/users': typeof UsersRoute
   '/accounts/$accountId': typeof AccountsAccountIdRoute
   '/clients/$clientId': typeof ClientsClientIdRoute
   '/clients/new': typeof ClientsNewRoute
+  '/communications/$communicationId': typeof CommunicationsCommunicationIdRoute
   '/human-review/$reviewId': typeof HumanReviewReviewIdRoute
+  '/journeys/$journeyId': typeof JourneysJourneyIdRoute
   '/rules/$ruleId': typeof RulesRuleIdRoute
   '/rules/new': typeof RulesNewRoute
   '/accounts/': typeof AccountsIndexRoute
   '/clients/': typeof ClientsIndexRoute
+  '/communications/': typeof CommunicationsIndexRoute
   '/human-review/': typeof HumanReviewIndexRoute
+  '/journeys/': typeof JourneysIndexRoute
   '/rules/': typeof RulesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/communications': typeof CommunicationsRoute
   '/integrations': typeof IntegrationsRoute
-  '/journeys': typeof JourneysRoute
   '/users': typeof UsersRoute
   '/accounts/$accountId': typeof AccountsAccountIdRoute
   '/clients/$clientId': typeof ClientsClientIdRoute
   '/clients/new': typeof ClientsNewRoute
+  '/communications/$communicationId': typeof CommunicationsCommunicationIdRoute
   '/human-review/$reviewId': typeof HumanReviewReviewIdRoute
+  '/journeys/$journeyId': typeof JourneysJourneyIdRoute
   '/rules/$ruleId': typeof RulesRuleIdRoute
   '/rules/new': typeof RulesNewRoute
   '/accounts': typeof AccountsIndexRoute
   '/clients': typeof ClientsIndexRoute
+  '/communications': typeof CommunicationsIndexRoute
   '/human-review': typeof HumanReviewIndexRoute
+  '/journeys': typeof JourneysIndexRoute
   '/rules': typeof RulesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/communications': typeof CommunicationsRoute
   '/integrations': typeof IntegrationsRoute
-  '/journeys': typeof JourneysRoute
   '/users': typeof UsersRoute
   '/accounts/$accountId': typeof AccountsAccountIdRoute
   '/clients/$clientId': typeof ClientsClientIdRoute
   '/clients/new': typeof ClientsNewRoute
+  '/communications/$communicationId': typeof CommunicationsCommunicationIdRoute
   '/human-review/$reviewId': typeof HumanReviewReviewIdRoute
+  '/journeys/$journeyId': typeof JourneysJourneyIdRoute
   '/rules/$ruleId': typeof RulesRuleIdRoute
   '/rules/new': typeof RulesNewRoute
   '/accounts/': typeof AccountsIndexRoute
   '/clients/': typeof ClientsIndexRoute
+  '/communications/': typeof CommunicationsIndexRoute
   '/human-review/': typeof HumanReviewIndexRoute
+  '/journeys/': typeof JourneysIndexRoute
   '/rules/': typeof RulesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/communications'
     | '/integrations'
-    | '/journeys'
     | '/users'
     | '/accounts/$accountId'
     | '/clients/$clientId'
     | '/clients/new'
+    | '/communications/$communicationId'
     | '/human-review/$reviewId'
+    | '/journeys/$journeyId'
     | '/rules/$ruleId'
     | '/rules/new'
     | '/accounts/'
     | '/clients/'
+    | '/communications/'
     | '/human-review/'
+    | '/journeys/'
     | '/rules/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/communications'
     | '/integrations'
-    | '/journeys'
     | '/users'
     | '/accounts/$accountId'
     | '/clients/$clientId'
     | '/clients/new'
+    | '/communications/$communicationId'
     | '/human-review/$reviewId'
+    | '/journeys/$journeyId'
     | '/rules/$ruleId'
     | '/rules/new'
     | '/accounts'
     | '/clients'
+    | '/communications'
     | '/human-review'
+    | '/journeys'
     | '/rules'
   id:
     | '__root__'
     | '/'
-    | '/communications'
     | '/integrations'
-    | '/journeys'
     | '/users'
     | '/accounts/$accountId'
     | '/clients/$clientId'
     | '/clients/new'
+    | '/communications/$communicationId'
     | '/human-review/$reviewId'
+    | '/journeys/$journeyId'
     | '/rules/$ruleId'
     | '/rules/new'
     | '/accounts/'
     | '/clients/'
+    | '/communications/'
     | '/human-review/'
+    | '/journeys/'
     | '/rules/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  CommunicationsRoute: typeof CommunicationsRoute
   IntegrationsRoute: typeof IntegrationsRoute
-  JourneysRoute: typeof JourneysRoute
   UsersRoute: typeof UsersRoute
   AccountsAccountIdRoute: typeof AccountsAccountIdRoute
   ClientsClientIdRoute: typeof ClientsClientIdRoute
   ClientsNewRoute: typeof ClientsNewRoute
+  CommunicationsCommunicationIdRoute: typeof CommunicationsCommunicationIdRoute
   HumanReviewReviewIdRoute: typeof HumanReviewReviewIdRoute
+  JourneysJourneyIdRoute: typeof JourneysJourneyIdRoute
   RulesRuleIdRoute: typeof RulesRuleIdRoute
   RulesNewRoute: typeof RulesNewRoute
   AccountsIndexRoute: typeof AccountsIndexRoute
   ClientsIndexRoute: typeof ClientsIndexRoute
+  CommunicationsIndexRoute: typeof CommunicationsIndexRoute
   HumanReviewIndexRoute: typeof HumanReviewIndexRoute
+  JourneysIndexRoute: typeof JourneysIndexRoute
   RulesIndexRoute: typeof RulesIndexRoute
 }
 
@@ -234,25 +261,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/communications': {
-      id: '/communications'
-      path: '/communications'
-      fullPath: '/communications'
-      preLoaderRoute: typeof CommunicationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/integrations': {
       id: '/integrations'
       path: '/integrations'
       fullPath: '/integrations'
       preLoaderRoute: typeof IntegrationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/journeys': {
-      id: '/journeys'
-      path: '/journeys'
-      fullPath: '/journeys'
-      preLoaderRoute: typeof JourneysRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/users': {
@@ -297,6 +310,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClientsNewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/communications/': {
+      id: '/communications/'
+      path: '/communications'
+      fullPath: '/communications/'
+      preLoaderRoute: typeof CommunicationsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/communications/$communicationId': {
+      id: '/communications/$communicationId'
+      path: '/communications/$communicationId'
+      fullPath: '/communications/$communicationId'
+      preLoaderRoute: typeof CommunicationsCommunicationIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/human-review/': {
       id: '/human-review/'
       path: '/human-review'
@@ -309,6 +336,20 @@ declare module '@tanstack/react-router' {
       path: '/human-review/$reviewId'
       fullPath: '/human-review/$reviewId'
       preLoaderRoute: typeof HumanReviewReviewIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/journeys/': {
+      id: '/journeys/'
+      path: '/journeys'
+      fullPath: '/journeys/'
+      preLoaderRoute: typeof JourneysIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/journeys/$journeyId': {
+      id: '/journeys/$journeyId'
+      path: '/journeys/$journeyId'
+      fullPath: '/journeys/$journeyId'
+      preLoaderRoute: typeof JourneysJourneyIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/rules/': {
@@ -337,19 +378,21 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  CommunicationsRoute: CommunicationsRoute,
   IntegrationsRoute: IntegrationsRoute,
-  JourneysRoute: JourneysRoute,
   UsersRoute: UsersRoute,
   AccountsAccountIdRoute: AccountsAccountIdRoute,
   ClientsClientIdRoute: ClientsClientIdRoute,
   ClientsNewRoute: ClientsNewRoute,
+  CommunicationsCommunicationIdRoute: CommunicationsCommunicationIdRoute,
   HumanReviewReviewIdRoute: HumanReviewReviewIdRoute,
+  JourneysJourneyIdRoute: JourneysJourneyIdRoute,
   RulesRuleIdRoute: RulesRuleIdRoute,
   RulesNewRoute: RulesNewRoute,
   AccountsIndexRoute: AccountsIndexRoute,
   ClientsIndexRoute: ClientsIndexRoute,
+  CommunicationsIndexRoute: CommunicationsIndexRoute,
   HumanReviewIndexRoute: HumanReviewIndexRoute,
+  JourneysIndexRoute: JourneysIndexRoute,
   RulesIndexRoute: RulesIndexRoute,
 }
 export const routeTree = rootRouteImport

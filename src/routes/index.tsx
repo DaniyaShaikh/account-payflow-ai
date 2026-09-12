@@ -42,6 +42,24 @@ const funnelStages = [
 
 const stageRates = [1, 0.956, 0.738, 0.416, 0.737, 0.802];
 
+// Funnel stages map onto the communication statuses that produced them, so a
+// click leads to the underlying communications.
+function stageStatus(stage: string): string | undefined {
+  switch (stage) {
+    case "Delivered":
+      return "Delivered";
+    case "Opened / Read":
+      return "Opened / Read";
+    case "Clicked":
+    case "Payment Initiated":
+    case "Paid":
+      return "Payment Link Clicked";
+    default:
+      return undefined;
+  }
+}
+
+
 function hashSeed(input: string) {
   let h = 0;
   for (let i = 0; i < input.length; i++) h = (h * 31 + input.charCodeAt(i)) >>> 0;
@@ -149,10 +167,17 @@ function CommunicationFunnel() {
           return (
             <Link
               key={row.stage}
-              to="/accounts"
+              to="/communications"
+              search={{
+                ...(client !== "All Clients" ? { client } : {}),
+                ...(channel !== "All Channels" ? { channel } : {}),
+                ...(journey !== "All Journeys" ? { journey } : {}),
+                ...(stageStatus(row.stage) ? { status: stageStatus(row.stage) } : {}),
+              }}
               className="group block rounded-lg px-3 py-2.5 transition-colors hover:bg-surface"
-              title={`View accounts at "${row.stage}" (drill-down coming soon)`}
+              title={`View communications at "${row.stage}"`}
             >
+
               <div className="flex items-baseline justify-between gap-4">
                 <span className="flex items-center gap-2 text-[13px] font-medium text-foreground">
                   <span className="tabular w-4 text-[11px] text-muted-foreground">{i + 1}</span>
