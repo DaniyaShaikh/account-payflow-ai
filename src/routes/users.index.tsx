@@ -260,9 +260,9 @@ function AddUserForm({
         </Field>
       </div>
 
-      {role === "Operations Admin" ? (
+      {platform ? (
         <p className="mt-4 rounded-lg border border-border bg-surface px-3.5 py-3 text-[12px] text-muted-foreground">
-          An Operations Admin has platform-wide access across every client. No client assignment is
+          {role} is a platform-wide role with access across every client. No client assignment is
           required.
         </p>
       ) : (
