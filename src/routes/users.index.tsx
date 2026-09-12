@@ -44,7 +44,7 @@ export const Route = createFileRoute("/users/")({
 
 function UsersPage() {
   const { isAdmin, allClients } = useRole();
-  const { users, addUser } = useUsers();
+  const { users, roles, roleNames, isPlatformRoleName, addUser } = useUsers();
   const navigate = useNavigate();
 
   const [query, setQuery] = useState("");
@@ -62,7 +62,7 @@ function UsersPage() {
       if (roleFilter !== "All Roles" && u.role !== roleFilter) return false;
       if (statusFilter !== "All Statuses" && u.status !== statusFilter) return false;
       if (clientFilter !== "All Clients") {
-        if (u.role === "Operations Admin") return true;
+        if (isPlatformRoleName(u.role)) return true;
         const target = allClients.find((c) => c.name === clientFilter);
         if (!target || !u.assignments.some((a) => a.clientId === target.id)) return false;
       }
@@ -86,15 +86,15 @@ function UsersPage() {
     );
   }
 
-  const admins = users.filter((u) => u.role === "Operations Admin").length;
-  const supervisors = users.filter((u) => u.role === "Supervisor").length;
+  const admins = users.filter((u) => isPlatformRoleName(u.role)).length;
+  const clientScoped = users.length - admins;
   const active = users.filter((u) => u.status === "Active").length;
 
   return (
     <>
       <PageHeader
         title="Users & Permissions"
-        description="Manage PayFlow users, Client assignments and operational access."
+        description="Manage PayFlow users, roles, Client assignments and operational access."
         actions={
           <Btn variant="primary" onClick={() => setAdding((v) => !v)}>
             {adding ? "Close" : "+ Add User"}
@@ -102,10 +102,11 @@ function UsersPage() {
         }
       />
 
-      <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <KpiCard label="Total Users" value={String(users.length)} />
-        <KpiCard label="Operations Admins" value={String(admins)} />
-        <KpiCard label="Supervisors" value={String(supervisors)} />
+        <KpiCard label="Roles" value={String(roles.length)} />
+        <KpiCard label="Platform-wide Access" value={String(admins)} />
+        <KpiCard label="Client-scoped Users" value={String(clientScoped)} />
         <KpiCard label="Active Users" value={String(active)} tone="primary" />
       </div>
 
@@ -132,7 +133,7 @@ function UsersPage() {
         <FilterSelect
           label="Role"
           value={roleFilter}
-          options={["All Roles", "Operations Admin", "Supervisor"]}
+          options={["All Roles", ...roleNames]}
           onChange={setRoleFilter}
         />
         <FilterSelect
