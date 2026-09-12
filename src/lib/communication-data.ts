@@ -544,7 +544,8 @@ export const communications: Communication[] = [
       { at: "03 Sep · 15:45", label: "SMS delivered" },
     ],
   },
-);
+];
+
 
 export function communicationById(id: string) {
   return communications.find((c) => c.id === id);
