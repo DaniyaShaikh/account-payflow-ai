@@ -23,6 +23,7 @@ import { Route as HumanReviewIndexRouteImport } from './routes/human-review.inde
 import { Route as HumanReviewReviewIdRouteImport } from './routes/human-review.$reviewId'
 import { Route as JourneysIndexRouteImport } from './routes/journeys.index'
 import { Route as JourneysJourneyIdRouteImport } from './routes/journeys.$journeyId'
+import { Route as PayTokenRouteImport } from './routes/pay.$token'
 import { Route as RulesIndexRouteImport } from './routes/rules.index'
 import { Route as RulesRuleIdRouteImport } from './routes/rules.$ruleId'
 import { Route as RulesNewRouteImport } from './routes/rules.new'
@@ -98,6 +99,11 @@ const JourneysJourneyIdRoute = JourneysJourneyIdRouteImport.update({
   path: '/journeys/$journeyId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PayTokenRoute = PayTokenRouteImport.update({
+  id: '/pay/$token',
+  path: '/pay/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RulesIndexRoute = RulesIndexRouteImport.update({
   id: '/rules/',
   path: '/rules/',
@@ -124,6 +130,7 @@ export interface FileRoutesByFullPath {
   '/communications/$communicationId': typeof CommunicationsCommunicationIdRoute
   '/human-review/$reviewId': typeof HumanReviewReviewIdRoute
   '/journeys/$journeyId': typeof JourneysJourneyIdRoute
+  '/pay/$token': typeof PayTokenRoute
   '/rules/$ruleId': typeof RulesRuleIdRoute
   '/rules/new': typeof RulesNewRoute
   '/accounts/': typeof AccountsIndexRoute
@@ -143,6 +150,7 @@ export interface FileRoutesByTo {
   '/communications/$communicationId': typeof CommunicationsCommunicationIdRoute
   '/human-review/$reviewId': typeof HumanReviewReviewIdRoute
   '/journeys/$journeyId': typeof JourneysJourneyIdRoute
+  '/pay/$token': typeof PayTokenRoute
   '/rules/$ruleId': typeof RulesRuleIdRoute
   '/rules/new': typeof RulesNewRoute
   '/accounts': typeof AccountsIndexRoute
@@ -163,6 +171,7 @@ export interface FileRoutesById {
   '/communications/$communicationId': typeof CommunicationsCommunicationIdRoute
   '/human-review/$reviewId': typeof HumanReviewReviewIdRoute
   '/journeys/$journeyId': typeof JourneysJourneyIdRoute
+  '/pay/$token': typeof PayTokenRoute
   '/rules/$ruleId': typeof RulesRuleIdRoute
   '/rules/new': typeof RulesNewRoute
   '/accounts/': typeof AccountsIndexRoute
@@ -184,6 +193,7 @@ export interface FileRouteTypes {
     | '/communications/$communicationId'
     | '/human-review/$reviewId'
     | '/journeys/$journeyId'
+    | '/pay/$token'
     | '/rules/$ruleId'
     | '/rules/new'
     | '/accounts/'
@@ -203,6 +213,7 @@ export interface FileRouteTypes {
     | '/communications/$communicationId'
     | '/human-review/$reviewId'
     | '/journeys/$journeyId'
+    | '/pay/$token'
     | '/rules/$ruleId'
     | '/rules/new'
     | '/accounts'
@@ -222,6 +233,7 @@ export interface FileRouteTypes {
     | '/communications/$communicationId'
     | '/human-review/$reviewId'
     | '/journeys/$journeyId'
+    | '/pay/$token'
     | '/rules/$ruleId'
     | '/rules/new'
     | '/accounts/'
@@ -242,6 +254,7 @@ export interface RootRouteChildren {
   CommunicationsCommunicationIdRoute: typeof CommunicationsCommunicationIdRoute
   HumanReviewReviewIdRoute: typeof HumanReviewReviewIdRoute
   JourneysJourneyIdRoute: typeof JourneysJourneyIdRoute
+  PayTokenRoute: typeof PayTokenRoute
   RulesRuleIdRoute: typeof RulesRuleIdRoute
   RulesNewRoute: typeof RulesNewRoute
   AccountsIndexRoute: typeof AccountsIndexRoute
@@ -352,6 +365,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JourneysJourneyIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pay/$token': {
+      id: '/pay/$token'
+      path: '/pay/$token'
+      fullPath: '/pay/$token'
+      preLoaderRoute: typeof PayTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/rules/': {
       id: '/rules/'
       path: '/rules'
@@ -386,6 +406,7 @@ const rootRouteChildren: RootRouteChildren = {
   CommunicationsCommunicationIdRoute: CommunicationsCommunicationIdRoute,
   HumanReviewReviewIdRoute: HumanReviewReviewIdRoute,
   JourneysJourneyIdRoute: JourneysJourneyIdRoute,
+  PayTokenRoute: PayTokenRoute,
   RulesRuleIdRoute: RulesRuleIdRoute,
   RulesNewRoute: RulesNewRoute,
   AccountsIndexRoute: AccountsIndexRoute,

@@ -10,6 +10,7 @@ import {
   communicationById,
   engagementLabel,
 } from "@/lib/communication-data";
+import { paymentTokenForAccount } from "@/lib/payment-data";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/communications/$communicationId")({
@@ -74,6 +75,8 @@ function CommunicationDetail() {
   const account = accounts.find((a) => a.id === comm.accountId);
   const journey = journeyById(comm.journeyId);
   const brand = brandingFor(comm.clientId);
+  // Secure payment link into the external, client-branded customer experience.
+  const payLink = account ? `/pay/${paymentTokenForAccount(account)}` : null;
 
   const facts = [
     { label: "Client", value: clientName(comm.clientId) },
@@ -104,6 +107,11 @@ function CommunicationDetail() {
           <div className="flex flex-wrap items-center gap-2">
             <StatusPill tone={commStatusTone(comm.status)}>{comm.status}</StatusPill>
             <StatusPill>{comm.id}</StatusPill>
+            {comm.paymentLink && payLink && (
+              <a href={payLink} target="_blank" rel="noreferrer">
+                <Btn variant="primary">Preview Payment Experience</Btn>
+              </a>
+            )}
           </div>
         }
       />
@@ -194,17 +202,20 @@ function CommunicationDetail() {
                 </div>
                 {comm.paymentLink && (
                   <div>
-                    <span
+                    <a
+                      href={payLink ?? "#"}
+                      target="_blank"
+                      rel="noreferrer"
                       className={cn(
                         "inline-flex items-center rounded-md px-3.5 py-2 text-[13px] font-semibold",
                         brand.accentClass,
                       )}
                     >
                       Pay Now
-                    </span>
+                    </a>
                     <p className="mt-1.5 text-[11px] text-muted-foreground">
-                      Unique secure payment link · opens the {brand.name}-branded payment experience
-                      (built in a later step)
+                      Unique secure payment link · opens the {brand.name}-branded customer payment
+                      experience
                     </p>
                   </div>
                 )}

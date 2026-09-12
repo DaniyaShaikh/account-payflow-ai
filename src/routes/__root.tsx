@@ -6,6 +6,7 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  useRouterState,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
@@ -127,6 +128,19 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  // The customer-facing payment experience is an external, client-branded
+  // surface: it renders without the internal PayFlow application shell.
+  const isCustomerPaymentExperience = useRouterState({
+    select: (s) => s.location.pathname.startsWith("/pay/"),
+  });
+
+  if (isCustomerPaymentExperience) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <Outlet />
+      </QueryClientProvider>
+    );
+  }
 
   return (
     <QueryClientProvider client={queryClient}>

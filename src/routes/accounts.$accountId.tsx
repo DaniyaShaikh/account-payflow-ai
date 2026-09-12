@@ -11,6 +11,14 @@ import {
   communicationsForAccount,
   engagementLabel,
 } from "@/lib/communication-data";
+import {
+  outcomeHandling,
+  paymentStatusTone,
+  paymentSummaryFor,
+  paymentTimelineEvents,
+  paymentTokenForAccount,
+  type PaymentOutcome,
+} from "@/lib/payment-data";
 
 export const Route = createFileRoute("/accounts/$accountId")({
   head: () => ({
@@ -51,9 +59,21 @@ function AccountDetail() {
   const caseReviews = reviewsForAccount(accountId);
   const journeyState = journeyStateForAccount(accountId, account.journey);
   const accountComms = communicationsForAccount(accountId);
+  const payment = paymentSummaryFor(accountId);
+  const handledOutcome: PaymentOutcome =
+    payment?.status === "Paid in Full"
+      ? "Paid in Full"
+      : payment?.status === "Payment Plan Active"
+        ? "Installment Received"
+        : payment?.status === "Last Payment Failed"
+          ? "Payment Failed"
+          : payment?.status === "Partial Payment Received"
+            ? "Partial Payment"
+            : "Payment Not Completed";
   const timeline: TimelineEvent[] = [
     ...account.timeline,
     ...communicationTimelineEvents(accountId),
+    ...paymentTimelineEvents(accountId),
     ...accountReviewEvents(accountId),
   ];
 
@@ -110,6 +130,82 @@ function AccountDetail() {
               ))}
             </dl>
           </Panel>
+
+          {payment && (
+            <Panel
+              title="Payment"
+              description="Payment outcomes received from the customer payment experience"
+              action={
+                <a href={`/pay/${paymentTokenForAccount(account)}`} target="_blank" rel="noreferrer">
+                  <Btn>Preview Payment Experience</Btn>
+                </a>
+              }
+              bodyClassName="p-0"
+            >
+              <div className="flex items-center justify-between gap-4 border-b border-border px-4 py-2.5">
+                <span className="text-[13px] text-muted-foreground">Payment Status</span>
+                <StatusPill tone={paymentStatusTone(payment.status)}>{payment.status}</StatusPill>
+              </div>
+              <dl className="divide-y divide-border">
+                <div className="flex items-center justify-between gap-4 px-4 py-2.5">
+                  <dt className="text-[13px] text-muted-foreground">Outstanding Balance</dt>
+                  <dd className="tabular text-[13px] font-medium text-foreground">
+                    {formatCurrency(payment.outstanding)}
+                  </dd>
+                </div>
+                <div className="flex items-center justify-between gap-4 px-4 py-2.5">
+                  <dt className="text-[13px] text-muted-foreground">Amount Recovered</dt>
+                  <dd className="tabular text-[13px] font-medium text-foreground">
+                    {formatCurrency(payment.recovered)}
+                  </dd>
+                </div>
+                <div className="flex items-center justify-between gap-4 px-4 py-2.5">
+                  <dt className="text-[13px] text-muted-foreground">Last Payment</dt>
+                  <dd className="tabular text-[13px] font-medium text-foreground">
+                    {payment.lastPayment
+                      ? `${formatCurrency(payment.lastPayment.amount)} · ${payment.lastPayment.at} · ${payment.lastPayment.method}`
+                      : "No payment received yet"}
+                  </dd>
+                </div>
+                <div className="flex items-center justify-between gap-4 px-4 py-2.5">
+                  <dt className="text-[13px] text-muted-foreground">Payment Plan</dt>
+                  <dd className="tabular text-[13px] font-medium text-foreground">
+                    {payment.plan
+                      ? `${payment.plan.paymentsMade} of ${payment.plan.totalPayments} payments made`
+                      : "No active arrangement"}
+                  </dd>
+                </div>
+                {payment.plan && (
+                  <div className="flex items-center justify-between gap-4 px-4 py-2.5">
+                    <dt className="text-[13px] text-muted-foreground">Next Installment</dt>
+                    <dd className="tabular text-[13px] font-medium text-foreground">
+                      {formatCurrency(payment.plan.installmentAmount)} · {payment.plan.nextInstallment}
+                    </dd>
+                  </div>
+                )}
+                {payment.failedAttempts > 0 && (
+                  <div className="flex items-center justify-between gap-4 px-4 py-2.5">
+                    <dt className="text-[13px] text-muted-foreground">Failed Attempts</dt>
+                    <dd className="tabular text-[13px] font-medium text-foreground">
+                      {payment.failedAttempts}
+                    </dd>
+                  </div>
+                )}
+              </dl>
+              <div className="border-t border-border px-4 py-3">
+                <p className="text-[12px] font-medium text-foreground">
+                  How this outcome is handled
+                </p>
+                <ul className="mt-1.5 space-y-1">
+                  {outcomeHandling[handledOutcome].map((line) => (
+                    <li key={line} className="text-[12px] leading-relaxed text-muted-foreground">
+                      · {line}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </Panel>
+          )}
 
           {journeyState?.journey && (
             <Panel
