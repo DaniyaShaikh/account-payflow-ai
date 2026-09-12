@@ -132,10 +132,11 @@ function RootComponent() {
       <RoleProvider>
         <RulesProvider>
           <ReviewsProvider>
-          <AppShell>
-            {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-            <Outlet />
-          </AppShell>
+            <AppShell>
+              {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+              <Outlet />
+            </AppShell>
+          </ReviewsProvider>
         </RulesProvider>
       </RoleProvider>
     </QueryClientProvider>
