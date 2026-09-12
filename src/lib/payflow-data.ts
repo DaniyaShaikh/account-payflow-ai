@@ -246,6 +246,8 @@ export interface CustomerAccount {
   clientId: string;
   customer: string;
   reference: string;
+  /** Distinct collection-case reference — illustrative, not a technical standard. */
+  caseReference: string;
   originalBalance: number;
   outstanding: number;
   recovered: number;
@@ -255,6 +257,10 @@ export interface CustomerAccount {
   nextAction: string;
   humanReview: boolean;
   timeline: { label: string; detail: string; at: string }[];
+}
+
+export function caseReferenceFor(accountId: string) {
+  return accounts.find((a) => a.id === accountId)?.caseReference ?? "—";
 }
 
 export const accounts: CustomerAccount[] = [
