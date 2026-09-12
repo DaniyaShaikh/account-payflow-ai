@@ -213,7 +213,7 @@ function AddClientPage() {
 
       <Panel
         title={`Step ${step + 1} of ${steps.length} · ${steps[step]}`}
-        description={stepDescriptions[step]}
+        description={stepDescriptions[step] ?? ""}
       >
         {step === 0 && <ProfileSection {...sectionProps} />}
         {step === 1 && <DataSourceSection {...sectionProps} />}
