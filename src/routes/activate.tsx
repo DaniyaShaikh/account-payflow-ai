@@ -292,10 +292,6 @@ function ActivatePage() {
         </Btn>
       </div>
 
-      <p className="mt-4 text-[11.5px] leading-relaxed text-muted-foreground">
-        Prototype account activation — no password is stored and requirements are illustrative until
-        the security policy is finalised.
-      </p>
     </AuthLayout>
   );
 }
