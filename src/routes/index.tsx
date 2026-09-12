@@ -37,7 +37,132 @@ const funnelStages = [
   "Clicked",
   "Payment Initiated",
   "Paid",
-];
+] as const;
+
+const stageRates = [1, 0.956, 0.738, 0.416, 0.737, 0.802];
+
+function hashSeed(input: string) {
+  let h = 0;
+  for (let i = 0; i < input.length; i++) h = (h * 31 + input.charCodeAt(i)) >>> 0;
+  return h;
+}
+
+function funnelVolumes(client: string, date: string, channel: string, journey: string) {
+  const seed = hashSeed(`${client}|${date}|${channel}|${journey}`);
+  const base = 5200 + (seed % 5200);
+  let previous = base;
+  return funnelStages.map((stage, i) => {
+    if (i === 0) return { stage, volume: base, rate: null as number | null };
+    const jitter = 0.94 + ((seed >> (i * 3)) % 13) / 100;
+    const volume = Math.round(previous * stageRates[i] * jitter);
+    const rate = volume / previous;
+    previous = volume;
+    return { stage, volume, rate };
+  });
+}
+
+function CommunicationFunnel() {
+  const { visibleClients } = useRole();
+  const [client, setClient] = useState("All Clients");
+  const [date, setDate] = useState("Today");
+  const [channel, setChannel] = useState("All Channels");
+  const [journey, setJourney] = useState("All Journeys");
+
+  const isDefault =
+    client === "All Clients" &&
+    date === "Today" &&
+    channel === "All Channels" &&
+    journey === "All Journeys";
+
+  const rows = funnelVolumes(client, date, channel, journey);
+  const activeParts = [
+    client !== "All Clients" ? client : null,
+    channel !== "All Channels" ? channel : null,
+    date !== "Today" ? date : null,
+    journey !== "All Journeys" ? journey : null,
+  ].filter(Boolean);
+
+  return (
+    <Panel
+      title="Communication to Payment Performance"
+      description="Conversion from outreach to completed payment"
+      className="mb-5"
+      action={
+        !isDefault ? (
+          <button
+            onClick={() => {
+              setClient("All Clients");
+              setDate("Today");
+              setChannel("All Channels");
+              setJourney("All Journeys");
+            }}
+            className="text-xs font-medium text-muted-foreground underline-offset-2 transition-colors hover:text-foreground hover:underline"
+          >
+            Reset Filters
+          </button>
+        ) : undefined
+      }
+    >
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <FilterSelect
+          label="Client"
+          value={client}
+          onChange={setClient}
+          options={["All Clients", ...visibleClients.map((c) => c.name)]}
+        />
+        <FilterSelect
+          label="Date"
+          value={date}
+          onChange={setDate}
+          options={["Today", "Yesterday", "Last 7 Days", "This Month", "Custom Range"]}
+        />
+        <FilterSelect
+          label="Channel"
+          value={channel}
+          onChange={setChannel}
+          options={["All Channels", "Email", "SMS"]}
+        />
+        <span
+          className="flex cursor-not-allowed items-center gap-2 rounded-md border border-border bg-surface px-2.5 py-1.5 opacity-60"
+          title="Coming in a later phase"
+        >
+          <span className="text-[11px] font-medium text-muted-foreground">Channel</span>
+          <span className="text-[13px] font-medium text-muted-foreground">WhatsApp · soon</span>
+        </span>
+        <FilterSelect
+          label="Journey"
+          value={journey}
+          onChange={setJourney}
+          options={["All Journeys", ...journeys]}
+        />
+        {!isDefault && (
+          <span className="text-xs text-muted-foreground">{activeParts.join(" · ")}</span>
+        )}
+      </div>
+
+      <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
+        {rows.map((row) => (
+          <Link
+            key={row.stage}
+            to="/accounts"
+            className="group rounded-md border border-border bg-surface px-3 py-4 transition-colors hover:border-primary/40 hover:bg-card"
+            title={`View accounts at "${row.stage}" (drill-down coming soon)`}
+          >
+            <p className="text-[11px] font-medium text-muted-foreground group-hover:text-foreground">
+              {row.stage}
+            </p>
+            <p className="tabular mt-1 text-sm font-semibold text-foreground">
+              {formatNumber(row.volume)}
+            </p>
+            <p className="tabular mt-0.5 text-[11px] text-muted-foreground">
+              {row.rate === null ? "—" : `${(row.rate * 100).toFixed(1)}%`}
+            </p>
+          </Link>
+        ))}
+      </div>
+    </Panel>
+  );
+}
 
 function Dashboard() {
   const { visibleClients, roleLabel } = useRole();
@@ -97,23 +222,7 @@ function Dashboard() {
         <KpiCard label="Human Reviews Pending" value={formatNumber(reviews)} />
       </div>
 
-      <Panel
-        title="Communication to Payment Performance"
-        description="Funnel detail arrives in a later step"
-        className="mb-5"
-      >
-        <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
-          {funnelStages.map((stage) => (
-            <div
-              key={stage}
-              className="rounded-md border border-dashed border-border-strong bg-surface px-3 py-4"
-            >
-              <p className="text-[11px] font-medium text-muted-foreground">{stage}</p>
-              <p className="mt-1 text-sm font-semibold text-muted-foreground/70">—</p>
-            </div>
-          ))}
-        </div>
-      </Panel>
+      <CommunicationFunnel />
 
       <div className="grid gap-5 lg:grid-cols-2">
         <Panel title="Clients Needing Attention" bodyClassName="p-0">
