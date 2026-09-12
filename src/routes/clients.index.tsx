@@ -14,6 +14,7 @@ import {
 } from "@/components/payflow-ui";
 import { useRole } from "@/lib/role-context";
 import { formatCurrency, formatNumber, supervisorDirectory } from "@/lib/payflow-data";
+import { intakeForClient } from "@/lib/intake-data";
 
 export const Route = createFileRoute("/clients/")({
   head: () => ({
