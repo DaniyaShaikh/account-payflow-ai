@@ -22,6 +22,8 @@ import {
   type DataSource,
   type MappingStatus,
 } from "@/lib/payflow-data";
+import { useUsers } from "@/lib/users-context";
+import { permissionGroups } from "@/lib/users-data";
 import { cn } from "@/lib/utils";
 
 export interface ClientDraft {
