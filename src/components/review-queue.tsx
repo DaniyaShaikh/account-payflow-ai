@@ -84,6 +84,14 @@ export function ReviewQueue({
 
   return (
     <div>
+      {title && (
+        <div className="mb-4">
+          <h2 className="text-[15px] font-semibold tracking-tight text-foreground">{title}</h2>
+          {description && (
+            <p className="mt-0.5 text-[12px] text-muted-foreground">{description}</p>
+          )}
+        </div>
+      )}
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <SearchInput
           value={search}
