@@ -13,6 +13,7 @@ import {
   Bell,
 } from "lucide-react";
 import type { ReactNode } from "react";
+import { PayflowWordmark } from "@/components/brand";
 import { useRole } from "@/lib/role-context";
 import { useReviews } from "@/lib/reviews-context";
 import { formatWaiting } from "@/lib/review-data";
@@ -71,20 +72,46 @@ function UserMenu({ compact = false }: { compact?: boolean }) {
       <DropdownMenuTrigger
         className={
           compact
-            ? "flex items-center gap-2 rounded-md border border-border bg-card px-2 py-1.5 transition-colors hover:bg-surface"
+            ? "flex items-center gap-2.5 rounded-lg px-1.5 py-1.5 text-left transition-colors hover:bg-muted"
             : "flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left transition-colors hover:bg-sidebar-accent"
         }
       >
-        <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-semibold text-primary">
+        <span
+          className={
+            compact
+              ? "flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-bold text-primary"
+              : "flex size-8 shrink-0 items-center justify-center rounded-full bg-sidebar-primary/25 text-[11px] font-bold text-sidebar-foreground"
+          }
+        >
           {initials}
         </span>
-        <span className="min-w-0 leading-tight">
-          <span className="block truncate text-[13px] font-medium text-foreground">{userName}</span>
-          {!compact && (
-            <span className="block truncate text-[11px] text-muted-foreground">{roleLabel}</span>
-          )}
+        <span className="hidden min-w-0 leading-tight sm:block">
+          <span
+            className={
+              compact
+                ? "block truncate text-[13px] font-semibold text-foreground"
+                : "block truncate text-[13px] font-semibold text-sidebar-foreground"
+            }
+          >
+            {userName}
+          </span>
+          <span
+            className={
+              compact
+                ? "block truncate text-[11px] text-muted-foreground"
+                : "block truncate text-[11px] text-sidebar-muted"
+            }
+          >
+            {roleLabel}
+          </span>
         </span>
-        {!compact && <ChevronsUpDown className="ml-auto size-3.5 text-muted-foreground" />}
+        <ChevronsUpDown
+          className={
+            compact
+              ? "size-3.5 text-muted-foreground"
+              : "ml-auto size-3.5 text-sidebar-muted"
+          }
+        />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" side="top" className="w-60">
         <DropdownMenuLabel className="text-eyebrow">Preview role</DropdownMenuLabel>
@@ -118,7 +145,7 @@ function ReviewBell() {
         >
           <Bell className="size-[17px]" />
           {counts.awaiting > 0 && (
-            <span className="absolute top-1.5 right-1.5 flex min-w-[15px] justify-center rounded-full bg-danger px-1 text-[9px] leading-[15px] font-semibold text-white">
+            <span className="absolute top-1.5 right-1.5 flex min-w-[15px] justify-center rounded-full bg-destructive px-1 text-[9px] leading-[15px] font-semibold text-white">
               {counts.awaiting}
             </span>
           )}
@@ -167,14 +194,9 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-screen bg-surface">
-      <aside className="sticky top-0 hidden h-screen w-[236px] shrink-0 flex-col border-r border-sidebar-border bg-sidebar lg:flex">
-        <div className="flex h-16 items-center gap-2.5 px-5">
-          <span className="flex size-7 items-center justify-center rounded-lg bg-primary text-[12px] font-bold text-primary-foreground">
-            P
-          </span>
-          <span className="text-[15px] font-semibold tracking-tight text-sidebar-foreground">
-            PayFlow
-          </span>
+      <aside className="sticky top-0 hidden h-screen w-[244px] shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:flex">
+        <div className="flex h-[68px] items-center px-4">
+          <PayflowWordmark tagline invert />
         </div>
 
         <nav className="flex-1 overflow-y-auto px-3 pb-4">
@@ -187,18 +209,21 @@ export function AppShell({ children }: { children: ReactNode }) {
             }))
             .filter((group) => group.items.length > 0)
             .map((group) => (
-            <div key={group.label} className="mb-4">
-              <p className="text-eyebrow px-2 pb-1.5">{group.label}</p>
+            <div key={group.label} className="mb-5">
+              <p className="px-2.5 pb-2 text-[10px] font-semibold tracking-[0.1em] text-sidebar-muted uppercase">
+                {group.label}
+              </p>
               <ul className="space-y-0.5">
                 {group.items.map((item) => (
                   <li key={item.to}>
                     <Link
                       to={item.to}
                       activeOptions={{ exact: "exact" in item ? item.exact : false }}
-                      className="group relative flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground data-[status=active]:bg-sidebar-accent data-[status=active]:text-sidebar-accent-foreground"
+                      className="group relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-medium text-sidebar-muted transition-colors hover:bg-sidebar-accent/70 hover:text-sidebar-foreground data-[status=active]:bg-sidebar-accent data-[status=active]:text-sidebar-accent-foreground"
                       activeProps={{ className: "font-semibold" }}
                     >
-                      <item.icon className="size-[15px] shrink-0 opacity-70" />
+                      <span className="absolute top-1.5 bottom-1.5 -left-1 w-[3px] rounded-full bg-sidebar-primary opacity-0 transition-opacity group-data-[status=active]:opacity-100" />
+                      <item.icon className="size-[15px] shrink-0 opacity-80" />
                       {item.label}
                     </Link>
                   </li>
@@ -208,8 +233,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           ))}
         </nav>
 
-        <div className="border-t border-sidebar-border p-2">
-          <p className="px-2 pt-1 pb-2 text-[11px] text-muted-foreground">
+        <div className="border-t border-sidebar-border p-2.5">
+          <p className="px-1.5 pt-0.5 pb-2 text-[11px] text-sidebar-muted">
             {role === "admin"
               ? "All clients in view"
               : visibleClients.map((c) => c.name).join(" · ")}
@@ -219,27 +244,26 @@ export function AppShell({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-4 border-b border-border bg-background/80 px-5 backdrop-blur lg:px-10">
-          <div className="flex items-center gap-2 lg:hidden">
-            <span className="flex size-6 items-center justify-center rounded-md bg-primary text-[11px] font-bold text-primary-foreground">
-              P
-            </span>
-            <span className="text-sm font-semibold">PayFlow</span>
+        <header className="sticky top-0 z-20 flex h-[68px] items-center justify-between gap-4 border-b border-border bg-background/85 px-5 backdrop-blur lg:px-9">
+          <div className="lg:hidden">
+            <PayflowWordmark />
           </div>
-          <p className="hidden text-xs text-muted-foreground lg:block">
-            Collections operations · {visibleClients.length} client
-            {visibleClients.length === 1 ? "" : "s"} in view
+          <p className="hidden text-[12px] text-muted-foreground lg:block">
+            Collections operations ·{" "}
+            <span className="font-medium text-foreground">
+              {visibleClients.length} client{visibleClients.length === 1 ? "" : "s"}
+            </span>{" "}
+            in view
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <ReviewBell />
-            <div className="lg:hidden">
-              <UserMenu compact />
-            </div>
+            <span className="mx-1 hidden h-7 w-px bg-border lg:block" />
+            <UserMenu compact />
           </div>
         </header>
 
-        <main className="flex-1 px-5 py-7 lg:px-10 lg:py-9">
-          <div className="mx-auto w-full max-w-[1180px]">{children}</div>
+        <main className="flex-1 px-5 py-7 lg:px-9 lg:py-8">
+          <div className="mx-auto w-full max-w-[1220px]">{children}</div>
         </main>
       </div>
     </div>

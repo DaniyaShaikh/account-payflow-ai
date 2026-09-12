@@ -162,11 +162,17 @@ function CommunicationFunnel() {
         )}
       </div>
 
-      <div className="space-y-1">
+      {/* Connected progression: navy → PayFlow blue → teal at the paid stage. */}
+      <div className="grid gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-3 xl:grid-cols-6">
         {rows.map((row, i) => {
           const top = rows[0]?.volume || 1;
-          const width = Math.max(6, (row.volume / top) * 100);
-          const dropOff = row.rate === null ? null : 1 - row.rate;
+          const width = Math.max(5, (row.volume / top) * 100);
+          const isPaid = i === rows.length - 1;
+          const barColor = isPaid
+            ? "bg-teal"
+            : i === 0
+              ? "bg-navy"
+              : "bg-primary";
           return (
             <Link
               key={row.stage}
@@ -177,35 +183,40 @@ function CommunicationFunnel() {
                 ...(journey !== "All Workflows" ? { journey } : {}),
                 ...(stageStatus(row.stage) ? { status: stageStatus(row.stage) } : {}),
               }}
-              className="group block rounded-lg px-3 py-2.5 transition-colors hover:bg-surface"
+              className="group relative block bg-card px-4 py-3.5 transition-colors hover:bg-surface"
               title={`View communications at "${row.stage}"`}
             >
-
-              <div className="flex items-baseline justify-between gap-4">
-                <span className="flex items-center gap-2 text-[13px] font-medium text-foreground">
-                  <span className="tabular w-4 text-[11px] text-muted-foreground">{i + 1}</span>
+              <div className="flex items-center gap-1.5">
+                <span className="tabular text-[10px] font-semibold text-muted-foreground">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <span
+                  className={
+                    isPaid
+                      ? "text-[11.5px] font-semibold text-success"
+                      : "text-[11.5px] font-semibold text-foreground"
+                  }
+                >
                   {row.stage}
                 </span>
-                <span className="flex items-baseline gap-3">
-                  <span className="tabular text-[15px] font-semibold text-foreground">
-                    {formatNumber(row.volume)}
-                  </span>
-                  <span className="tabular w-14 text-right text-[12px] font-medium text-muted-foreground">
-                    {row.rate === null ? "—" : `${(row.rate * 100).toFixed(1)}%`}
-                  </span>
-                </span>
               </div>
-              <div className="mt-1.5 flex items-center gap-2">
-                <div className="h-2 flex-1 overflow-hidden rounded-full bg-secondary">
-                  <div
-                    className="h-full rounded-full bg-primary/80 transition-all group-hover:bg-primary"
-                    style={{ width: `${width}%` }}
-                  />
-                </div>
-                <span className="tabular w-24 text-right text-[11px] text-muted-foreground">
-                  {dropOff === null
-                    ? "start of funnel"
-                    : `−${formatNumber(Math.round((rows[i - 1]?.volume ?? 0) - row.volume))} lost`}
+              <p className="tabular mt-2 text-[19px] leading-none font-bold tracking-tight text-foreground">
+                {formatNumber(row.volume)}
+              </p>
+              <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-secondary">
+                <div
+                  className={`h-full rounded-full ${barColor} transition-all group-hover:opacity-80`}
+                  style={{ width: `${width}%` }}
+                />
+              </div>
+              <div className="mt-2 flex items-baseline justify-between gap-2">
+                <span className="tabular text-[11.5px] font-semibold text-primary">
+                  {row.rate === null ? "Start" : `${(row.rate * 100).toFixed(1)}%`}
+                </span>
+                <span className="tabular text-[10.5px] text-muted-foreground">
+                  {row.rate === null
+                    ? "of funnel"
+                    : `−${formatNumber(Math.round((rows[i - 1]?.volume ?? 0) - row.volume))}`}
                 </span>
               </div>
             </Link>

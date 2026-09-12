@@ -5,8 +5,10 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * PayFlow design system — light enterprise interface.
- * Neutral slate surfaces, single teal-ink accent, subtle borders.
+ * PayFlow design system.
+ * Brand language taken from the PayFlow logo: deep navy ("Pay"),
+ * electric royal blue ("Flow") and a restrained teal accent (the flowing mark).
+ * Semantic states stay separate from brand colour.
  */
 
 @theme inline {
@@ -43,8 +45,13 @@
   --color-ring: var(--ring);
   --color-surface: var(--surface);
   --color-surface-foreground: var(--surface-foreground);
+  --color-navy: var(--brand-navy);
+  --color-navy-foreground: var(--brand-navy-foreground);
+  --color-teal: var(--brand-teal);
+  --color-teal-foreground: var(--brand-teal-foreground);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-muted: var(--sidebar-muted);
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
   --color-sidebar-accent: var(--sidebar-accent);
@@ -53,99 +60,113 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --color-ai: var(--ai);
   --color-ai-foreground: var(--ai-foreground);
-  --shadow-subtle: 0 1px 2px 0 oklch(0.25 0.04 265 / 5%);
+  --shadow-subtle: 0 1px 2px 0 oklch(0.24 0.05 262 / 6%);
   --shadow-panel:
-    0 1px 2px 0 oklch(0.25 0.04 265 / 5%), 0 12px 28px -20px oklch(0.25 0.04 265 / 18%);
+    0 1px 2px 0 oklch(0.24 0.05 262 / 5%), 0 14px 30px -22px oklch(0.24 0.05 262 / 22%);
+  --shadow-brand: 0 6px 18px -10px oklch(0.55 0.21 264 / 45%);
 }
 
 :root {
   --radius: 0.625rem;
   --font-sans-stack:
-    ui-sans-serif, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    "Plus Jakarta Sans", ui-sans-serif, -apple-system, "Segoe UI", "Helvetica Neue", Arial,
+    sans-serif;
 
-  --background: oklch(0.985 0.003 265);
-  --foreground: oklch(0.235 0.024 265);
-  --surface: oklch(0.968 0.005 265);
-  --surface-foreground: oklch(0.235 0.024 265);
+  /* Brand */
+  --brand-navy: oklch(0.235 0.048 264);
+  --brand-navy-foreground: oklch(0.99 0.002 265);
+  --brand-blue: oklch(0.55 0.212 264);
+  --brand-teal: oklch(0.72 0.108 190);
+  --brand-teal-foreground: oklch(0.28 0.05 200);
+
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.235 0.048 264);
+  --surface: oklch(0.973 0.005 260);
+  --surface-foreground: oklch(0.235 0.048 264);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.235 0.024 265);
+  --card-foreground: oklch(0.235 0.048 264);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.235 0.024 265);
+  --popover-foreground: oklch(0.235 0.048 264);
 
-  --primary: oklch(0.45 0.155 268);
+  --primary: oklch(0.55 0.212 264);
   --primary-foreground: oklch(0.99 0.002 265);
-  --secondary: oklch(0.958 0.006 265);
-  --secondary-foreground: oklch(0.32 0.022 265);
-  --muted: oklch(0.962 0.005 265);
-  --muted-foreground: oklch(0.555 0.019 264);
-  --accent: oklch(0.955 0.024 268);
-  --accent-foreground: oklch(0.38 0.13 268);
+  --secondary: oklch(0.962 0.006 260);
+  --secondary-foreground: oklch(0.33 0.032 264);
+  --muted: oklch(0.965 0.005 260);
+  --muted-foreground: oklch(0.545 0.023 262);
+  --accent: oklch(0.955 0.028 264);
+  --accent-foreground: oklch(0.42 0.17 264);
 
-  --destructive: oklch(0.545 0.185 24);
+  --destructive: oklch(0.55 0.19 25);
   --destructive-foreground: oklch(0.99 0.002 265);
-  --success: oklch(0.545 0.115 158);
+  --success: oklch(0.55 0.12 158);
   --success-foreground: oklch(0.99 0.002 265);
-  --warning: oklch(0.7 0.145 68);
-  --warning-foreground: oklch(0.33 0.06 62);
-  --info: oklch(0.52 0.14 258);
+  --warning: oklch(0.72 0.15 70);
+  --warning-foreground: oklch(0.36 0.07 62);
+  --info: oklch(0.55 0.16 258);
   --info-foreground: oklch(0.99 0.002 265);
-  --ai: oklch(0.52 0.15 300);
+  --ai: oklch(0.6 0.13 232);
   --ai-foreground: oklch(0.99 0.002 265);
 
-  --border: oklch(0.918 0.006 265);
-  --border-strong: oklch(0.862 0.009 265);
-  --input: oklch(0.912 0.006 265);
-  --ring: oklch(0.55 0.13 268);
+  --border: oklch(0.918 0.007 262);
+  --border-strong: oklch(0.858 0.011 262);
+  --input: oklch(0.912 0.007 262);
+  --ring: oklch(0.55 0.212 264);
 
-  --sidebar: oklch(0.975 0.004 265);
-  --sidebar-foreground: oklch(0.32 0.02 265);
-  --sidebar-primary: oklch(0.45 0.155 268);
+  --sidebar: oklch(0.225 0.045 264);
+  --sidebar-foreground: oklch(0.95 0.006 262);
+  --sidebar-muted: oklch(0.7 0.022 262);
+  --sidebar-primary: oklch(0.63 0.19 264);
   --sidebar-primary-foreground: oklch(0.99 0.002 265);
-  --sidebar-accent: oklch(0.945 0.025 268);
-  --sidebar-accent-foreground: oklch(0.34 0.115 268);
-  --sidebar-border: oklch(0.915 0.006 265);
-  --sidebar-ring: oklch(0.55 0.13 268);
+  --sidebar-accent: oklch(0.3 0.062 264);
+  --sidebar-accent-foreground: oklch(0.98 0.004 262);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.63 0.19 264);
 }
 
 .dark {
-  --background: oklch(0.185 0.02 265);
-  --foreground: oklch(0.965 0.004 265);
-  --surface: oklch(0.222 0.021 265);
-  --surface-foreground: oklch(0.965 0.004 265);
-  --card: oklch(0.232 0.021 265);
-  --card-foreground: oklch(0.965 0.004 265);
-  --popover: oklch(0.232 0.021 265);
-  --popover-foreground: oklch(0.965 0.004 265);
-  --primary: oklch(0.68 0.135 268);
-  --primary-foreground: oklch(0.17 0.02 265);
-  --secondary: oklch(0.278 0.021 265);
-  --secondary-foreground: oklch(0.95 0.004 265);
-  --muted: oklch(0.278 0.021 265);
-  --muted-foreground: oklch(0.71 0.016 264);
-  --accent: oklch(0.3 0.05 268);
-  --accent-foreground: oklch(0.92 0.03 268);
-  --destructive: oklch(0.64 0.17 24);
-  --destructive-foreground: oklch(0.17 0.02 265);
-  --success: oklch(0.68 0.11 158);
-  --success-foreground: oklch(0.17 0.02 265);
-  --warning: oklch(0.78 0.13 68);
-  --warning-foreground: oklch(0.22 0.05 62);
-  --info: oklch(0.68 0.12 258);
-  --info-foreground: oklch(0.17 0.02 265);
-  --ai: oklch(0.7 0.13 300);
-  --ai-foreground: oklch(0.17 0.02 265);
+  --background: oklch(0.185 0.03 264);
+  --foreground: oklch(0.965 0.005 262);
+  --surface: oklch(0.218 0.03 264);
+  --surface-foreground: oklch(0.965 0.005 262);
+  --card: oklch(0.232 0.03 264);
+  --card-foreground: oklch(0.965 0.005 262);
+  --popover: oklch(0.232 0.03 264);
+  --popover-foreground: oklch(0.965 0.005 262);
+  --primary: oklch(0.68 0.16 264);
+  --primary-foreground: oklch(0.17 0.03 264);
+  --secondary: oklch(0.278 0.03 264);
+  --secondary-foreground: oklch(0.95 0.005 262);
+  --muted: oklch(0.278 0.03 264);
+  --muted-foreground: oklch(0.72 0.02 262);
+  --accent: oklch(0.3 0.06 264);
+  --accent-foreground: oklch(0.92 0.035 264);
+  --destructive: oklch(0.65 0.18 25);
+  --destructive-foreground: oklch(0.17 0.03 264);
+  --success: oklch(0.7 0.12 158);
+  --success-foreground: oklch(0.17 0.03 264);
+  --warning: oklch(0.8 0.14 70);
+  --warning-foreground: oklch(0.24 0.05 62);
+  --info: oklch(0.7 0.13 258);
+  --info-foreground: oklch(0.17 0.03 264);
+  --ai: oklch(0.72 0.12 232);
+  --ai-foreground: oklch(0.17 0.03 264);
   --border: oklch(1 0 0 / 10%);
   --border-strong: oklch(1 0 0 / 18%);
   --input: oklch(1 0 0 / 14%);
-  --ring: oklch(0.6 0.12 268);
-  --sidebar: oklch(0.2 0.02 265);
-  --sidebar-foreground: oklch(0.94 0.004 265);
-  --sidebar-primary: oklch(0.68 0.135 268);
-  --sidebar-primary-foreground: oklch(0.17 0.02 265);
-  --sidebar-accent: oklch(0.3 0.05 268);
-  --sidebar-accent-foreground: oklch(0.95 0.02 268);
+  --ring: oklch(0.68 0.16 264);
+  --brand-navy: oklch(0.2 0.03 264);
+  --brand-teal: oklch(0.75 0.1 190);
+  --brand-teal-foreground: oklch(0.18 0.03 200);
+  --sidebar: oklch(0.2 0.03 264);
+  --sidebar-foreground: oklch(0.95 0.005 262);
+  --sidebar-muted: oklch(0.72 0.02 262);
+  --sidebar-primary: oklch(0.68 0.16 264);
+  --sidebar-primary-foreground: oklch(0.17 0.03 264);
+  --sidebar-accent: oklch(0.3 0.06 264);
+  --sidebar-accent-foreground: oklch(0.96 0.005 262);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.6 0.12 268);
+  --sidebar-ring: oklch(0.68 0.16 264);
 }
 
 @layer base {
@@ -158,13 +179,13 @@
     color: var(--color-foreground);
     font-family: var(--font-sans-stack);
     -webkit-font-smoothing: antialiased;
-    font-feature-settings: "cv02", "cv03", "cv04";
+    text-rendering: optimizeLegibility;
   }
 
   h1,
   h2,
   h3 {
-    letter-spacing: -0.018em;
+    letter-spacing: -0.02em;
   }
 }
 
@@ -178,6 +199,7 @@
 
 @utility tabular {
   font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
 }
 
 @utility panel {
@@ -191,4 +213,27 @@
   background-color: var(--color-card);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-panel);
+}
+
+/* Subtle brand wash used behind hero/entry surfaces. */
+@utility brand-wash {
+  background-image:
+    radial-gradient(circle at 12% 8%, oklch(0.55 0.212 264 / 12%), transparent 45%),
+    radial-gradient(circle at 92% 92%, oklch(0.72 0.108 190 / 12%), transparent 45%);
+}
+
+@utility skeleton {
+  background-color: var(--color-secondary);
+  border-radius: var(--radius-sm);
+  animation: payflow-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes payflow-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
 }

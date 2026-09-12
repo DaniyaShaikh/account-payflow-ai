@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Search } from "lucide-react";
+import { Inbox, Search } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
@@ -32,18 +32,18 @@ export function PageHeader({
           ))}
         </nav>
       )}
-      <div className="flex flex-wrap items-end justify-between gap-4">
+      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-4">
         <div className="min-w-0">
-          <h1 className="text-[24px] leading-tight font-semibold tracking-tight text-foreground">
+          <h1 className="text-[21px] leading-tight font-bold tracking-tight text-foreground">
             {title}
           </h1>
           {description && (
-            <p className="mt-1.5 max-w-2xl text-[13px] leading-relaxed text-muted-foreground">
+            <p className="mt-1 max-w-2xl text-[13px] leading-relaxed text-muted-foreground">
               {description}
             </p>
           )}
         </div>
-        {actions}
+        <div className="flex flex-wrap items-center gap-2">{actions}</div>
       </div>
     </div>
   );
@@ -89,17 +89,17 @@ export function Panel({
   return (
     <section className={cn("panel overflow-hidden", className)}>
       {title && (
-        <header className="flex flex-wrap items-center justify-between gap-3 px-5 pt-4 pb-3">
+        <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border/70 px-5 py-3.5">
           <div>
-            <h2 className="text-[14px] font-semibold tracking-tight text-foreground">{title}</h2>
+            <h2 className="text-[13.5px] font-semibold tracking-tight text-foreground">{title}</h2>
             {description && (
-              <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
+              <p className="mt-0.5 text-[11.5px] text-muted-foreground">{description}</p>
             )}
           </div>
           {action}
         </header>
       )}
-      <div className={cn(title ? "px-5 pb-4" : "px-5 py-4", bodyClassName)}>{children}</div>
+      <div className={cn(title ? "px-5 py-4" : "px-5 py-4", bodyClassName)}>{children}</div>
     </section>
   );
 }
@@ -124,11 +124,22 @@ export function KpiCard({
         ? "text-destructive"
         : "text-muted-foreground";
   return (
-    <div className="panel px-4 py-3.5 transition-shadow hover:shadow-panel">
+    <div
+      className={cn(
+        "group relative overflow-hidden rounded-lg border border-border bg-card px-4 py-3.5 transition-all hover:border-border-strong hover:shadow-panel",
+        tone === "primary" && "border-primary/25 bg-primary/[0.035]",
+      )}
+    >
+      <span
+        className={cn(
+          "absolute inset-y-0 left-0 w-[3px]",
+          tone === "primary" ? "bg-primary" : "bg-transparent",
+        )}
+      />
       <p className="text-eyebrow">{label}</p>
       <p
         className={cn(
-          "tabular mt-2 text-[22px] leading-none font-semibold tracking-tight",
+          "tabular mt-2 text-[23px] leading-none font-bold tracking-tight",
           tone === "primary" ? "text-primary" : "text-foreground",
         )}
       >
@@ -153,19 +164,42 @@ const toneStyles = {
   ai: "bg-ai/10 text-ai border-ai/20",
 } as const;
 
+const toneDot = {
+  neutral: "bg-muted-foreground/60",
+  success: "bg-success",
+  warning: "bg-warning",
+  info: "bg-info",
+  danger: "bg-destructive",
+  ai: "bg-ai",
+} as const;
+
 export type Tone = keyof typeof toneStyles;
 
-export function StatusPill({ children, tone = "neutral" }: { children: ReactNode; tone?: Tone }) {
+export function StatusPill({
+  children,
+  tone = "neutral",
+  dot = false,
+}: {
+  children: ReactNode;
+  tone?: Tone;
+  dot?: boolean;
+}) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium whitespace-nowrap",
+        "inline-flex items-center gap-1.5 rounded-md border px-2 py-[3px] text-[11px] font-semibold whitespace-nowrap",
         toneStyles[tone],
       )}
     >
+      {dot && <span className={cn("size-1.5 shrink-0 rounded-full", toneDot[tone])} />}
       {children}
     </span>
   );
+}
+
+/** Subtle loading placeholder used while a view settles. */
+export function Skeleton({ className }: { className?: string }) {
+  return <span className={cn("skeleton block h-4 w-full", className)} />;
 }
 
 export function statusTone(status: string): Tone {
@@ -197,12 +231,12 @@ export function DataTable({
   return (
     <div className="panel max-h-[70vh] overflow-auto">
       <table className="w-full border-collapse text-[13px]" style={{ minWidth }}>
-        <thead className="sticky top-0 z-10 bg-card">
-          <tr className="border-b border-border">
+        <thead className="sticky top-0 z-10">
+          <tr>
             {head.map((h, i) => (
               <th
                 key={i}
-                className="text-eyebrow bg-card px-4 py-3 text-left font-semibold whitespace-nowrap"
+                className="text-eyebrow border-b border-border bg-surface px-4 py-2.5 text-left font-semibold whitespace-nowrap"
               >
                 {h}
               </th>
@@ -240,7 +274,7 @@ export function Tr({
 
 export function Td({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <td className={cn("px-4 py-3.5 align-middle whitespace-nowrap", className)}>{children}</td>
+    <td className={cn("px-4 py-3 align-middle whitespace-nowrap", className)}>{children}</td>
   );
 }
 
@@ -255,11 +289,25 @@ export function PrimaryCell({ title, subtitle }: { title: ReactNode; subtitle?: 
   );
 }
 
-export function EmptyState({ title, description }: { title: string; description?: string }) {
+export function EmptyState({
+  title,
+  description,
+  action,
+}: {
+  title: string;
+  description?: string;
+  action?: ReactNode;
+}) {
   return (
-    <div className="rounded-lg border border-dashed border-border-strong bg-surface px-4 py-10 text-center">
-      <p className="text-[13px] font-medium text-foreground">{title}</p>
-      {description && <p className="mt-1 text-xs text-muted-foreground">{description}</p>}
+    <div className="flex flex-col items-center rounded-lg border border-dashed border-border-strong bg-surface px-4 py-9 text-center">
+      <span className="mb-2.5 flex size-8 items-center justify-center rounded-full bg-card text-muted-foreground ring-1 ring-border">
+        <Inbox className="size-4" />
+      </span>
+      <p className="text-[13px] font-semibold text-foreground">{title}</p>
+      {description && (
+        <p className="mt-1 max-w-sm text-xs text-muted-foreground">{description}</p>
+      )}
+      {action && <div className="mt-3">{action}</div>}
     </div>
   );
 }
@@ -304,16 +352,36 @@ export function FilterSelect({
   options: string[];
   onChange: (value: string) => void;
 }) {
+  // A filter left on its first / "All …" option reads as unset and stays quiet;
+  // an applied filter picks up a subtle PayFlow Blue emphasis.
+  const applied = value !== options[0] && !value.startsWith("All ");
   return (
-    <label className="flex h-8 items-center gap-2 rounded-md border border-border bg-card px-2.5 transition-colors hover:border-border-strong">
-      <span className="text-[11px] font-medium text-muted-foreground">{label}</span>
+    <label
+      className={cn(
+        "flex h-8 items-center gap-2 rounded-md border px-2.5 transition-colors",
+        applied
+          ? "border-primary/40 bg-primary/[0.06]"
+          : "border-border bg-card hover:border-border-strong",
+      )}
+    >
+      <span
+        className={cn(
+          "text-[11px] font-medium",
+          applied ? "text-primary" : "text-muted-foreground",
+        )}
+      >
+        {label}
+      </span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="bg-transparent text-[13px] font-medium text-foreground outline-none"
+        className={cn(
+          "bg-transparent text-[13px] font-medium outline-none",
+          applied ? "text-primary" : "text-foreground",
+        )}
       >
         {options.map((option) => (
-          <option key={option} value={option}>
+          <option key={option} value={option} className="text-foreground">
             {option}
           </option>
         ))}
@@ -340,10 +408,10 @@ export function TabBar<T extends string>({
           key={t}
           onClick={() => onChange(t)}
           className={cn(
-            "-mb-px border-b-2 px-3 py-2.5 text-[13px] font-medium whitespace-nowrap transition-colors",
+            "-mb-px border-b-2 px-3 py-2.5 text-[13px] whitespace-nowrap transition-colors",
             active === t
-              ? "border-primary text-foreground"
-              : "border-transparent text-muted-foreground hover:text-foreground",
+              ? "border-primary font-semibold text-primary"
+              : "border-transparent font-medium text-muted-foreground hover:border-border-strong hover:text-foreground",
           )}
         >
           {t}
@@ -583,11 +651,12 @@ export function Btn({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-[13px] font-medium transition-all disabled:opacity-50",
+        "inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-[13px] font-semibold transition-all focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-none disabled:opacity-50",
         variant === "primary" &&
-          "bg-primary text-primary-foreground shadow-subtle hover:bg-primary/90",
-        variant === "secondary" && "border border-border bg-card text-foreground hover:bg-surface",
-        variant === "ghost" && "text-muted-foreground hover:text-foreground",
+          "bg-primary text-primary-foreground shadow-brand hover:bg-primary/92 active:translate-y-px",
+        variant === "secondary" &&
+          "border border-border bg-card text-foreground hover:border-border-strong hover:bg-surface",
+        variant === "ghost" && "font-medium text-muted-foreground hover:text-primary",
         variant === "danger" &&
           "border border-destructive/30 text-destructive hover:bg-destructive/10",
         className,
