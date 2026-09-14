@@ -31,7 +31,7 @@ export const Route = createFileRoute("/portfolios/$portfolioId")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: PortfolioWorkspace;
+  component: PortfolioWorkspace,
 });
 
 function PortfolioWorkspace() {
