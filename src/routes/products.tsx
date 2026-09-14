@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 import { ArrowRight, ShieldAlert } from "lucide-react";
 import { PayflowMark, PayflowWordmark } from "@/components/brand";
 import { Btn, StatusPill } from "@/components/payflow-ui";
@@ -69,6 +70,20 @@ function ProductSelection() {
             : ""}
           Roles, scope and permissions are managed inside each product.
         </p>
+        {currentPerson && (
+          <p className="mt-1 text-[12.5px] text-muted-foreground">
+            Signed in as{" "}
+            <span className="font-medium text-foreground">{currentPerson.name}</span> ·{" "}
+            {currentPerson.email}
+          </p>
+        )}
+
+        {notice && (
+          <p className="mt-5 rounded-md border border-border bg-card px-3.5 py-2.5 text-[12.5px] text-foreground">
+            {notice}
+          </p>
+        )}
+
 
         {entitledProducts.length === 0 ? (
           <div className="mt-8 flex flex-col items-center rounded-lg border border-dashed border-border-strong/60 bg-card px-6 py-14 text-center">
@@ -87,7 +102,7 @@ function ProductSelection() {
               <button
                 key={product.id}
                 type="button"
-                onClick={() => openProduct(product.id)}
+                onClick={() => openProduct(product.id, product.name)}
                 className="panel group flex flex-col items-start p-5 text-left transition-all duration-150 hover:border-border-strong hover:shadow-brand"
               >
                 <div className="flex w-full items-center justify-between gap-3">
