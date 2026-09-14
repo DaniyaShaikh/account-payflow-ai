@@ -140,7 +140,9 @@ function RootShell({ children }: { children: ReactNode }) {
           <UsersProvider>
             <RoleProvider>
               <RulesProvider>
-                <ReviewsProvider>{children}</ReviewsProvider>
+                <ReviewsProvider>
+                  <StrategyProvider>{children}</StrategyProvider>
+                </ReviewsProvider>
               </RulesProvider>
             </RoleProvider>
           </UsersProvider>
