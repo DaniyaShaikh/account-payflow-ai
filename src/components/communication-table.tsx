@@ -33,9 +33,9 @@ export function useVisibleCommunications() {
 }
 
 import {
-  ALL_SUB_CLIENTS,
-  matchesSubClient,
-  subClientOptions,
+  isSingleClientSelected,
+  matchesSubClients,
+  subClientNamesForClient,
 } from "@/lib/portfolio-data";
 
 export function CommunicationTable({
