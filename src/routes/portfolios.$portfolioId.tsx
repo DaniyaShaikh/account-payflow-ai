@@ -60,7 +60,7 @@ function PortfolioWorkspace() {
       <PageHeader
         breadcrumb={[
           { label: "Clients", to: "/clients" },
-          { label: clientName(portfolio.clientId), to: "/clients/$clientId" },
+          { label: clientName(portfolio.clientId) },
           { label: portfolio.name },
         ]}
         title={portfolio.name}

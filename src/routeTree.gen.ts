@@ -27,10 +27,12 @@ import { Route as IntegrationsIntegrationIdRouteImport } from './routes/integrat
 import { Route as JourneysIndexRouteImport } from './routes/journeys.index'
 import { Route as JourneysJourneyIdRouteImport } from './routes/journeys.$journeyId'
 import { Route as PayTokenRouteImport } from './routes/pay.$token'
+import { Route as PortfoliosPortfolioIdRouteImport } from './routes/portfolios.$portfolioId'
 import { Route as RulesIndexRouteImport } from './routes/rules.index'
 import { Route as RulesRuleIdRouteImport } from './routes/rules.$ruleId'
 import { Route as RulesNewRouteImport } from './routes/rules.new'
 import { Route as StrategiesIndexRouteImport } from './routes/strategies.index'
+import { Route as StrategiesStrategyIdRouteImport } from './routes/strategies.$strategyId'
 import { Route as UsersIndexRouteImport } from './routes/users.index'
 import { Route as UsersUserIdRouteImport } from './routes/users.$userId'
 
@@ -126,6 +128,11 @@ const PayTokenRoute = PayTokenRouteImport.update({
   path: '/pay/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PortfoliosPortfolioIdRoute = PortfoliosPortfolioIdRouteImport.update({
+  id: '/portfolios/$portfolioId',
+  path: '/portfolios/$portfolioId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RulesIndexRoute = RulesIndexRouteImport.update({
   id: '/rules/',
   path: '/rules/',
@@ -144,6 +151,11 @@ const RulesNewRoute = RulesNewRouteImport.update({
 const StrategiesIndexRoute = StrategiesIndexRouteImport.update({
   id: '/strategies/',
   path: '/strategies/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StrategiesStrategyIdRoute = StrategiesStrategyIdRouteImport.update({
+  id: '/strategies/$strategyId',
+  path: '/strategies/$strategyId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const UsersIndexRoute = UsersIndexRouteImport.update({
@@ -170,8 +182,10 @@ export interface FileRoutesByFullPath {
   '/integrations/$integrationId': typeof IntegrationsIntegrationIdRoute
   '/journeys/$journeyId': typeof JourneysJourneyIdRoute
   '/pay/$token': typeof PayTokenRoute
+  '/portfolios/$portfolioId': typeof PortfoliosPortfolioIdRoute
   '/rules/$ruleId': typeof RulesRuleIdRoute
   '/rules/new': typeof RulesNewRoute
+  '/strategies/$strategyId': typeof StrategiesStrategyIdRoute
   '/users/$userId': typeof UsersUserIdRoute
   '/accounts/': typeof AccountsIndexRoute
   '/clients/': typeof ClientsIndexRoute
@@ -196,8 +210,10 @@ export interface FileRoutesByTo {
   '/integrations/$integrationId': typeof IntegrationsIntegrationIdRoute
   '/journeys/$journeyId': typeof JourneysJourneyIdRoute
   '/pay/$token': typeof PayTokenRoute
+  '/portfolios/$portfolioId': typeof PortfoliosPortfolioIdRoute
   '/rules/$ruleId': typeof RulesRuleIdRoute
   '/rules/new': typeof RulesNewRoute
+  '/strategies/$strategyId': typeof StrategiesStrategyIdRoute
   '/users/$userId': typeof UsersUserIdRoute
   '/accounts': typeof AccountsIndexRoute
   '/clients': typeof ClientsIndexRoute
@@ -223,8 +239,10 @@ export interface FileRoutesById {
   '/integrations/$integrationId': typeof IntegrationsIntegrationIdRoute
   '/journeys/$journeyId': typeof JourneysJourneyIdRoute
   '/pay/$token': typeof PayTokenRoute
+  '/portfolios/$portfolioId': typeof PortfoliosPortfolioIdRoute
   '/rules/$ruleId': typeof RulesRuleIdRoute
   '/rules/new': typeof RulesNewRoute
+  '/strategies/$strategyId': typeof StrategiesStrategyIdRoute
   '/users/$userId': typeof UsersUserIdRoute
   '/accounts/': typeof AccountsIndexRoute
   '/clients/': typeof ClientsIndexRoute
@@ -251,8 +269,10 @@ export interface FileRouteTypes {
     | '/integrations/$integrationId'
     | '/journeys/$journeyId'
     | '/pay/$token'
+    | '/portfolios/$portfolioId'
     | '/rules/$ruleId'
     | '/rules/new'
+    | '/strategies/$strategyId'
     | '/users/$userId'
     | '/accounts/'
     | '/clients/'
@@ -277,8 +297,10 @@ export interface FileRouteTypes {
     | '/integrations/$integrationId'
     | '/journeys/$journeyId'
     | '/pay/$token'
+    | '/portfolios/$portfolioId'
     | '/rules/$ruleId'
     | '/rules/new'
+    | '/strategies/$strategyId'
     | '/users/$userId'
     | '/accounts'
     | '/clients'
@@ -303,8 +325,10 @@ export interface FileRouteTypes {
     | '/integrations/$integrationId'
     | '/journeys/$journeyId'
     | '/pay/$token'
+    | '/portfolios/$portfolioId'
     | '/rules/$ruleId'
     | '/rules/new'
+    | '/strategies/$strategyId'
     | '/users/$userId'
     | '/accounts/'
     | '/clients/'
@@ -330,8 +354,10 @@ export interface RootRouteChildren {
   IntegrationsIntegrationIdRoute: typeof IntegrationsIntegrationIdRoute
   JourneysJourneyIdRoute: typeof JourneysJourneyIdRoute
   PayTokenRoute: typeof PayTokenRoute
+  PortfoliosPortfolioIdRoute: typeof PortfoliosPortfolioIdRoute
   RulesRuleIdRoute: typeof RulesRuleIdRoute
   RulesNewRoute: typeof RulesNewRoute
+  StrategiesStrategyIdRoute: typeof StrategiesStrategyIdRoute
   UsersUserIdRoute: typeof UsersUserIdRoute
   AccountsIndexRoute: typeof AccountsIndexRoute
   ClientsIndexRoute: typeof ClientsIndexRoute
@@ -472,6 +498,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PayTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/portfolios/$portfolioId': {
+      id: '/portfolios/$portfolioId'
+      path: '/portfolios/$portfolioId'
+      fullPath: '/portfolios/$portfolioId'
+      preLoaderRoute: typeof PortfoliosPortfolioIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/rules/': {
       id: '/rules/'
       path: '/rules'
@@ -498,6 +531,13 @@ declare module '@tanstack/react-router' {
       path: '/strategies'
       fullPath: '/strategies/'
       preLoaderRoute: typeof StrategiesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/strategies/$strategyId': {
+      id: '/strategies/$strategyId'
+      path: '/strategies/$strategyId'
+      fullPath: '/strategies/$strategyId'
+      preLoaderRoute: typeof StrategiesStrategyIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/users/': {
@@ -530,8 +570,10 @@ const rootRouteChildren: RootRouteChildren = {
   IntegrationsIntegrationIdRoute: IntegrationsIntegrationIdRoute,
   JourneysJourneyIdRoute: JourneysJourneyIdRoute,
   PayTokenRoute: PayTokenRoute,
+  PortfoliosPortfolioIdRoute: PortfoliosPortfolioIdRoute,
   RulesRuleIdRoute: RulesRuleIdRoute,
   RulesNewRoute: RulesNewRoute,
+  StrategiesStrategyIdRoute: StrategiesStrategyIdRoute,
   UsersUserIdRoute: UsersUserIdRoute,
   AccountsIndexRoute: AccountsIndexRoute,
   ClientsIndexRoute: ClientsIndexRoute,
