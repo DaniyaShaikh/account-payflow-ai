@@ -130,13 +130,13 @@ const earlyStageSteps: JourneyStep[] = [
 
 const progressiveSteps: JourneyStep[] = [
   { kind: "Entry", title: "Account enters workflow", detail: "Overdue after early-stage contact" },
-  { kind: "Communication", title: "First reminder", channel: "Email", timing: "Day 0" },
+  { kind: "Communication", title: "First reminder", channel: "Email", timing: "Immediately when case is received" },
   { kind: "Wait", title: "Wait / observe", timing: "3 days" },
   { kind: "Reassess", title: "Reassess customer", detail: "Channel preference and engagement" },
-  { kind: "Communication", title: "Second reminder", channel: "SMS", timing: "Day 3" },
+  { kind: "Communication", title: "Second reminder", channel: "SMS", timing: "3 days after previous Email" },
   { kind: "Condition", title: "If no meaningful response", detail: "Create no-response event" },
   { kind: "Governance", title: "Governance check", detail: "Applicable client rules evaluated" },
-  { kind: "Communication", title: "Firm reminder", channel: "Email", timing: "Day 7" },
+  { kind: "Communication", title: "Firm reminder", channel: "Email", timing: "7 days after case received" },
   { kind: "Outcome", title: "Observe outcome", detail: "Payment, promise to pay or no response" },
   { kind: "Escalation", title: "Escalation point", detail: "Only where governance requires it" },
 ];
@@ -169,20 +169,20 @@ const escalatedSteps: JourneyStep[] = [
 
 const highEngagementSteps: JourneyStep[] = [
   { kind: "Entry", title: "Account enters workflow", detail: "Consistent SMS engagement observed" },
-  { kind: "Communication", title: "Short SMS reminder", channel: "SMS", timing: "Day 0" },
+  { kind: "Communication", title: "Short SMS reminder", channel: "SMS", timing: "Immediately when case is received" },
   { kind: "Wait", title: "Wait / observe", timing: "1 day" },
   { kind: "Reassess", title: "Reassess customer", detail: "Click and payment behaviour" },
-  { kind: "Communication", title: "Payment link nudge", channel: "SMS", timing: "Day 1" },
+  { kind: "Communication", title: "Payment link nudge", channel: "SMS", timing: "1 day after previous SMS" },
   { kind: "Payment", title: "Payment initiated", detail: "Client-branded payment experience" },
   { kind: "Reassess", title: "Reassess", detail: "Stop or continue based on outcome" },
 ];
 
 const ctVariationSteps: JourneyStep[] = [
   { kind: "Entry", title: "Account enters workflow", detail: "Retail seasonal balances" },
-  { kind: "Communication", title: "Soft reminder", channel: "Email", timing: "Day 0" },
+  { kind: "Communication", title: "Soft reminder", channel: "Email", timing: "Immediately when case is received" },
   { kind: "Wait", title: "Wait / observe", timing: "4 days" },
   { kind: "Reassess", title: "Reassess customer", detail: "No existing workflow fitted this segment" },
-  { kind: "Communication", title: "SMS reminder", channel: "SMS", timing: "Day 4" },
+  { kind: "Communication", title: "SMS reminder", channel: "SMS", timing: "4 days after previous Email" },
   { kind: "Governance", title: "Governance check", detail: "Client requires approval of AI-created workflows" },
   { kind: "Outcome", title: "Observe outcome", detail: "Recovery measured against baseline" },
 ];
