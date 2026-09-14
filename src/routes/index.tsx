@@ -15,9 +15,9 @@ import { paymentOutcomeTotals } from "@/lib/payment-data";
 import { useVisibleCommunications } from "@/components/communication-table";
 import { buildIntegrations, integrationSummary } from "@/lib/integration-data";
 import {
-  ALL_SUB_CLIENTS,
+  isSingleClientSelected,
   portfolioByName,
-  subClientOptions,
+  subClientNamesForClient,
 } from "@/lib/portfolio-data";
 
 export const Route = createFileRoute("/")({
