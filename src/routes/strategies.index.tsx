@@ -1,17 +1,19 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Plus, GitBranch, Mail, MessageSquare } from "lucide-react";
 import {
   PageHeader,
   StatusPill,
   SearchInput,
   FilterSelect,
   EmptyState,
+  Btn,
 } from "@/components/payflow-ui";
+import { StrategyMiniMap } from "@/components/strategy-canvas";
 import { useRole } from "@/lib/role-context";
 import { useStrategies } from "@/lib/strategy-context";
 import { clientName, formatNumber } from "@/lib/payflow-data";
-import { strategyStatusTone, strategyStatuses } from "@/lib/strategy-data";
+import { strategyStatusTone, strategyStatuses, type Strategy } from "@/lib/strategy-data";
 
 export const Route = createFileRoute("/strategies/")({
   head: () => ({
@@ -20,7 +22,7 @@ export const Route = createFileRoute("/strategies/")({
       {
         name: "description",
         content:
-          "AI-proposed and approved collection strategies per client and sub-client portfolio, ready for human review in the PayFlow strategy builder.",
+          "AI-proposed and human-created collection strategies per client and sub-client portfolio, with visual flow previews and targeting details.",
       },
       { property: "og:title", content: "Strategies / Workflows — PayFlow" },
       {
@@ -33,6 +35,16 @@ export const Route = createFileRoute("/strategies/")({
   }),
   component: StrategiesPage,
 });
+
+function flowStats(strategy: Strategy) {
+  const nodes = Object.values(strategy.nodes);
+  return {
+    steps: nodes.length,
+    branches: nodes.filter((n) => n.kind === "Condition").length,
+    emails: nodes.filter((n) => n.kind === "Communication" && n.config.channel === "Email").length,
+    sms: nodes.filter((n) => n.kind === "Communication" && n.config.channel === "SMS").length,
+  };
+}
 
 function StrategiesPage() {
   const { visibleClients, canSeeClient } = useRole();
@@ -69,13 +81,20 @@ function StrategiesPage() {
     <>
       <PageHeader
         title="Strategies / Workflows"
-        description="PayFlow analyses collection data and case context, then proposes a strategy for review. A human reviews, adjusts and approves it before it runs."
+        description="PayFlow proposes a strategy from collection data and case context — and a person can create one too, with AI suggesting the steps. Every strategy is reviewed and approved before it runs."
         actions={
-          proposed > 0 ? (
-            <StatusPill tone="ai" dot>
-              {proposed} awaiting review
-            </StatusPill>
-          ) : undefined
+          <div className="flex flex-wrap items-center gap-2">
+            {proposed > 0 && (
+              <StatusPill tone="ai" dot>
+                {proposed} awaiting review
+              </StatusPill>
+            )}
+            <Link to="/strategies/new">
+              <Btn variant="primary">
+                <Plus className="size-3.5" /> Create workflow
+              </Btn>
+            </Link>
+          </div>
         }
       />
 
@@ -118,6 +137,7 @@ function StrategiesPage() {
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {rows.map((s) => {
             const pf = portfolioById(s.portfolioId);
+            const stats = flowStats(s);
             return (
               <Link
                 key={s.id}
@@ -136,9 +156,37 @@ function StrategiesPage() {
                 <p className="mt-1 text-[11.5px] text-muted-foreground">
                   {clientName(s.clientId)} · {pf?.name ?? "Portfolio"}
                 </p>
+
+                <div className="mt-3">
+                  <StrategyMiniMap strategy={s} />
+                </div>
+
+                <div className="mt-2.5 flex flex-wrap items-center gap-3 text-[11.5px] text-muted-foreground">
+                  <span className="tabular">{stats.steps} steps</span>
+                  <span className="inline-flex items-center gap-1">
+                    <GitBranch className="size-3" /> {stats.branches} branches
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <Mail className="size-3" /> {stats.emails}
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <MessageSquare className="size-3" /> {stats.sms}
+                  </span>
+                </div>
+
                 <p className="mt-2.5 line-clamp-2 text-[12px] leading-relaxed text-muted-foreground">
                   {s.summary}
                 </p>
+
+                {s.segment && (
+                  <div className="mt-2.5 flex flex-wrap gap-1.5">
+                    <StatusPill>Age {s.segment.ageBand}</StatusPill>
+                    <StatusPill>{s.segment.postalRegion}</StatusPill>
+                    <StatusPill>{s.segment.balanceBand}</StatusPill>
+                    <StatusPill>{s.segment.delinquency}</StatusPill>
+                  </div>
+                )}
+
                 <div className="mt-3 flex flex-wrap items-center gap-1.5">
                   <StatusPill tone={s.origin === "AI Proposed" ? "ai" : "info"}>
                     {s.origin === "AI Proposed" ? (
