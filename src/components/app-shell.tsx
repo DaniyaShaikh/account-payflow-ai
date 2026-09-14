@@ -13,6 +13,7 @@ import {
   Bell,
   LogOut,
   UserRound,
+  LayoutGrid,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { PayflowMark, PayflowWordmark } from "@/components/brand";
@@ -20,6 +21,9 @@ import { useRole } from "@/lib/role-context";
 import { useReviews } from "@/lib/reviews-context";
 import { formatWaiting } from "@/lib/review-data";
 import { markSignedOut } from "@/lib/session";
+import { usePlatform } from "@/lib/platform-context";
+import { PAYFLOW_PRODUCT_ID } from "@/lib/platform-data";
+import { Btn } from "@/components/payflow-ui";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -241,9 +245,89 @@ function ReviewBell() {
   );
 }
 
+/** Current product plus a way back to product selection, within the same session. */
+function ProductSwitcher() {
+  const { entitledProducts, currentOrganization } = usePlatform();
+  const others = entitledProducts.filter((p) => p.id !== PAYFLOW_PRODUCT_ID);
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 py-1.5 text-[12px] font-semibold text-foreground transition-colors hover:border-border-strong hover:bg-surface"
+        >
+          <LayoutGrid className="size-3.5 text-muted-foreground" />
+          PayFlow
+          <ChevronsUpDown className="size-3 text-muted-foreground" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-60">
+        <DropdownMenuLabel className="text-eyebrow">Current product</DropdownMenuLabel>
+        <DropdownMenuItem disabled>
+          <span className="flex-1">PayFlow</span>
+          <span className="text-xs text-primary">Active</span>
+        </DropdownMenuItem>
+        {others.length > 0 && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel className="text-eyebrow">Other products</DropdownMenuLabel>
+            {others.map((p) => (
+              <DropdownMenuItem key={p.id} asChild>
+                <Link to="/products">
+                  <span className="flex-1">{p.name}</span>
+                </Link>
+              </DropdownMenuItem>
+            ))}
+          </>
+        )}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link to="/products">
+            <span className="flex-1">Product selection</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/platform">
+            <span className="flex-1">Platform administration</span>
+          </Link>
+        </DropdownMenuItem>
+        {currentOrganization && (
+          <DropdownMenuLabel className="text-[11px] font-normal text-muted-foreground">
+            {currentOrganization.name}
+          </DropdownMenuLabel>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 export function AppShell({ children }: { children: ReactNode }) {
   const { role, visibleClients } = useRole();
+  const { hasPayflowAccess } = usePlatform();
   const location = useLocation();
+
+  if (!hasPayflowAccess) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-surface px-5">
+        <div className="panel max-w-md p-8 text-center">
+          <PayflowWordmark className="mx-auto" />
+          <h1 className="mt-6 text-[18px] font-semibold text-foreground">
+            PayFlow access unavailable
+          </h1>
+          <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">
+            Your organization's PayFlow entitlement is currently revoked. Operational data is
+            retained — contact your platform administrator to restore access.
+          </p>
+          <div className="mt-6 flex justify-center">
+            <Link to="/products">
+              <Btn variant="primary">Back to product selection</Btn>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <SidebarProvider>
@@ -329,6 +413,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               </p>
             </div>
             <div className="flex items-center gap-1.5">
+              <ProductSwitcher />
               <ReviewBell />
               <span className="mx-1 hidden h-7 w-px bg-border lg:block" />
               <UserMenu compact />

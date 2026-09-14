@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ActivateRouteImport } from './routes/activate'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as ProductsRouteImport } from './routes/products'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ShowcaseRouteImport } from './routes/showcase'
 import { Route as AccountsIndexRouteImport } from './routes/accounts.index'
@@ -28,6 +29,8 @@ import { Route as IntegrationsIntegrationIdRouteImport } from './routes/integrat
 import { Route as JourneysIndexRouteImport } from './routes/journeys.index'
 import { Route as JourneysJourneyIdRouteImport } from './routes/journeys.$journeyId'
 import { Route as PayTokenRouteImport } from './routes/pay.$token'
+import { Route as PlatformIndexRouteImport } from './routes/platform.index'
+import { Route as PlatformAccessRouteImport } from './routes/platform.access'
 import { Route as PortfoliosPortfolioIdRouteImport } from './routes/portfolios.$portfolioId'
 import { Route as RulesIndexRouteImport } from './routes/rules.index'
 import { Route as RulesRuleIdRouteImport } from './routes/rules.$ruleId'
@@ -37,6 +40,8 @@ import { Route as StrategiesStrategyIdRouteImport } from './routes/strategies.$s
 import { Route as StrategiesNewRouteImport } from './routes/strategies.new'
 import { Route as UsersIndexRouteImport } from './routes/users.index'
 import { Route as UsersUserIdRouteImport } from './routes/users.$userId'
+import { Route as PlatformProductsIndexRouteImport } from './routes/platform.products.index'
+import { Route as PlatformProductsProductIdRouteImport } from './routes/platform.products.$productId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -51,6 +56,11 @@ const ActivateRoute = ActivateRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProductsRoute = ProductsRouteImport.update({
+  id: '/products',
+  path: '/products',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -135,6 +145,16 @@ const PayTokenRoute = PayTokenRouteImport.update({
   path: '/pay/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlatformIndexRoute = PlatformIndexRouteImport.update({
+  id: '/platform/',
+  path: '/platform/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformAccessRoute = PlatformAccessRouteImport.update({
+  id: '/platform/access',
+  path: '/platform/access',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PortfoliosPortfolioIdRoute = PortfoliosPortfolioIdRouteImport.update({
   id: '/portfolios/$portfolioId',
   path: '/portfolios/$portfolioId',
@@ -180,11 +200,23 @@ const UsersUserIdRoute = UsersUserIdRouteImport.update({
   path: '/users/$userId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlatformProductsIndexRoute = PlatformProductsIndexRouteImport.update({
+  id: '/platform/products/',
+  path: '/platform/products/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformProductsProductIdRoute =
+  PlatformProductsProductIdRouteImport.update({
+    id: '/platform/products/$productId',
+    path: '/platform/products/$productId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/activate': typeof ActivateRoute
   '/login': typeof LoginRoute
+  '/products': typeof ProductsRoute
   '/profile': typeof ProfileRoute
   '/showcase': typeof ShowcaseRoute
   '/accounts/$accountId': typeof AccountsAccountIdRoute
@@ -195,6 +227,7 @@ export interface FileRoutesByFullPath {
   '/integrations/$integrationId': typeof IntegrationsIntegrationIdRoute
   '/journeys/$journeyId': typeof JourneysJourneyIdRoute
   '/pay/$token': typeof PayTokenRoute
+  '/platform/access': typeof PlatformAccessRoute
   '/portfolios/$portfolioId': typeof PortfoliosPortfolioIdRoute
   '/rules/$ruleId': typeof RulesRuleIdRoute
   '/rules/new': typeof RulesNewRoute
@@ -207,14 +240,18 @@ export interface FileRoutesByFullPath {
   '/human-review/': typeof HumanReviewIndexRoute
   '/integrations/': typeof IntegrationsIndexRoute
   '/journeys/': typeof JourneysIndexRoute
+  '/platform/': typeof PlatformIndexRoute
   '/rules/': typeof RulesIndexRoute
   '/strategies/': typeof StrategiesIndexRoute
   '/users/': typeof UsersIndexRoute
+  '/platform/products/$productId': typeof PlatformProductsProductIdRoute
+  '/platform/products/': typeof PlatformProductsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/activate': typeof ActivateRoute
   '/login': typeof LoginRoute
+  '/products': typeof ProductsRoute
   '/profile': typeof ProfileRoute
   '/showcase': typeof ShowcaseRoute
   '/accounts/$accountId': typeof AccountsAccountIdRoute
@@ -225,6 +262,7 @@ export interface FileRoutesByTo {
   '/integrations/$integrationId': typeof IntegrationsIntegrationIdRoute
   '/journeys/$journeyId': typeof JourneysJourneyIdRoute
   '/pay/$token': typeof PayTokenRoute
+  '/platform/access': typeof PlatformAccessRoute
   '/portfolios/$portfolioId': typeof PortfoliosPortfolioIdRoute
   '/rules/$ruleId': typeof RulesRuleIdRoute
   '/rules/new': typeof RulesNewRoute
@@ -237,15 +275,19 @@ export interface FileRoutesByTo {
   '/human-review': typeof HumanReviewIndexRoute
   '/integrations': typeof IntegrationsIndexRoute
   '/journeys': typeof JourneysIndexRoute
+  '/platform': typeof PlatformIndexRoute
   '/rules': typeof RulesIndexRoute
   '/strategies': typeof StrategiesIndexRoute
   '/users': typeof UsersIndexRoute
+  '/platform/products/$productId': typeof PlatformProductsProductIdRoute
+  '/platform/products': typeof PlatformProductsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/activate': typeof ActivateRoute
   '/login': typeof LoginRoute
+  '/products': typeof ProductsRoute
   '/profile': typeof ProfileRoute
   '/showcase': typeof ShowcaseRoute
   '/accounts/$accountId': typeof AccountsAccountIdRoute
@@ -256,6 +298,7 @@ export interface FileRoutesById {
   '/integrations/$integrationId': typeof IntegrationsIntegrationIdRoute
   '/journeys/$journeyId': typeof JourneysJourneyIdRoute
   '/pay/$token': typeof PayTokenRoute
+  '/platform/access': typeof PlatformAccessRoute
   '/portfolios/$portfolioId': typeof PortfoliosPortfolioIdRoute
   '/rules/$ruleId': typeof RulesRuleIdRoute
   '/rules/new': typeof RulesNewRoute
@@ -268,9 +311,12 @@ export interface FileRoutesById {
   '/human-review/': typeof HumanReviewIndexRoute
   '/integrations/': typeof IntegrationsIndexRoute
   '/journeys/': typeof JourneysIndexRoute
+  '/platform/': typeof PlatformIndexRoute
   '/rules/': typeof RulesIndexRoute
   '/strategies/': typeof StrategiesIndexRoute
   '/users/': typeof UsersIndexRoute
+  '/platform/products/$productId': typeof PlatformProductsProductIdRoute
+  '/platform/products/': typeof PlatformProductsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -278,6 +324,7 @@ export interface FileRouteTypes {
     | '/'
     | '/activate'
     | '/login'
+    | '/products'
     | '/profile'
     | '/showcase'
     | '/accounts/$accountId'
@@ -288,6 +335,7 @@ export interface FileRouteTypes {
     | '/integrations/$integrationId'
     | '/journeys/$journeyId'
     | '/pay/$token'
+    | '/platform/access'
     | '/portfolios/$portfolioId'
     | '/rules/$ruleId'
     | '/rules/new'
@@ -300,14 +348,18 @@ export interface FileRouteTypes {
     | '/human-review/'
     | '/integrations/'
     | '/journeys/'
+    | '/platform/'
     | '/rules/'
     | '/strategies/'
     | '/users/'
+    | '/platform/products/$productId'
+    | '/platform/products/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/activate'
     | '/login'
+    | '/products'
     | '/profile'
     | '/showcase'
     | '/accounts/$accountId'
@@ -318,6 +370,7 @@ export interface FileRouteTypes {
     | '/integrations/$integrationId'
     | '/journeys/$journeyId'
     | '/pay/$token'
+    | '/platform/access'
     | '/portfolios/$portfolioId'
     | '/rules/$ruleId'
     | '/rules/new'
@@ -330,14 +383,18 @@ export interface FileRouteTypes {
     | '/human-review'
     | '/integrations'
     | '/journeys'
+    | '/platform'
     | '/rules'
     | '/strategies'
     | '/users'
+    | '/platform/products/$productId'
+    | '/platform/products'
   id:
     | '__root__'
     | '/'
     | '/activate'
     | '/login'
+    | '/products'
     | '/profile'
     | '/showcase'
     | '/accounts/$accountId'
@@ -348,6 +405,7 @@ export interface FileRouteTypes {
     | '/integrations/$integrationId'
     | '/journeys/$journeyId'
     | '/pay/$token'
+    | '/platform/access'
     | '/portfolios/$portfolioId'
     | '/rules/$ruleId'
     | '/rules/new'
@@ -360,15 +418,19 @@ export interface FileRouteTypes {
     | '/human-review/'
     | '/integrations/'
     | '/journeys/'
+    | '/platform/'
     | '/rules/'
     | '/strategies/'
     | '/users/'
+    | '/platform/products/$productId'
+    | '/platform/products/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ActivateRoute: typeof ActivateRoute
   LoginRoute: typeof LoginRoute
+  ProductsRoute: typeof ProductsRoute
   ProfileRoute: typeof ProfileRoute
   ShowcaseRoute: typeof ShowcaseRoute
   AccountsAccountIdRoute: typeof AccountsAccountIdRoute
@@ -379,6 +441,7 @@ export interface RootRouteChildren {
   IntegrationsIntegrationIdRoute: typeof IntegrationsIntegrationIdRoute
   JourneysJourneyIdRoute: typeof JourneysJourneyIdRoute
   PayTokenRoute: typeof PayTokenRoute
+  PlatformAccessRoute: typeof PlatformAccessRoute
   PortfoliosPortfolioIdRoute: typeof PortfoliosPortfolioIdRoute
   RulesRuleIdRoute: typeof RulesRuleIdRoute
   RulesNewRoute: typeof RulesNewRoute
@@ -391,9 +454,12 @@ export interface RootRouteChildren {
   HumanReviewIndexRoute: typeof HumanReviewIndexRoute
   IntegrationsIndexRoute: typeof IntegrationsIndexRoute
   JourneysIndexRoute: typeof JourneysIndexRoute
+  PlatformIndexRoute: typeof PlatformIndexRoute
   RulesIndexRoute: typeof RulesIndexRoute
   StrategiesIndexRoute: typeof StrategiesIndexRoute
   UsersIndexRoute: typeof UsersIndexRoute
+  PlatformProductsProductIdRoute: typeof PlatformProductsProductIdRoute
+  PlatformProductsIndexRoute: typeof PlatformProductsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -417,6 +483,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/products': {
+      id: '/products'
+      path: '/products'
+      fullPath: '/products'
+      preLoaderRoute: typeof ProductsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -531,6 +604,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PayTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/platform/': {
+      id: '/platform/'
+      path: '/platform'
+      fullPath: '/platform/'
+      preLoaderRoute: typeof PlatformIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/access': {
+      id: '/platform/access'
+      path: '/platform/access'
+      fullPath: '/platform/access'
+      preLoaderRoute: typeof PlatformAccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/portfolios/$portfolioId': {
       id: '/portfolios/$portfolioId'
       path: '/portfolios/$portfolioId'
@@ -594,6 +681,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UsersUserIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/platform/products/': {
+      id: '/platform/products/'
+      path: '/platform/products'
+      fullPath: '/platform/products/'
+      preLoaderRoute: typeof PlatformProductsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/products/$productId': {
+      id: '/platform/products/$productId'
+      path: '/platform/products/$productId'
+      fullPath: '/platform/products/$productId'
+      preLoaderRoute: typeof PlatformProductsProductIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -601,6 +702,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ActivateRoute: ActivateRoute,
   LoginRoute: LoginRoute,
+  ProductsRoute: ProductsRoute,
   ProfileRoute: ProfileRoute,
   ShowcaseRoute: ShowcaseRoute,
   AccountsAccountIdRoute: AccountsAccountIdRoute,
@@ -611,6 +713,7 @@ const rootRouteChildren: RootRouteChildren = {
   IntegrationsIntegrationIdRoute: IntegrationsIntegrationIdRoute,
   JourneysJourneyIdRoute: JourneysJourneyIdRoute,
   PayTokenRoute: PayTokenRoute,
+  PlatformAccessRoute: PlatformAccessRoute,
   PortfoliosPortfolioIdRoute: PortfoliosPortfolioIdRoute,
   RulesRuleIdRoute: RulesRuleIdRoute,
   RulesNewRoute: RulesNewRoute,
@@ -623,9 +726,12 @@ const rootRouteChildren: RootRouteChildren = {
   HumanReviewIndexRoute: HumanReviewIndexRoute,
   IntegrationsIndexRoute: IntegrationsIndexRoute,
   JourneysIndexRoute: JourneysIndexRoute,
+  PlatformIndexRoute: PlatformIndexRoute,
   RulesIndexRoute: RulesIndexRoute,
   StrategiesIndexRoute: StrategiesIndexRoute,
   UsersIndexRoute: UsersIndexRoute,
+  PlatformProductsProductIdRoute: PlatformProductsProductIdRoute,
+  PlatformProductsIndexRoute: PlatformProductsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

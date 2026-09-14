@@ -17,6 +17,7 @@ import { UsersProvider } from "../lib/users-context";
 import { RulesProvider } from "../lib/rules-context";
 import { ReviewsProvider } from "../lib/reviews-context";
 import { StrategyProvider } from "../lib/strategy-context";
+import { PlatformProvider } from "../lib/platform-context";
 import { AppShell } from "../components/app-shell";
 import { isSignedIn } from "../lib/session";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -138,6 +139,7 @@ function RootShell({ children }: { children: ReactNode }) {
       </head>
       <body>
         <QueryClientProvider client={queryClient}>
+          <PlatformProvider>
           <UsersProvider>
             <RoleProvider>
               <RulesProvider>
@@ -147,6 +149,7 @@ function RootShell({ children }: { children: ReactNode }) {
               </RulesProvider>
             </RoleProvider>
           </UsersProvider>
+          </PlatformProvider>
         </QueryClientProvider>
         <Scripts />
       </body>
@@ -177,8 +180,23 @@ function RootComponent() {
       s.location.pathname.startsWith("/activate"),
   });
 
+  // Platform administration and product selection sit above PayFlow: they are
+  // authenticated, but render their own shell instead of the PayFlow shell.
+  const isPlatformSurface = useRouterState({
+    select: (s) =>
+      s.location.pathname.startsWith("/platform") || s.location.pathname.startsWith("/products"),
+  });
+
   if (isBareSurface) {
     return <Outlet />;
+  }
+
+  if (isPlatformSurface) {
+    return (
+      <SessionGate>
+        <Outlet />
+      </SessionGate>
+    );
   }
 
   return (
