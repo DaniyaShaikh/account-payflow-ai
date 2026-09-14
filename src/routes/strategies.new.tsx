@@ -156,8 +156,6 @@ function buildNodes(steps: Step[]): Record<string, StrategyNode> {
           ? {
               channel: step.channel ?? "Email",
               purpose: step.purpose ?? messagePurposes[0]!,
-              channel: step.channel,
-              purpose: step.purpose,
               referenceEvent: "Previous Action",
               amount: step.amount,
               unit: step.unit,
