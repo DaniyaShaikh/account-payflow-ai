@@ -353,7 +353,7 @@ function AccountDetail() {
                   onClick={() => setShowAllTimeline(!showAllTimeline)}
                   className="mt-4 text-[12px] font-medium text-primary hover:underline"
                 >
-                  {showAllTimeline ? "Show less" : \}
+                  {showAllTimeline ? "Show less" : `Show ${timeline.length - 6} more events`}
                 </button>
               )}
           </Panel>

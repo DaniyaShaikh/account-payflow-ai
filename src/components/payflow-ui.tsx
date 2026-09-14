@@ -32,7 +32,7 @@ export function PageHeader({
           ))}
         </nav>
       )}
-      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-border/80 pb-5">
+      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-border/60 pb-6">
         <div className="min-w-0">
           <h1 className="text-[24px] leading-tight font-bold text-foreground">
             {title}
@@ -87,7 +87,7 @@ export function Panel({
   bodyClassName?: string;
 }) {
   return (
-    <section className={cn("panel overflow-hidden transition-[border-color,box-shadow] duration-200 hover:border-border-strong/80", className)}>
+    <section className={cn("panel overflow-hidden transition-all duration-300 hover:border-primary/30 hover:shadow-panel-hover ring-1 ring-inset ring-foreground/5", className)}>
       {title && (
         <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 bg-card/80 px-5 py-4">
           <div>
@@ -126,8 +126,8 @@ export function KpiCard({
   return (
     <div
       className={cn(
-        "group relative min-h-[106px] overflow-hidden rounded-lg border border-border/80 bg-card px-4 py-4 shadow-subtle transition-all duration-200 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-panel",
-        tone === "primary" && "border-primary/30 bg-primary/[0.055] shadow-brand",
+        "group relative min-h-[106px] overflow-hidden rounded-lg border border-border/80 bg-card px-4 py-4 shadow-subtle transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-panel ring-1 ring-inset ring-foreground/[0.02]",
+        tone === "primary" && "border-primary/40 bg-gradient-to-br from-primary/[0.08] to-transparent shadow-brand",
       )}
     >
       <span
@@ -262,7 +262,7 @@ export function Tr({
     <tr
       onClick={onClick}
       className={cn(
-         "border-b border-border/60 transition-colors last:border-0 hover:bg-accent/35",
+         "border-b border-border/40 transition-colors last:border-0 hover:bg-accent/40",
         onClick && "cursor-pointer",
         className,
       )}
@@ -299,7 +299,7 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center rounded-lg border border-dashed border-border-strong bg-surface px-4 py-9 text-center">
+    <div className="flex flex-col items-center rounded-lg border border-dashed border-border-strong/60 bg-muted/30 px-6 py-12 text-center">
       <span className="mb-2.5 flex size-8 items-center justify-center rounded-full bg-card text-muted-foreground ring-1 ring-border">
         <Inbox className="size-4" />
       </span>
