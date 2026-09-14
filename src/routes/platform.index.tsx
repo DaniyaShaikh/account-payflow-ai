@@ -33,7 +33,6 @@ function PlatformOverview() {
   return (
     <PlatformShell>
       <PageHeader
-        eyebrow="Platform"
         title="Platform Overview"
         description="Products registered on the platform and which organizations are entitled to them. Product roles, scope and permissions stay inside each product."
       />

@@ -107,7 +107,7 @@ function ProductsPage() {
       )}
 
       <Panel className="mt-6" bodyClassName="p-0">
-        <DataTable headers={["Product", "Code", "Description", "Status", ""]}>
+        <DataTable head={["Product", "Code", "Description", "Status", ""]}>
           {products.map((p) => (
             <Tr key={p.id}>
               <Td>
