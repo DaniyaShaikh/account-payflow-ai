@@ -28,7 +28,13 @@ import {
   type StrategyNodeKind,
 } from "@/lib/strategy-data";
 
-const addableKinds: StrategyNodeKind[] = ["Communication", "Wait", "AI Reassessment", "Case Action"];
+const addableKinds: StrategyNodeKind[] = [
+  "Communication",
+  "Wait",
+  "Condition",
+  "AI Reassessment",
+  "Case Action",
+];
 
 export function TemplatePreview({ node }: { node: StrategyNode }) {
   const template = templateForNode(node);
