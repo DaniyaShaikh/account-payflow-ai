@@ -1,5 +1,5 @@
-import logoAsset from "@/assets/payflow-logo.png.asset.json";
-import markAsset from "@/assets/payflow-mark.png.asset.json";
+import logoAsset from "@/assets/payflow-logo-transparent.png.asset.json";
+import markAsset from "@/assets/payflow-mark-transparent.png.asset.json";
 import { cn } from "@/lib/utils";
 
 /** Full PayFlow lockup (mark + wordmark + tagline). Use where there is room. */
@@ -27,7 +27,7 @@ export function PayflowMark({ className }: { className?: string }) {
 /** Mark plus wordmark, sized for navigation chrome. */
 export function PayflowWordmark({
   className,
-  tagline = false,
+  tagline: _tagline = false,
   invert = false,
 }: {
   className?: string;
@@ -35,28 +35,14 @@ export function PayflowWordmark({
   invert?: boolean;
 }) {
   return (
-    <span className={cn("flex items-center gap-2.5", className)}>
-      <PayflowMark className="size-8" />
-      <span className="leading-none">
-        <span
-          className={cn(
-            "block text-[16px] font-extrabold tracking-tight",
-            invert ? "text-sidebar-foreground" : "text-foreground",
-          )}
-        >
-          Pay<span className="text-primary">Flow</span>
-        </span>
-        {tagline && (
-          <span
-            className={cn(
-              "mt-1 block text-[8.5px] font-semibold tracking-[0.16em] uppercase",
-              invert ? "text-sidebar-muted" : "text-muted-foreground",
-            )}
-          >
-            Automate. Engage. Recover.
-          </span>
-        )}
-      </span>
-    </span>
+    <img
+      src={logoAsset.url}
+      alt="PayFlow — Automate. Engage. Recover."
+      className={cn(
+        "h-11 w-auto max-w-full object-contain object-left",
+        invert && "brightness-0 invert",
+        className,
+      )}
+    />
   );
 }
