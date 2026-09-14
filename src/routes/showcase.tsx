@@ -6,7 +6,7 @@ import {
   LayoutDashboard,
   MessageSquare,
   Plug,
-  Route,
+  Route as RouteIcon,
   Scale,
   UserCheck,
   Users,
@@ -42,7 +42,7 @@ const groups = [
   {
     label: "AI Operations",
     items: [
-      { label: "Strategies / Workflows", icon: Route },
+      { label: "Strategies / Workflows", icon: RouteIcon },
       { label: "Communications", icon: MessageSquare },
     ],
   },
