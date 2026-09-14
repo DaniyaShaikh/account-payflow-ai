@@ -39,6 +39,7 @@ import { Route as StrategiesNewRouteImport } from './routes/strategies.new'
 import { Route as UsersIndexRouteImport } from './routes/users.index'
 import { Route as UsersUserIdRouteImport } from './routes/users.$userId'
 import { Route as PlatformProductsIndexRouteImport } from './routes/platform.products.index'
+import { Route as PlatformProductsProductIdRouteImport } from './routes/platform.products.$productId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -192,6 +193,12 @@ const PlatformProductsIndexRoute = PlatformProductsIndexRouteImport.update({
   path: '/platform/products/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlatformProductsProductIdRoute =
+  PlatformProductsProductIdRouteImport.update({
+    id: '/platform/products/$productId',
+    path: '/platform/products/$productId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -223,6 +230,7 @@ export interface FileRoutesByFullPath {
   '/rules/': typeof RulesIndexRoute
   '/strategies/': typeof StrategiesIndexRoute
   '/users/': typeof UsersIndexRoute
+  '/platform/products/$productId': typeof PlatformProductsProductIdRoute
   '/platform/products/': typeof PlatformProductsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -255,6 +263,7 @@ export interface FileRoutesByTo {
   '/rules': typeof RulesIndexRoute
   '/strategies': typeof StrategiesIndexRoute
   '/users': typeof UsersIndexRoute
+  '/platform/products/$productId': typeof PlatformProductsProductIdRoute
   '/platform/products': typeof PlatformProductsIndexRoute
 }
 export interface FileRoutesById {
@@ -288,6 +297,7 @@ export interface FileRoutesById {
   '/rules/': typeof RulesIndexRoute
   '/strategies/': typeof StrategiesIndexRoute
   '/users/': typeof UsersIndexRoute
+  '/platform/products/$productId': typeof PlatformProductsProductIdRoute
   '/platform/products/': typeof PlatformProductsIndexRoute
 }
 export interface FileRouteTypes {
@@ -322,6 +332,7 @@ export interface FileRouteTypes {
     | '/rules/'
     | '/strategies/'
     | '/users/'
+    | '/platform/products/$productId'
     | '/platform/products/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -354,6 +365,7 @@ export interface FileRouteTypes {
     | '/rules'
     | '/strategies'
     | '/users'
+    | '/platform/products/$productId'
     | '/platform/products'
   id:
     | '__root__'
@@ -386,6 +398,7 @@ export interface FileRouteTypes {
     | '/rules/'
     | '/strategies/'
     | '/users/'
+    | '/platform/products/$productId'
     | '/platform/products/'
   fileRoutesById: FileRoutesById
 }
@@ -419,6 +432,7 @@ export interface RootRouteChildren {
   RulesIndexRoute: typeof RulesIndexRoute
   StrategiesIndexRoute: typeof StrategiesIndexRoute
   UsersIndexRoute: typeof UsersIndexRoute
+  PlatformProductsProductIdRoute: typeof PlatformProductsProductIdRoute
   PlatformProductsIndexRoute: typeof PlatformProductsIndexRoute
 }
 
@@ -634,6 +648,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlatformProductsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/platform/products/$productId': {
+      id: '/platform/products/$productId'
+      path: '/platform/products/$productId'
+      fullPath: '/platform/products/$productId'
+      preLoaderRoute: typeof PlatformProductsProductIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -667,6 +688,7 @@ const rootRouteChildren: RootRouteChildren = {
   RulesIndexRoute: RulesIndexRoute,
   StrategiesIndexRoute: StrategiesIndexRoute,
   UsersIndexRoute: UsersIndexRoute,
+  PlatformProductsProductIdRoute: PlatformProductsProductIdRoute,
   PlatformProductsIndexRoute: PlatformProductsIndexRoute,
 }
 export const routeTree = rootRouteImport
