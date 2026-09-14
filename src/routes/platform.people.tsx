@@ -38,7 +38,7 @@ export const Route = createFileRoute("/platform/people")({
   component: PlatformPeoplePage,
 });
 
-const NEW_ORG = "__new__";
+const NEW_ORG = "+ Add a new organization";
 
 function PlatformPeoplePage() {
   const {

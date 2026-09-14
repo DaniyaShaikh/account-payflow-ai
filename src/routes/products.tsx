@@ -26,11 +26,16 @@ export const Route = createFileRoute("/products")({
 });
 
 function ProductSelection() {
-  const { entitledProducts, currentOrganization } = usePlatform();
+  const { entitledProducts, currentOrganization, currentPerson } = usePlatform();
   const navigate = useNavigate();
+  const [notice, setNotice] = useState<string | null>(null);
 
-  const openProduct = (productId: string) => {
-    if (productId === PAYFLOW_PRODUCT_ID) navigate({ to: "/" });
+  const openProduct = (productId: string, productName: string) => {
+    if (productId === PAYFLOW_PRODUCT_ID) {
+      navigate({ to: "/" });
+      return;
+    }
+    setNotice(`${productName} has no operational screens in this phase.`);
   };
 
   return (
