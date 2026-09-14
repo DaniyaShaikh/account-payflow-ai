@@ -48,10 +48,7 @@ import {
 const navGroups = [
   {
     label: "Overview",
-    items: [
-      { to: "/", label: "Dashboard", icon: LayoutDashboard, exact: true },
-      { to: "/showcase", label: "Navigation Showcase", icon: Layout, adminOnly: true },
-    ],
+    items: [{ to: "/", label: "Dashboard", icon: LayoutDashboard, exact: true }],
   },
   {
     label: "Operations",
