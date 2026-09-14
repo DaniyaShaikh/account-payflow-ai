@@ -30,6 +30,7 @@ import { Route as PayTokenRouteImport } from './routes/pay.$token'
 import { Route as RulesIndexRouteImport } from './routes/rules.index'
 import { Route as RulesRuleIdRouteImport } from './routes/rules.$ruleId'
 import { Route as RulesNewRouteImport } from './routes/rules.new'
+import { Route as StrategiesIndexRouteImport } from './routes/strategies.index'
 import { Route as UsersIndexRouteImport } from './routes/users.index'
 import { Route as UsersUserIdRouteImport } from './routes/users.$userId'
 
@@ -140,6 +141,11 @@ const RulesNewRoute = RulesNewRouteImport.update({
   path: '/rules/new',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StrategiesIndexRoute = StrategiesIndexRouteImport.update({
+  id: '/strategies/',
+  path: '/strategies/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UsersIndexRoute = UsersIndexRouteImport.update({
   id: '/users/',
   path: '/users/',
@@ -174,6 +180,7 @@ export interface FileRoutesByFullPath {
   '/integrations/': typeof IntegrationsIndexRoute
   '/journeys/': typeof JourneysIndexRoute
   '/rules/': typeof RulesIndexRoute
+  '/strategies/': typeof StrategiesIndexRoute
   '/users/': typeof UsersIndexRoute
 }
 export interface FileRoutesByTo {
@@ -199,6 +206,7 @@ export interface FileRoutesByTo {
   '/integrations': typeof IntegrationsIndexRoute
   '/journeys': typeof JourneysIndexRoute
   '/rules': typeof RulesIndexRoute
+  '/strategies': typeof StrategiesIndexRoute
   '/users': typeof UsersIndexRoute
 }
 export interface FileRoutesById {
@@ -225,6 +233,7 @@ export interface FileRoutesById {
   '/integrations/': typeof IntegrationsIndexRoute
   '/journeys/': typeof JourneysIndexRoute
   '/rules/': typeof RulesIndexRoute
+  '/strategies/': typeof StrategiesIndexRoute
   '/users/': typeof UsersIndexRoute
 }
 export interface FileRouteTypes {
@@ -252,6 +261,7 @@ export interface FileRouteTypes {
     | '/integrations/'
     | '/journeys/'
     | '/rules/'
+    | '/strategies/'
     | '/users/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -277,6 +287,7 @@ export interface FileRouteTypes {
     | '/integrations'
     | '/journeys'
     | '/rules'
+    | '/strategies'
     | '/users'
   id:
     | '__root__'
@@ -302,6 +313,7 @@ export interface FileRouteTypes {
     | '/integrations/'
     | '/journeys/'
     | '/rules/'
+    | '/strategies/'
     | '/users/'
   fileRoutesById: FileRoutesById
 }
@@ -328,6 +340,7 @@ export interface RootRouteChildren {
   IntegrationsIndexRoute: typeof IntegrationsIndexRoute
   JourneysIndexRoute: typeof JourneysIndexRoute
   RulesIndexRoute: typeof RulesIndexRoute
+  StrategiesIndexRoute: typeof StrategiesIndexRoute
   UsersIndexRoute: typeof UsersIndexRoute
 }
 
@@ -480,6 +493,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RulesNewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/strategies/': {
+      id: '/strategies/'
+      path: '/strategies'
+      fullPath: '/strategies/'
+      preLoaderRoute: typeof StrategiesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/users/': {
       id: '/users/'
       path: '/users'
@@ -520,6 +540,7 @@ const rootRouteChildren: RootRouteChildren = {
   IntegrationsIndexRoute: IntegrationsIndexRoute,
   JourneysIndexRoute: JourneysIndexRoute,
   RulesIndexRoute: RulesIndexRoute,
+  StrategiesIndexRoute: StrategiesIndexRoute,
   UsersIndexRoute: UsersIndexRoute,
 }
 export const routeTree = rootRouteImport
