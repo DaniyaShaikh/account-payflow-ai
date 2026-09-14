@@ -29,6 +29,7 @@ import { Route as JourneysIndexRouteImport } from './routes/journeys.index'
 import { Route as JourneysJourneyIdRouteImport } from './routes/journeys.$journeyId'
 import { Route as PayTokenRouteImport } from './routes/pay.$token'
 import { Route as PlatformIndexRouteImport } from './routes/platform.index'
+import { Route as PlatformAccessRouteImport } from './routes/platform.access'
 import { Route as PortfoliosPortfolioIdRouteImport } from './routes/portfolios.$portfolioId'
 import { Route as RulesIndexRouteImport } from './routes/rules.index'
 import { Route as RulesRuleIdRouteImport } from './routes/rules.$ruleId'
@@ -143,6 +144,11 @@ const PlatformIndexRoute = PlatformIndexRouteImport.update({
   path: '/platform/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlatformAccessRoute = PlatformAccessRouteImport.update({
+  id: '/platform/access',
+  path: '/platform/access',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PortfoliosPortfolioIdRoute = PortfoliosPortfolioIdRouteImport.update({
   id: '/portfolios/$portfolioId',
   path: '/portfolios/$portfolioId',
@@ -214,6 +220,7 @@ export interface FileRoutesByFullPath {
   '/integrations/$integrationId': typeof IntegrationsIntegrationIdRoute
   '/journeys/$journeyId': typeof JourneysJourneyIdRoute
   '/pay/$token': typeof PayTokenRoute
+  '/platform/access': typeof PlatformAccessRoute
   '/portfolios/$portfolioId': typeof PortfoliosPortfolioIdRoute
   '/rules/$ruleId': typeof RulesRuleIdRoute
   '/rules/new': typeof RulesNewRoute
@@ -247,6 +254,7 @@ export interface FileRoutesByTo {
   '/integrations/$integrationId': typeof IntegrationsIntegrationIdRoute
   '/journeys/$journeyId': typeof JourneysJourneyIdRoute
   '/pay/$token': typeof PayTokenRoute
+  '/platform/access': typeof PlatformAccessRoute
   '/portfolios/$portfolioId': typeof PortfoliosPortfolioIdRoute
   '/rules/$ruleId': typeof RulesRuleIdRoute
   '/rules/new': typeof RulesNewRoute
@@ -281,6 +289,7 @@ export interface FileRoutesById {
   '/integrations/$integrationId': typeof IntegrationsIntegrationIdRoute
   '/journeys/$journeyId': typeof JourneysJourneyIdRoute
   '/pay/$token': typeof PayTokenRoute
+  '/platform/access': typeof PlatformAccessRoute
   '/portfolios/$portfolioId': typeof PortfoliosPortfolioIdRoute
   '/rules/$ruleId': typeof RulesRuleIdRoute
   '/rules/new': typeof RulesNewRoute
@@ -316,6 +325,7 @@ export interface FileRouteTypes {
     | '/integrations/$integrationId'
     | '/journeys/$journeyId'
     | '/pay/$token'
+    | '/platform/access'
     | '/portfolios/$portfolioId'
     | '/rules/$ruleId'
     | '/rules/new'
@@ -349,6 +359,7 @@ export interface FileRouteTypes {
     | '/integrations/$integrationId'
     | '/journeys/$journeyId'
     | '/pay/$token'
+    | '/platform/access'
     | '/portfolios/$portfolioId'
     | '/rules/$ruleId'
     | '/rules/new'
@@ -382,6 +393,7 @@ export interface FileRouteTypes {
     | '/integrations/$integrationId'
     | '/journeys/$journeyId'
     | '/pay/$token'
+    | '/platform/access'
     | '/portfolios/$portfolioId'
     | '/rules/$ruleId'
     | '/rules/new'
@@ -416,6 +428,7 @@ export interface RootRouteChildren {
   IntegrationsIntegrationIdRoute: typeof IntegrationsIntegrationIdRoute
   JourneysJourneyIdRoute: typeof JourneysJourneyIdRoute
   PayTokenRoute: typeof PayTokenRoute
+  PlatformAccessRoute: typeof PlatformAccessRoute
   PortfoliosPortfolioIdRoute: typeof PortfoliosPortfolioIdRoute
   RulesRuleIdRoute: typeof RulesRuleIdRoute
   RulesNewRoute: typeof RulesNewRoute
@@ -578,6 +591,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlatformIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/platform/access': {
+      id: '/platform/access'
+      path: '/platform/access'
+      fullPath: '/platform/access'
+      preLoaderRoute: typeof PlatformAccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/portfolios/$portfolioId': {
       id: '/portfolios/$portfolioId'
       path: '/portfolios/$portfolioId'
@@ -672,6 +692,7 @@ const rootRouteChildren: RootRouteChildren = {
   IntegrationsIntegrationIdRoute: IntegrationsIntegrationIdRoute,
   JourneysJourneyIdRoute: JourneysJourneyIdRoute,
   PayTokenRoute: PayTokenRoute,
+  PlatformAccessRoute: PlatformAccessRoute,
   PortfoliosPortfolioIdRoute: PortfoliosPortfolioIdRoute,
   RulesRuleIdRoute: RulesRuleIdRoute,
   RulesNewRoute: RulesNewRoute,
