@@ -28,6 +28,7 @@ import { Route as IntegrationsIntegrationIdRouteImport } from './routes/integrat
 import { Route as JourneysIndexRouteImport } from './routes/journeys.index'
 import { Route as JourneysJourneyIdRouteImport } from './routes/journeys.$journeyId'
 import { Route as PayTokenRouteImport } from './routes/pay.$token'
+import { Route as PlatformIndexRouteImport } from './routes/platform.index'
 import { Route as PortfoliosPortfolioIdRouteImport } from './routes/portfolios.$portfolioId'
 import { Route as RulesIndexRouteImport } from './routes/rules.index'
 import { Route as RulesRuleIdRouteImport } from './routes/rules.$ruleId'
@@ -135,6 +136,11 @@ const PayTokenRoute = PayTokenRouteImport.update({
   path: '/pay/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlatformIndexRoute = PlatformIndexRouteImport.update({
+  id: '/platform/',
+  path: '/platform/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PortfoliosPortfolioIdRoute = PortfoliosPortfolioIdRouteImport.update({
   id: '/portfolios/$portfolioId',
   path: '/portfolios/$portfolioId',
@@ -207,6 +213,7 @@ export interface FileRoutesByFullPath {
   '/human-review/': typeof HumanReviewIndexRoute
   '/integrations/': typeof IntegrationsIndexRoute
   '/journeys/': typeof JourneysIndexRoute
+  '/platform/': typeof PlatformIndexRoute
   '/rules/': typeof RulesIndexRoute
   '/strategies/': typeof StrategiesIndexRoute
   '/users/': typeof UsersIndexRoute
@@ -237,6 +244,7 @@ export interface FileRoutesByTo {
   '/human-review': typeof HumanReviewIndexRoute
   '/integrations': typeof IntegrationsIndexRoute
   '/journeys': typeof JourneysIndexRoute
+  '/platform': typeof PlatformIndexRoute
   '/rules': typeof RulesIndexRoute
   '/strategies': typeof StrategiesIndexRoute
   '/users': typeof UsersIndexRoute
@@ -268,6 +276,7 @@ export interface FileRoutesById {
   '/human-review/': typeof HumanReviewIndexRoute
   '/integrations/': typeof IntegrationsIndexRoute
   '/journeys/': typeof JourneysIndexRoute
+  '/platform/': typeof PlatformIndexRoute
   '/rules/': typeof RulesIndexRoute
   '/strategies/': typeof StrategiesIndexRoute
   '/users/': typeof UsersIndexRoute
@@ -300,6 +309,7 @@ export interface FileRouteTypes {
     | '/human-review/'
     | '/integrations/'
     | '/journeys/'
+    | '/platform/'
     | '/rules/'
     | '/strategies/'
     | '/users/'
@@ -330,6 +340,7 @@ export interface FileRouteTypes {
     | '/human-review'
     | '/integrations'
     | '/journeys'
+    | '/platform'
     | '/rules'
     | '/strategies'
     | '/users'
@@ -360,6 +371,7 @@ export interface FileRouteTypes {
     | '/human-review/'
     | '/integrations/'
     | '/journeys/'
+    | '/platform/'
     | '/rules/'
     | '/strategies/'
     | '/users/'
@@ -391,6 +403,7 @@ export interface RootRouteChildren {
   HumanReviewIndexRoute: typeof HumanReviewIndexRoute
   IntegrationsIndexRoute: typeof IntegrationsIndexRoute
   JourneysIndexRoute: typeof JourneysIndexRoute
+  PlatformIndexRoute: typeof PlatformIndexRoute
   RulesIndexRoute: typeof RulesIndexRoute
   StrategiesIndexRoute: typeof StrategiesIndexRoute
   UsersIndexRoute: typeof UsersIndexRoute
@@ -531,6 +544,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PayTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/platform/': {
+      id: '/platform/'
+      path: '/platform'
+      fullPath: '/platform/'
+      preLoaderRoute: typeof PlatformIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/portfolios/$portfolioId': {
       id: '/portfolios/$portfolioId'
       path: '/portfolios/$portfolioId'
@@ -623,6 +643,7 @@ const rootRouteChildren: RootRouteChildren = {
   HumanReviewIndexRoute: HumanReviewIndexRoute,
   IntegrationsIndexRoute: IntegrationsIndexRoute,
   JourneysIndexRoute: JourneysIndexRoute,
+  PlatformIndexRoute: PlatformIndexRoute,
   RulesIndexRoute: RulesIndexRoute,
   StrategiesIndexRoute: StrategiesIndexRoute,
   UsersIndexRoute: UsersIndexRoute,
