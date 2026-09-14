@@ -1,102 +1,157 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PageHeader, Panel } from "@/components/payflow-ui";
-import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { 
-  LayoutDashboard, 
-  Settings, 
-  Bell, 
-  Search, 
-  Plus, 
-  ExternalLink,
-  ChevronRight,
-  Info
+import {
+  Bell,
+  Building2,
+  FolderKanban,
+  LayoutDashboard,
+  MessageSquare,
+  Plug,
+  Route,
+  Scale,
+  UserCheck,
+  Users,
 } from "lucide-react";
+import { PayflowMark, PayflowWordmark } from "@/components/brand";
+import { PageHeader, StatusPill } from "@/components/payflow-ui";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/showcase")({
+  head: () => ({
+    meta: [
+      { title: "Navigation Showcase — PayFlow" },
+      { name: "description", content: "Expanded and slim PayFlow navigation states." },
+      { property: "og:title", content: "Navigation Showcase — PayFlow" },
+      { property: "og:description", content: "Expanded and slim PayFlow navigation states." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: Showcase,
 });
+
+const groups = [
+  { label: "Overview", items: [{ label: "Dashboard", icon: LayoutDashboard }] },
+  {
+    label: "Operations",
+    items: [
+      { label: "Clients", icon: Building2 },
+      { label: "Accounts / Cases", icon: FolderKanban },
+      { label: "Human Review", icon: UserCheck },
+    ],
+  },
+  {
+    label: "AI Operations",
+    items: [
+      { label: "Strategies / Workflows", icon: Route },
+      { label: "Communications", icon: MessageSquare },
+    ],
+  },
+  { label: "Governance", items: [{ label: "Rules", icon: Scale }] },
+  {
+    label: "Administration",
+    items: [
+      { label: "Users & Permissions", icon: Users },
+      { label: "Integrations", icon: Plug },
+    ],
+  },
+] as const;
+
+function NavigationPreview({ slim = false }: { slim?: boolean }) {
+  return (
+    <div
+      className={cn(
+        "flex h-[690px] flex-col overflow-hidden rounded-lg border border-sidebar-border bg-sidebar text-sidebar-foreground shadow-panel",
+        slim ? "w-[76px]" : "w-full max-w-[260px]",
+      )}
+    >
+      <div className={cn("flex h-[72px] shrink-0 items-center", slim ? "justify-center" : "px-4")}>
+        {slim ? <PayflowMark className="size-9" /> : <PayflowWordmark tagline invert />}
+      </div>
+      <div className={cn("flex-1 overflow-hidden pb-3", slim ? "px-2.5" : "px-3")}>
+        {groups.map((group) => (
+          <div key={group.label} className={cn("mb-4", slim && "mb-2.5")}>
+            {!slim && (
+              <p className="px-2.5 pb-1.5 text-[10px] font-semibold tracking-[0.1em] text-sidebar-muted uppercase">
+                {group.label}
+              </p>
+            )}
+            <div className="space-y-0.5">
+              {group.items.map((item) => {
+                const active = item.label === "Dashboard";
+                return (
+                  <div
+                    key={item.label}
+                    className={cn(
+                      "relative flex h-9 items-center rounded-lg text-[12.5px] font-medium",
+                      slim ? "justify-center" : "gap-2.5 px-2.5",
+                      active
+                        ? "border border-sidebar-border bg-sidebar-accent text-sidebar-accent-foreground"
+                        : "text-sidebar-muted",
+                    )}
+                    title={slim ? item.label : undefined}
+                  >
+                    {active && <span className="absolute inset-y-1.5 -left-1 w-[3px] rounded-full bg-sidebar-primary" />}
+                    <item.icon className="size-4 shrink-0" />
+                    {!slim && <span className="truncate">{item.label}</span>}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className={cn("border-t border-sidebar-border p-2.5", slim && "flex justify-center")}>
+        <div className="flex size-8 items-center justify-center rounded-full bg-sidebar-primary/25 text-[10px] font-bold">
+          ZA
+        </div>
+        {!slim && (
+          <div className="ml-2 min-w-0">
+            <p className="truncate text-[12px] font-semibold">Zeeshan Ali</p>
+            <p className="truncate text-[10px] text-sidebar-muted">Operations Admin</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 function Showcase() {
   return (
     <>
-      <PageHeader 
-        title="Navigation & UI Showcase" 
-        description="A demonstration of the application's design system and navigation components." 
+      <PageHeader
+        title="Navigation Showcase"
+        description="The same PayFlow hierarchy in expanded and focused navigation states."
+        actions={<StatusPill tone="info">Desktop</StatusPill>}
       />
-
-      <div className="grid gap-6">
-        <Panel title="Buttons & Actions" description="Standard button variants used throughout the platform.">
-          <div className="flex flex-wrap gap-4">
-            <Button>Default Button</Button>
-            <Button variant="secondary">Secondary</Button>
-            <Button variant="outline">Outline</Button>
-            <Button variant="ghost">Ghost</Button>
-            <Button variant="destructive">Destructive</Button>
-          </div>
-          <div className="mt-6 flex flex-wrap gap-4">
-            <Button size="sm"><Plus className="mr-2 size-4" /> New Item</Button>
-            <Button><Settings className="mr-2 size-4" /> Settings</Button>
-            <Button size="lg">Large Action</Button>
-            <Button size="icon" variant="outline"><Bell className="size-4" /></Button>
-            <Button size="icon" variant="ghost"><Search className="size-4" /></Button>
-          </div>
-        </Panel>
-
-        <Panel title="Tooltips" description="Contextual information displayed on hover.">
-          <div className="flex flex-wrap gap-8">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="outline" size="icon">
-                    <Info className="size-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>This is a helpful tooltip message.</p>
-                </TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="cursor-help text-sm font-medium text-primary underline decoration-dotted underline-offset-4">
-                    Hover for details
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent side="right">
-                  <p>Tooltips can appear on any side.</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        </Panel>
-
-        <Panel title="Navigation Patterns" description="Common link and navigation styles.">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between rounded-lg border border-border p-3 transition-colors hover:bg-muted/50">
-              <div className="flex items-center gap-3">
-                <div className="flex size-8 items-center justify-center rounded-md bg-primary/10 text-primary">
-                  <LayoutDashboard className="size-4" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium">Dashboard Overview</p>
-                  <p className="text-xs text-muted-foreground">View key metrics and active cases.</p>
-                </div>
-              </div>
-              <ChevronRight className="size-4 text-muted-foreground" />
+      <div className="grid gap-6 xl:grid-cols-2">
+        <section>
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <h2 className="text-[15px] font-semibold">Expanded</h2>
+              <p className="text-xs text-muted-foreground">Labels and groups remain visible.</p>
             </div>
-
-            <div className="flex items-center gap-4 text-sm">
-              <a href="#" className="flex items-center gap-1 text-primary hover:underline">
-                Documentation <ExternalLink className="size-3" />
-              </a>
-              <span className="text-muted-foreground">|</span>
-              <a href="#" className="text-muted-foreground hover:text-foreground">
-                Help Center
-              </a>
-            </div>
+            <StatusPill>260 px</StatusPill>
           </div>
-        </Panel>
+          <div className="flex min-h-[730px] items-start justify-center rounded-lg border border-border/60 bg-card p-5">
+            <NavigationPreview />
+          </div>
+        </section>
+        <section>
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <h2 className="text-[15px] font-semibold">Slim</h2>
+              <p className="text-xs text-muted-foreground">Icons retain tooltips and active context.</p>
+            </div>
+            <StatusPill>76 px</StatusPill>
+          </div>
+          <div className="flex min-h-[730px] items-start justify-center rounded-lg border border-border/60 bg-card p-5">
+            <NavigationPreview slim />
+          </div>
+        </section>
+      </div>
+      <div className="mt-5 flex items-center gap-2 rounded-lg border border-border/60 bg-card px-4 py-3 text-xs text-muted-foreground">
+        <Bell className="size-4 text-primary" />
+        Both states preserve role visibility, active-page context, profile access, and review notifications.
       </div>
     </>
   );

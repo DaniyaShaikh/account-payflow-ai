@@ -155,7 +155,7 @@ function UserMenu({ compact = false }: { compact?: boolean }) {
           )}
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align={compact ? "end" : "left"} side={compact ? "bottom" : "top"} className="w-60">
+      <DropdownMenuContent align={compact ? "end" : "start"} side={compact ? "bottom" : "top"} className="w-60">
         <DropdownMenuItem asChild>
           <Link to="/profile">
             <UserRound className="mr-2 size-4" />
@@ -320,7 +320,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <SidebarInset className="flex min-w-0 flex-1 flex-col">
           <header className="sticky top-0 z-20 flex h-[68px] items-center justify-between gap-4 border-b border-border/80 bg-background/90 px-5 shadow-subtle backdrop-blur-xl lg:px-9">
             <div className="flex items-center gap-4">
-              <SidebarTrigger className="-ml-1 hidden lg:flex" />
+              <SidebarTrigger className="-ml-1" />
               <div className="lg:hidden">
                 <PayflowWordmark />
               </div>
