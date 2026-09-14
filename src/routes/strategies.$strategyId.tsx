@@ -31,14 +31,9 @@ export const Route = createFileRoute("/strategies/$strategyId")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  loader: ({ params }) => {
-    if (!seedStrategies.some((s) => s.id === params.strategyId)) throw notFound();
-    return null;
-  },
   component: StrategyBuilder,
 });
 
-const addableKinds: StrategyNodeKind[] = ["Communication", "Wait", "AI Reassessment", "Case Action"];
 
 function StrategyBuilder() {
   const { strategyId } = Route.useParams();
@@ -60,7 +55,7 @@ function StrategyBuilder() {
   const [showAudit, setShowAudit] = useState(false);
   const [rejectNote, setRejectNote] = useState("");
   const [notice, setNotice] = useState<string | null>(null);
-  const [addKind, setAddKind] = useState<StrategyNodeKind>("Communication");
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   if (!strategy || !canSeeClient(strategy.clientId)) {
     return (
