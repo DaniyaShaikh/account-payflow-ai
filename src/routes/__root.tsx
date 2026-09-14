@@ -148,6 +148,7 @@ function RootShell({ children }: { children: ReactNode }) {
               </RulesProvider>
             </RoleProvider>
           </UsersProvider>
+          </PlatformProvider>
         </QueryClientProvider>
         <Scripts />
       </body>
