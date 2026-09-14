@@ -199,7 +199,7 @@ function StrategiesPage() {
                   </StatusPill>
                   <StatusPill>{s.version}</StatusPill>
                 </div>
-                <div className="mt-3 flex items-center justify-between border-t border-border/60 pt-2.5 text-[11.5px] text-muted-foreground">
+                <div className="mt-2 flex items-center justify-between border-t border-border/60 pt-2 text-[11.5px] text-muted-foreground">
                   <span className="tabular">{formatNumber(s.coverage)} cases covered</span>
                   <span>Updated {s.lastUpdated}</span>
                 </div>

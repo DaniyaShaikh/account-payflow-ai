@@ -268,7 +268,7 @@ function Dashboard() {
         description={`${roleLabel} view · ${formatNumber(accounts.length)} sample accounts loaded`}
       />
 
-      <div className="mb-5 flex flex-wrap gap-2">
+      <div className="mb-5 flex flex-wrap gap-x-2 gap-y-2.5">
         <FilterSelect
           label="Date"
           value={date}
@@ -324,7 +324,7 @@ function Dashboard() {
         description="Open items that need an operations decision or follow-up"
         className="mb-5"
       >
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-x-2 gap-y-2.5">
           <Link to="/human-review" search={{ status: "Awaiting Review" }}>
             <StatusPill tone={reviewCounts.awaiting ? "warning" : "neutral"}>
               Human Reviews Pending · {reviewCounts.awaiting}

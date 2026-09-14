@@ -1,4 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useState } from "react";
 import { PageHeader, Panel, StatusPill, statusTone, Btn } from "@/components/payflow-ui";
 import { useRole } from "@/lib/role-context";
 import { useReviews } from "@/lib/reviews-context";
@@ -53,6 +54,7 @@ interface TimelineEvent {
 
 function AccountDetail() {
   const { accountId } = Route.useParams();
+  const [showAllTimeline, setShowAllTimeline] = useState(false);
   const { canSeeClient } = useRole();
   const { reviewsForAccount, accountReviewEvents } = useReviews();
   const account = accounts.find((a) => a.id === accountId)!;
@@ -318,7 +320,7 @@ function AccountDetail() {
           <Panel title="Activity Timeline">
             <ol className="relative space-y-4 pl-5">
               <span className="absolute top-1.5 bottom-1.5 left-[5px] w-px bg-border" />
-              {timeline.map((event, i) => (
+              {timeline.slice(0, showAllTimeline ? undefined : 6).map((event, i) => (
                 <li key={`${event.label}-${event.at}-${i}`} className="relative">
                   <span className="absolute top-1 -left-5 size-[11px] rounded-full border-2 border-card bg-primary/70" />
                   <div className="flex items-baseline justify-between gap-3">
@@ -347,6 +349,14 @@ function AccountDetail() {
                 </li>
               ))}
             </ol>
+              {timeline.length > 6 && (
+                <button
+                  onClick={() => setShowAllTimeline(!showAllTimeline)}
+                  className="mt-4 text-[12px] font-medium text-primary hover:underline"
+                >
+                  {showAllTimeline ? "Show less" : `Show ${timeline.length - 6} more events`}
+                </button>
+              )}
           </Panel>
         </div>
       </div>

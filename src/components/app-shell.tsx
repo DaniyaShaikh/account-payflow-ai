@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useLocation } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   Building2,
@@ -13,9 +13,10 @@ import {
   Bell,
   LogOut,
   UserRound,
+  Layout,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
-import { PayflowWordmark } from "@/components/brand";
+import { PayflowMark, PayflowWordmark } from "@/components/brand";
 import { useRole } from "@/lib/role-context";
 import { useReviews } from "@/lib/reviews-context";
 import { formatWaiting } from "@/lib/review-data";
@@ -28,11 +29,30 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarRail,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 
 const navGroups = [
   {
     label: "Overview",
-    items: [{ to: "/", label: "Dashboard", icon: LayoutDashboard, exact: true }],
+    items: [
+      { to: "/", label: "Dashboard", icon: LayoutDashboard, exact: true },
+      { to: "/showcase", label: "Navigation Showcase", icon: Layout, adminOnly: true },
+    ],
   },
   {
     label: "Operations",
@@ -89,55 +109,53 @@ function UserMenu({ compact = false }: { compact?: boolean }) {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        className={
-          compact
-            ? "flex items-center gap-2.5 rounded-lg px-1.5 py-1.5 text-left transition-colors hover:bg-muted"
-            : "flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left transition-colors hover:bg-sidebar-accent"
-        }
-      >
-        <span
+      <DropdownMenuTrigger asChild>
+        <button
           className={
             compact
-              ? "flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-bold text-primary"
-              : "flex size-8 shrink-0 items-center justify-center rounded-full bg-sidebar-primary/25 text-[11px] font-bold text-sidebar-foreground"
+              ? "flex items-center gap-2.5 rounded-lg px-1.5 py-1.5 text-left transition-colors hover:bg-muted"
+              : "flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left transition-colors hover:bg-sidebar-accent"
           }
         >
-          {profileImage ? (
-            <img src={profileImage} alt="" className="size-full rounded-full object-cover" />
-          ) : (
-            initials
+          <span
+            className={
+              compact
+                ? "flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-bold text-primary"
+                : "flex size-8 shrink-0 items-center justify-center rounded-full bg-sidebar-primary/25 text-[11px] font-bold text-sidebar-foreground"
+            }
+          >
+            {profileImage ? (
+              <img src={profileImage} alt="" className="size-full rounded-full object-cover" />
+            ) : (
+              initials
+            )}
+          </span>
+          <span className="flex min-w-0 flex-1 flex-col leading-tight group-data-[collapsible=icon]:hidden">
+            <span
+              className={
+                compact
+                  ? "block truncate text-[13px] font-semibold text-foreground"
+                  : "block truncate text-[13px] font-semibold text-sidebar-foreground"
+              }
+            >
+              {userName}
+            </span>
+            <span
+              className={
+                compact
+                  ? "block truncate text-[11px] text-muted-foreground"
+                  : "block truncate text-[11px] text-sidebar-muted"
+              }
+            >
+              {roleLabel}
+            </span>
+          </span>
+          {!compact && (
+            <ChevronsUpDown className="ml-auto size-3.5 text-sidebar-muted group-data-[collapsible=icon]:hidden" />
           )}
-        </span>
-        <span className="hidden min-w-0 leading-tight sm:block">
-          <span
-            className={
-              compact
-                ? "block truncate text-[13px] font-semibold text-foreground"
-                : "block truncate text-[13px] font-semibold text-sidebar-foreground"
-            }
-          >
-            {userName}
-          </span>
-          <span
-            className={
-              compact
-                ? "block truncate text-[11px] text-muted-foreground"
-                : "block truncate text-[11px] text-sidebar-muted"
-            }
-          >
-            {roleLabel}
-          </span>
-        </span>
-        <ChevronsUpDown
-          className={
-            compact
-              ? "size-3.5 text-muted-foreground"
-              : "ml-auto size-3.5 text-sidebar-muted"
-          }
-        />
+        </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" side="top" className="w-60">
+      <DropdownMenuContent align={compact ? "end" : "start"} side={compact ? "bottom" : "top"} className="w-60">
         <DropdownMenuItem asChild>
           <Link to="/profile">
             <UserRound className="mr-2 size-4" />
@@ -227,84 +245,105 @@ function ReviewBell() {
   );
 }
 
-
 export function AppShell({ children }: { children: ReactNode }) {
   const { role, visibleClients } = useRole();
+  const location = useLocation();
 
   return (
-    <div className="flex min-h-screen bg-surface">
-      <aside className="sticky top-0 z-30 hidden h-screen w-[244px] shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground shadow-[8px_0_32px_-24px_var(--brand-navy)] lg:flex">
-        <div className="flex h-[68px] items-center px-4">
-          <PayflowWordmark tagline invert />
-        </div>
-
-        <nav className="flex-1 overflow-y-auto px-3 pb-4">
-          {navGroups
-            .map((group) => ({
-              ...group,
-              items: group.items.filter(
-                (item) => role === "admin" || !("adminOnly" in item && item.adminOnly),
-              ),
-            }))
-            .filter((group) => group.items.length > 0)
-            .map((group) => (
-            <div key={group.label} className="mb-5">
-              <p className="px-2.5 pb-2 text-[10px] font-semibold tracking-[0.1em] text-sidebar-muted uppercase">
-                {group.label}
-              </p>
-              <ul className="space-y-0.5">
-                {group.items.map((item) => (
-                  <li key={item.to}>
-                    <Link
-                      to={item.to}
-                      activeOptions={{ exact: "exact" in item ? item.exact : false }}
-                       className="group relative flex items-center gap-2.5 rounded-lg border border-transparent px-2.5 py-2 text-[13px] font-medium text-sidebar-muted transition-all duration-150 hover:bg-sidebar-accent/70 hover:text-sidebar-foreground data-[status=active]:border-sidebar-border data-[status=active]:bg-sidebar-accent data-[status=active]:text-sidebar-accent-foreground data-[status=active]:shadow-[0_8px_20px_-14px_var(--sidebar-primary)]"
-                      activeProps={{ className: "font-semibold" }}
-                    >
-                      <span className="absolute top-1.5 bottom-1.5 -left-1 w-[3px] rounded-full bg-sidebar-primary opacity-0 transition-opacity group-data-[status=active]:opacity-100" />
-                      <item.icon className="size-[15px] shrink-0 opacity-80" />
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full bg-surface">
+        <Sidebar collapsible="icon" className="border-r border-sidebar-border shadow-[8px_0_32px_-24px_var(--brand-navy)]">
+          <SidebarHeader className="flex h-[68px] items-center px-4">
+            <PayflowWordmark tagline invert className="group-data-[collapsible=icon]:hidden" />
+            <div className="hidden group-data-[collapsible=icon]:block">
+              <PayflowMark className="size-8" />
             </div>
-          ))}
-        </nav>
+          </SidebarHeader>
 
-        <div className="border-t border-sidebar-border p-2.5">
-          <p className="px-1.5 pt-0.5 pb-2 text-[11px] text-sidebar-muted">
-            {role === "admin"
-              ? "All clients in view"
-              : visibleClients.map((c) => c.name).join(" · ")}
-          </p>
-          <UserMenu />
-        </div>
-      </aside>
+          <SidebarContent className="px-3 pb-4">
+            {navGroups
+              .map((group) => ({
+                ...group,
+                items: group.items.filter(
+                  (item) => role === "admin" || !("adminOnly" in item && item.adminOnly),
+                ),
+              }))
+              .filter((group) => group.items.length > 0)
+              .map((group) => (
+                <SidebarGroup key={group.label}>
+                  <SidebarGroupLabel className="px-2.5 pb-2 text-[10px] font-semibold tracking-[0.1em] text-sidebar-muted uppercase">
+                    {group.label}
+                  </SidebarGroupLabel>
+                  <SidebarGroupContent>
+                    <SidebarMenu>
+                      {group.items.map((item) => {
+                        const isActive = location.pathname === item.to || 
+                          (item.to !== "/" && location.pathname.startsWith(item.to));
+                        
+                        return (
+                          <SidebarMenuItem key={item.to}>
+                            <SidebarMenuButton
+                              asChild
+                              isActive={isActive}
+                              tooltip={item.label}
+                              className="group/btn relative flex items-center gap-2.5 rounded-lg border border-transparent px-2.5 py-2 text-[13px] font-medium text-sidebar-muted transition-all duration-150 hover:bg-sidebar-accent/70 hover:text-sidebar-foreground data-[active=true]:border-sidebar-border data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground data-[active=true]:shadow-[0_8px_20px_-14px_var(--sidebar-primary)]"
+                            >
+                              <Link
+                                to={item.to}
+                                activeOptions={{ exact: "exact" in item ? item.exact : false }}
+                              >
+                                <span className="absolute top-1.5 bottom-1.5 -left-1 w-[3px] rounded-full bg-sidebar-primary opacity-0 transition-opacity group-data-[active=true]/btn:opacity-100" />
+                                <item.icon className="size-[15px] shrink-0 opacity-80" />
+                                <span>{item.label}</span>
+                              </Link>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        );
+                      })}
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                </SidebarGroup>
+              ))}
+          </SidebarContent>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 flex h-[68px] items-center justify-between gap-4 border-b border-border/80 bg-background/90 px-5 shadow-subtle backdrop-blur-xl lg:px-9">
-          <div className="lg:hidden">
-            <PayflowWordmark />
-          </div>
-          <p className="hidden text-[12px] text-muted-foreground lg:block">
-            Collections operations ·{" "}
-            <span className="font-medium text-foreground">
-              {visibleClients.length} client{visibleClients.length === 1 ? "" : "s"}
-            </span>{" "}
-            in view
-          </p>
-          <div className="flex items-center gap-1.5">
-            <ReviewBell />
-            <span className="mx-1 hidden h-7 w-px bg-border lg:block" />
-            <UserMenu compact />
-          </div>
-        </header>
+          <SidebarFooter className="border-t border-sidebar-border p-2.5">
+            <p className="px-1.5 pt-0.5 pb-2 text-[11px] text-sidebar-muted group-data-[collapsible=icon]:hidden">
+              {role === "admin"
+                ? "All clients in view"
+                : visibleClients.map((c) => c.name).join(" · ")}
+            </p>
+            <UserMenu />
+          </SidebarFooter>
+          <SidebarRail />
+        </Sidebar>
 
-        <main className="relative flex-1 px-5 py-7 lg:px-9 lg:py-8">
-          <div className="mx-auto w-full max-w-[1220px]">{children}</div>
-        </main>
+        <SidebarInset className="flex min-w-0 flex-1 flex-col">
+          <header className="sticky top-0 z-20 flex h-[68px] items-center justify-between gap-4 border-b border-border/80 bg-background/90 px-5 shadow-subtle backdrop-blur-xl lg:px-9">
+            <div className="flex items-center gap-4">
+              <SidebarTrigger className="-ml-1" />
+              <div className="lg:hidden">
+                <PayflowWordmark />
+              </div>
+              <p className="hidden text-[12px] text-muted-foreground lg:block">
+                Collections operations ·{" "}
+                <span className="font-medium text-foreground">
+                  {visibleClients.length} client{visibleClients.length === 1 ? "" : "s"}
+                </span>{" "}
+                in view
+              </p>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <ReviewBell />
+              <span className="mx-1 hidden h-7 w-px bg-border lg:block" />
+              <UserMenu compact />
+            </div>
+          </header>
+
+          <main className="relative flex-1 px-5 py-7 lg:px-10 lg:py-9">
+            <div className="mx-auto w-full max-w-[1280px]">{children}</div>
+          </main>
+        </SidebarInset>
       </div>
-    </div>
+    </SidebarProvider>
   );
 }

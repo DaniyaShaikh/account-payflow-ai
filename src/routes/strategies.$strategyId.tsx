@@ -135,14 +135,14 @@ function StrategyBuilder() {
       )}
 
       {strategy.origin === "AI Proposed" && strategy.status !== "Active" && (
-        <div className="mb-4 flex flex-wrap items-start justify-between gap-3 rounded-xl border border-ai/25 bg-ai/[0.06] px-4 py-3.5">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-ai/25 bg-ai/[0.06] px-4 py-3.5">
           <div className="flex items-start gap-2.5">
             <span className="mt-0.5 flex size-7 items-center justify-center rounded-lg bg-ai/15 text-ai">
               <Sparkles className="size-4" />
             </span>
             <div>
               <p className="text-[13px] font-semibold text-foreground">AI Proposed Strategy</p>
-              <p className="mt-0.5 max-w-2xl text-[12px] leading-relaxed text-muted-foreground">
+              <p className="mt-0.5 max-w-2xl text-[12.5px] leading-relaxed text-muted-foreground">
                 PayFlow generated this strategy using the available portfolio, account, payment and
                 engagement context. Review each step, adjust what needs changing, then approve.
               </p>

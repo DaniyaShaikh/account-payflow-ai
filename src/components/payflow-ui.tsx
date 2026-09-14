@@ -15,7 +15,7 @@ export function PageHeader({
   breadcrumb?: { label: string; to?: string }[];
 }) {
   return (
-    <div className="mb-7">
+    <div className="mb-8">
       {breadcrumb && (
         <nav className="mb-2 flex items-center gap-1.5 text-xs text-muted-foreground">
           {breadcrumb.map((crumb, i) => (
@@ -32,13 +32,13 @@ export function PageHeader({
           ))}
         </nav>
       )}
-      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-border/80 pb-5">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-5 pb-2 sm:flex sm:flex-wrap sm:justify-between">
         <div className="min-w-0">
-          <h1 className="text-[24px] leading-tight font-bold text-foreground">
+          <h1 className="font-display text-[28px] leading-tight font-semibold text-foreground">
             {title}
           </h1>
           {description && (
-            <p className="mt-1 max-w-2xl text-[13px] leading-relaxed text-muted-foreground">
+            <p className="mt-1.5 max-w-2xl text-[13.5px] leading-relaxed text-muted-foreground">
               {description}
             </p>
           )}
@@ -87,9 +87,9 @@ export function Panel({
   bodyClassName?: string;
 }) {
   return (
-    <section className={cn("panel overflow-hidden transition-[border-color,box-shadow] duration-200 hover:border-border-strong/80", className)}>
+    <section className={cn("panel overflow-hidden transition-[border-color,box-shadow] duration-200", className)}>
       {title && (
-        <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 bg-card/80 px-5 py-4">
+        <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border/40 px-5 py-4.5">
           <div>
             <h2 className="text-[13.5px] font-semibold tracking-tight text-foreground">{title}</h2>
             {description && (
@@ -126,8 +126,8 @@ export function KpiCard({
   return (
     <div
       className={cn(
-        "group relative min-h-[106px] overflow-hidden rounded-lg border border-border/80 bg-card px-4 py-4 shadow-subtle transition-all duration-200 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-panel",
-        tone === "primary" && "border-primary/30 bg-primary/[0.055] shadow-brand",
+         "group relative min-h-[112px] overflow-hidden rounded-lg border border-border/55 bg-card px-5 py-4.5 shadow-subtle transition-all duration-200 hover:border-primary/25 hover:shadow-panel",
+        tone === "primary" && "border-primary/40 bg-gradient-to-br from-primary/[0.08] to-transparent shadow-brand",
       )}
     >
       <span
@@ -187,7 +187,7 @@ export function StatusPill({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-md border px-2 py-[3px] text-[11px] font-semibold whitespace-nowrap",
+        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-[3px] text-[11px] font-medium whitespace-nowrap",
         toneStyles[tone],
       )}
     >
@@ -229,7 +229,7 @@ export function DataTable({
   minWidth?: number;
 }) {
   return (
-    <div className="panel max-h-[70vh] overflow-auto shadow-panel">
+    <div className="panel max-h-[70vh] overflow-auto">
       <table className="w-full border-collapse text-[13px]" style={{ minWidth }}>
         <thead className="sticky top-0 z-10">
           <tr>
@@ -262,7 +262,7 @@ export function Tr({
     <tr
       onClick={onClick}
       className={cn(
-         "border-b border-border/60 transition-colors last:border-0 hover:bg-accent/35",
+         "border-b border-border/40 transition-colors last:border-0 hover:bg-accent/40",
         onClick && "cursor-pointer",
         className,
       )}
@@ -299,7 +299,7 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center rounded-lg border border-dashed border-border-strong bg-surface px-4 py-9 text-center">
+    <div className="flex flex-col items-center rounded-lg border border-dashed border-border-strong/60 bg-muted/30 px-6 py-12 text-center">
       <span className="mb-2.5 flex size-8 items-center justify-center rounded-full bg-card text-muted-foreground ring-1 ring-border">
         <Inbox className="size-4" />
       </span>
