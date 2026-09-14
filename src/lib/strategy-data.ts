@@ -28,6 +28,8 @@ export interface NodeConfig {
   action?: string;
   outcome?: string;
   note?: string;
+  /** Message template used for Communication steps. */
+  templateId?: string;
 }
 
 export interface StrategyNode {
@@ -69,6 +71,21 @@ export interface Strategy {
   entryNodeId: string;
   nodes: Record<string, StrategyNode>;
   versions: StrategyVersion[];
+  /** Which accounts the strategy applies to. Operational attributes only. */
+  segment?: StrategySegment;
+}
+
+/**
+ * Segment scope for a strategy. Only operational and geographic attributes are
+ * permitted — protected demographic attributes are never used for targeting.
+ */
+export interface StrategySegment {
+  ageBand: string;
+  postalRegion: string;
+  balanceBand: string;
+  delinquency: string;
+  language: string;
+  tenure: string;
 }
 
 export const strategyStatuses: StrategyStatus[] = [
