@@ -11,6 +11,7 @@ import {
   journeyTypeTone,
 } from "@/lib/journey-data";
 import { communicationsForJourney } from "@/lib/communication-data";
+import { WorkflowFlowPanel } from "@/components/workflow-flow-panel";
 
 export const Route = createFileRoute("/journeys/$journeyId")({
   head: () => ({
