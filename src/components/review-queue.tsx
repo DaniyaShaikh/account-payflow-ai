@@ -57,7 +57,7 @@ export function ReviewQueue({
 
   const [search, setSearch] = useState("");
   const [client, setClient] = useState("All Clients");
-  const [subClient, setSubClient] = useState(ALL_SUB_CLIENTS);
+  const [subClients, setSubClients] = useState<string[]>([]);
   const [priority, setPriority] = useState(initialPriority ?? "All Priorities");
   const [reason, setReason] = useState("All Reasons");
   const [rule, setRule] = useState("All Rules");
