@@ -15,7 +15,7 @@ import {
   SectionHeading,
 } from "@/components/payflow-ui";
 import { useRole } from "@/lib/role-context";
-import { ALL_SUB_CLIENTS, subClientOptions } from "@/lib/portfolio-data";
+import { isSingleClientSelected, subClientNamesForClient } from "@/lib/portfolio-data";
 import {
   buildIntegrations,
   integrationCategories,
