@@ -7,6 +7,7 @@ import {
   type Strategy,
   type StrategyNode,
   type StrategyNodeKind,
+  type StrategySegment,
 } from "./strategy-data";
 
 interface StrategyContextValue {
@@ -21,6 +22,15 @@ interface StrategyContextValue {
   updateNodeConfig: (strategyId: string, nodeId: string, patch: NodeConfig) => void;
   toggleNodeDisabled: (strategyId: string, nodeId: string) => void;
   addNodeAfter: (strategyId: string, nodeId: string, kind: StrategyNodeKind) => void;
+  createStrategy: (input: {
+    name: string;
+    clientId: string;
+    portfolioId: string;
+    summary: string;
+    segment: StrategySegment;
+    nodes: Record<string, StrategyNode>;
+    author: string;
+  }) => string;
   approveStrategy: (strategyId: string, approver: string) => void;
   rejectStrategy: (strategyId: string, note: string) => void;
   saveDraft: (strategyId: string) => void;
