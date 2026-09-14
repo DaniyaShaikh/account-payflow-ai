@@ -220,31 +220,45 @@ function NodeBranch({
         {...(onExpand ? { onExpand: () => onExpand(node.id) } : {})}
       />
       {node.kind === "Condition" ? (
-        <>
-          <span className="h-5 w-px bg-border-strong" aria-hidden />
-          <div className="flex items-start gap-6 sm:gap-10">
-            {(["yes", "no"] as const).map((path) => {
-              const target = node[path];
-              if (!target) return null;
-              return (
-                <div key={path} className="flex flex-col items-center">
-                  <Connector
-                    label={path === "yes" ? "YES" : "NO"}
-                    tone={path === "yes" ? "success" : "danger"}
-                  />
-                  <NodeBranch
-                    strategy={strategy}
-                    nodeId={target}
-                    selectedId={selectedId}
-                    onSelect={onSelect}
-                    {...(onExpand ? { onExpand } : {})}
-                    depth={depth + 1}
-                  />
-                </div>
-              );
-            })}
-          </div>
-        </>
+        (() => {
+          const paths = (["yes", "no"] as const).filter((p) => node[p]);
+          if (!paths.length) return null;
+          return (
+            <>
+              <span className="h-6 w-px bg-border-strong" aria-hidden />
+              <div className="flex items-start">
+                {paths.map((path, i) => (
+                  <div key={path} className="flex flex-col items-center px-4 sm:px-7">
+                    {/* elbow rail joining the branch columns to the condition stem */}
+                    <div className="flex w-full" aria-hidden>
+                      <span
+                        className={cn("h-px flex-1", i === 0 ? "bg-transparent" : "bg-border-strong")}
+                      />
+                      <span
+                        className={cn(
+                          "h-px flex-1",
+                          i === paths.length - 1 ? "bg-transparent" : "bg-border-strong",
+                        )}
+                      />
+                    </div>
+                    <Connector
+                      label={path === "yes" ? "YES" : "NO"}
+                      tone={path === "yes" ? "success" : "danger"}
+                    />
+                    <NodeBranch
+                      strategy={strategy}
+                      nodeId={node[path]}
+                      selectedId={selectedId}
+                      onSelect={onSelect}
+                      {...(onExpand ? { onExpand } : {})}
+                      depth={depth + 1}
+                    />
+                  </div>
+                ))}
+              </div>
+            </>
+          );
+        })()
       ) : node.next ? (
         <>
           <Connector />
