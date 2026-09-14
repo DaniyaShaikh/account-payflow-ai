@@ -13,6 +13,7 @@ import {
   SectionHeading,
 } from "@/components/payflow-ui";
 import { useReviews } from "@/lib/reviews-context";
+import { WorkflowFlowPanel } from "@/components/workflow-flow-panel";
 import { formatCurrency } from "@/lib/payflow-data";
 import { useRole } from "@/lib/role-context";
 import {
