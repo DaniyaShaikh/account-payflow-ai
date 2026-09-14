@@ -13,7 +13,6 @@ import {
   Bell,
   LogOut,
   UserRound,
-  Layout,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { PayflowMark, PayflowWordmark } from "@/components/brand";
@@ -49,10 +48,7 @@ import {
 const navGroups = [
   {
     label: "Overview",
-    items: [
-      { to: "/", label: "Dashboard", icon: LayoutDashboard, exact: true },
-      { to: "/showcase", label: "Navigation Showcase", icon: Layout, adminOnly: true },
-    ],
+    items: [{ to: "/", label: "Dashboard", icon: LayoutDashboard, exact: true }],
   },
   {
     label: "Operations",
