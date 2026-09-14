@@ -24,6 +24,7 @@ import {
   type HumanReview,
 } from "@/lib/review-data";
 import { formatCurrency } from "@/lib/payflow-data";
+import { ALL_SUB_CLIENTS, matchesSubClient, subClientOptions } from "@/lib/portfolio-data";
 
 interface Props {
   /** When set, the queue is locked to a single client (client detail usage). */
@@ -51,6 +52,7 @@ export function ReviewQueue({
 
   const [search, setSearch] = useState("");
   const [client, setClient] = useState("All Clients");
+  const [subClient, setSubClient] = useState(ALL_SUB_CLIENTS);
   const [priority, setPriority] = useState(initialPriority ?? "All Priorities");
   const [reason, setReason] = useState("All Reasons");
   const [rule, setRule] = useState("All Rules");
@@ -71,6 +73,7 @@ export function ReviewQueue({
           return false;
         if (client !== "All Clients" && clientName(visibleClients, r.clientId) !== client)
           return false;
+        if (!matchesSubClient(r.clientId, r.accountId, subClient)) return false;
         if (priority !== "All Priorities" && r.priority !== priority) return false;
         if (reason !== "All Reasons" && r.reason !== reason) return false;
         if (rule !== "All Rules" && r.ruleName !== rule) return false;
@@ -79,7 +82,7 @@ export function ReviewQueue({
         if (!inWaitingBucket(r.waitingMinutes, age)) return false;
         return true;
       }),
-    [scoped, search, client, priority, reason, rule, action, status, age, visibleClients],
+    [scoped, search, client, subClient, priority, reason, rule, action, status, age, visibleClients],
   );
 
   return (
@@ -103,10 +106,22 @@ export function ReviewQueue({
           <FilterSelect
             label="Client"
             value={client}
-            onChange={setClient}
+            onChange={(v) => {
+              setClient(v);
+              setSubClient(ALL_SUB_CLIENTS);
+            }}
             options={["All Clients", ...visibleClients.map((c) => c.name)]}
           />
         )}
+        <FilterSelect
+          label="Sub-Client"
+          value={subClient}
+          onChange={setSubClient}
+          options={subClientOptions(
+            clientId ? visibleClients.filter((c) => c.id === clientId) : visibleClients,
+            clientId ? null : client,
+          )}
+        />
         <FilterSelect
           label="Priority"
           value={priority}

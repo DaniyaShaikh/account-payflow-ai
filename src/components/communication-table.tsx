@@ -32,6 +32,12 @@ export function useVisibleCommunications() {
   );
 }
 
+import {
+  ALL_SUB_CLIENTS,
+  matchesSubClient,
+  subClientOptions,
+} from "@/lib/portfolio-data";
+
 export function CommunicationTable({
   rows,
   showClientFilter = true,
@@ -51,6 +57,7 @@ export function CommunicationTable({
   const [query, setQuery] = useState("");
   const [date, setDate] = useState("All Dates");
   const [client, setClient] = useState(initialClient);
+  const [subClient, setSubClient] = useState(ALL_SUB_CLIENTS);
   const [channel, setChannel] = useState(initialChannel);
   const [status, setStatus] = useState(initialStatus);
   const [journey, setJourney] = useState(initialJourney);
@@ -76,6 +83,7 @@ export function CommunicationTable({
     if (date !== "All Dates" && c.dateBucket !== date) return false;
     if (showClientFilter && client !== "All Clients" && clientName(c.clientId) !== client)
       return false;
+    if (!matchesSubClient(c.clientId, c.accountId, subClient)) return false;
     if (channel !== "All Channels" && c.channel !== channel) return false;
     if (status !== "All Statuses" && c.status !== status) return false;
     if (journey !== "All Workflows" && journeyById(c.journeyId)?.name !== journey) return false;
@@ -102,10 +110,19 @@ export function CommunicationTable({
           <FilterSelect
             label="Client"
             value={client}
-            onChange={setClient}
+            onChange={(v) => {
+              setClient(v);
+              setSubClient(ALL_SUB_CLIENTS);
+            }}
             options={["All Clients", ...visibleClients.map((c) => c.name)]}
           />
         )}
+        <FilterSelect
+          label="Sub-Client"
+          value={subClient}
+          onChange={setSubClient}
+          options={subClientOptions(visibleClients, showClientFilter ? client : null)}
+        />
         <FilterSelect
           label="Channel"
           value={channel}
