@@ -295,6 +295,21 @@ function StrategyBuilder() {
           </Panel>
         </div>
       </div>
+
+      <StepEditorDialog
+        strategy={strategy}
+        node={node}
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onChange={set}
+        onToggleDisabled={() => {
+          if (node) toggleNodeDisabled(strategy.id, node.id);
+        }}
+        onAddAfter={(kind) => {
+          if (node) addNodeAfter(strategy.id, node.id, kind);
+          setNotice(`${kind} step added and marked Human Modified.`);
+        }}
+      />
     </>
   );
 }
