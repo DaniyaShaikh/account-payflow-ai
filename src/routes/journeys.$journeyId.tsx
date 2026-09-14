@@ -50,7 +50,7 @@ function JourneyDetail() {
         <p className="text-sm text-muted-foreground">
           This journey belongs to a client that is not assigned to your supervisor account.
         </p>
-        <Link to="/journeys" className="mt-3 inline-block text-[13px] font-medium text-primary">
+        <Link to="/strategies" className="mt-3 inline-block text-[13px] font-medium text-primary">
           Back to workflows
         </Link>
       </Panel>
