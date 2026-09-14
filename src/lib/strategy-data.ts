@@ -185,7 +185,8 @@ export function timingLabel(node: StrategyNode): string | undefined {
   if (!referenceEvent) return undefined;
   if (amount === undefined || amount === 0)
     return `Immediately when ${referenceEvent.toLowerCase()} occurs`;
-  return `${amount} ${unit ?? "Days"} ${direction ?? "After"} ${referenceEvent}`;
+  const label = amount === 1 ? (unit ?? "Days").replace(/s$/, "") : (unit ?? "Days");
+  return `${amount} ${label} ${direction ?? "After"} ${referenceEvent}`;
 }
 
 export function conditionLabel(node: StrategyNode): string | undefined {

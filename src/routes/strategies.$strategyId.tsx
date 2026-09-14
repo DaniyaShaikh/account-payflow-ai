@@ -99,7 +99,8 @@ function StrategyBuilder() {
   const humanModified = Object.values(strategy.nodes).filter(
     (n) => n.origin === "Human Modified",
   ).length;
-  const canDecide = isAdmin || true;
+  // Supervisors approve strategies for their assigned clients; admins for all.
+  const canDecide = isAdmin || canSeeClient(strategy.clientId);
 
   const set = (patch: Parameters<typeof updateNodeConfig>[2]) => {
     if (!node) return;
