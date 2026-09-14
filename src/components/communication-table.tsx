@@ -57,7 +57,7 @@ export function CommunicationTable({
   const [query, setQuery] = useState("");
   const [date, setDate] = useState("All Dates");
   const [client, setClient] = useState(initialClient);
-  const [subClient, setSubClient] = useState(ALL_SUB_CLIENTS);
+  const [subClients, setSubClients] = useState<string[]>([]);
   const [channel, setChannel] = useState(initialChannel);
   const [status, setStatus] = useState(initialStatus);
   const [journey, setJourney] = useState(initialJourney);
