@@ -87,7 +87,7 @@ export function StepConfigForm({
                 value={node.config.channel ?? "Email"}
                 options={channels}
                 disabled={!canEdit}
-                onChange={(v) => onChange({ channel: v, templateId: undefined })}
+                onChange={(v) => onChange({ channel: v, templateId: "" })}
               />
             </Field>
             <Field label="Message Purpose">
@@ -95,7 +95,7 @@ export function StepConfigForm({
                 value={node.config.purpose ?? messagePurposes[0]!}
                 options={messagePurposes}
                 disabled={!canEdit}
-                onChange={(v) => onChange({ purpose: v, templateId: undefined })}
+                onChange={(v) => onChange({ purpose: v, templateId: "" })}
               />
             </Field>
           </div>
