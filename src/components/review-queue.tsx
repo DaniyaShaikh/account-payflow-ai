@@ -125,20 +125,20 @@ export function ReviewQueue({
             value={client}
             onChange={(v) => {
               setClient(v);
-              setSubClient(ALL_SUB_CLIENTS);
+              setSubClients([]);
             }}
             options={["All Clients", ...visibleClients.map((c) => c.name)]}
           />
         )}
-        <FilterSelect
-          label="Sub-Client"
-          value={subClient}
-          onChange={setSubClient}
-          options={subClientOptions(
-            clientId ? visibleClients.filter((c) => c.id === clientId) : visibleClients,
-            clientId ? null : client,
-          )}
-        />
+        {isSingleClientSelected(lockedClientName ?? client) && (
+          <FilterMultiSelect
+            label="Sub-Client"
+            allLabel="All Sub-Clients"
+            selected={subClients}
+            onChange={setSubClients}
+            options={subClientNamesForClient(visibleClients, lockedClientName ?? client)}
+          />
+        )}
         <FilterSelect
           label="Priority"
           value={priority}
