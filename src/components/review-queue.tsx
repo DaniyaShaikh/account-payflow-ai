@@ -25,7 +25,11 @@ import {
   type HumanReview,
 } from "@/lib/review-data";
 import { formatCurrency } from "@/lib/payflow-data";
-import { ALL_SUB_CLIENTS, matchesSubClient, subClientOptions } from "@/lib/portfolio-data";
+import {
+  isSingleClientSelected,
+  matchesSubClients,
+  subClientNamesForClient,
+} from "@/lib/portfolio-data";
 
 interface Props {
   /** When set, the queue is locked to a single client (client detail usage). */
