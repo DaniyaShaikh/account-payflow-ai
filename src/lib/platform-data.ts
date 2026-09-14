@@ -27,6 +27,17 @@ export interface ProductEntitlement {
 }
 
 export const PAYFLOW_PRODUCT_ID = "prod-payflow";
+/** Illustrative second product: exists only to show multi-product connections. */
+export const SAMPLE_PRODUCT_ID = "prod-insightiq";
+
+export interface PlatformPerson {
+  id: string;
+  name: string;
+  email: string;
+  organizationId: string;
+  /** Products this person may open (within their organization's entitlement). */
+  productIds: string[];
+}
 
 export const seedProducts: PlatformProduct[] = [
   {
@@ -35,6 +46,14 @@ export const seedProducts: PlatformProduct[] = [
     code: "PAYFLOW",
     description:
       "Collections operations: client portfolios, customer accounts, collection cases, adaptive workflows and governed AI decisions.",
+    status: "Active",
+  },
+  {
+    id: SAMPLE_PRODUCT_ID,
+    name: "InsightIQ",
+    code: "INSIGHTIQ",
+    description:
+      "Sample second product, registered to show multi-product access. It has no operational screens in this phase.",
     status: "Active",
   },
 ];
@@ -47,9 +66,39 @@ export const seedOrganizations: PlatformOrganization[] = [
 
 export const seedEntitlements: ProductEntitlement[] = [
   { organizationId: "org-payflow-ops", productId: PAYFLOW_PRODUCT_ID, status: "Granted" },
+  { organizationId: "org-payflow-ops", productId: SAMPLE_PRODUCT_ID, status: "Granted" },
   { organizationId: "org-northstar", productId: PAYFLOW_PRODUCT_ID, status: "Granted" },
+  { organizationId: "org-northstar", productId: SAMPLE_PRODUCT_ID, status: "Revoked" },
   { organizationId: "org-arcadia", productId: PAYFLOW_PRODUCT_ID, status: "Revoked" },
+  { organizationId: "org-arcadia", productId: SAMPLE_PRODUCT_ID, status: "Revoked" },
 ];
+
+export const seedPeople: PlatformPerson[] = [
+  {
+    id: "person-daniya",
+    name: "Daniya Khan",
+    email: "daniya@payflow.ai",
+    organizationId: "org-payflow-ops",
+    productIds: [PAYFLOW_PRODUCT_ID, SAMPLE_PRODUCT_ID],
+  },
+  {
+    id: "person-zeeshan",
+    name: "Zeeshan Ahmed",
+    email: "zeeshan@payflow.ai",
+    organizationId: "org-payflow-ops",
+    productIds: [PAYFLOW_PRODUCT_ID],
+  },
+  {
+    id: "person-northstar-lead",
+    name: "Meera Patel",
+    email: "meera.patel@northstarfg.com",
+    organizationId: "org-northstar",
+    productIds: [PAYFLOW_PRODUCT_ID],
+  },
+];
+
+/** The signed-in demo person. */
+export const currentPersonId = "person-daniya";
 
 /** The organization behind the signed-in demo user. */
 export const currentOrganizationId = "org-payflow-ops";
