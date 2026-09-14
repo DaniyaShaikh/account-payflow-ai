@@ -56,7 +56,7 @@ function AccountsPage() {
 
   const rows = accounts.filter((a) => {
     if (client !== "All Clients" && clientName(a.clientId) !== client) return false;
-    if (!matchesSubClient(a.clientId, a.id, subClient)) return false;
+    if (!matchesSubClients(a.clientId, a.id, subClients)) return false;
     if (status !== "All Statuses" && a.status !== status) return false;
     if (journey !== "All Workflows" && a.journey !== journey) return false;
     if (review === "Yes" && !a.humanReview) return false;
