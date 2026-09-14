@@ -114,7 +114,7 @@ function UserMenu({ compact = false }: { compact?: boolean }) {
           className={
             compact
               ? "flex items-center gap-2.5 rounded-lg px-1.5 py-1.5 text-left transition-colors hover:bg-muted"
-              : "flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left transition-colors hover:bg-sidebar-accent"
+              : "flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left transition-colors hover:bg-sidebar-accent group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
           }
         >
           <span
@@ -253,14 +253,14 @@ export function AppShell({ children }: { children: ReactNode }) {
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-surface">
         <Sidebar collapsible="icon" className="border-r border-sidebar-border shadow-[8px_0_32px_-24px_var(--brand-navy)]">
-          <SidebarHeader className="flex h-[68px] items-center px-4">
+          <SidebarHeader className="flex h-[68px] items-center px-4 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
             <PayflowWordmark tagline invert className="group-data-[collapsible=icon]:hidden" />
             <div className="hidden group-data-[collapsible=icon]:block">
-              <PayflowMark className="size-8" />
+              <PayflowMark className="size-9" />
             </div>
           </SidebarHeader>
 
-          <SidebarContent className="px-3 pb-4">
+          <SidebarContent className="px-3 pb-4 group-data-[collapsible=icon]:px-2">
             {navGroups
               .map((group) => ({
                 ...group,
@@ -286,14 +286,14 @@ export function AppShell({ children }: { children: ReactNode }) {
                               asChild
                               isActive={isActive}
                               tooltip={item.label}
-                              className="group/btn relative flex items-center gap-2.5 rounded-lg border border-transparent px-2.5 py-2 text-[13px] font-medium text-sidebar-muted transition-all duration-150 hover:bg-sidebar-accent/70 hover:text-sidebar-foreground data-[active=true]:border-sidebar-border data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground data-[active=true]:shadow-[0_8px_20px_-14px_var(--sidebar-primary)]"
+                              className="group/btn relative flex items-center gap-2.5 rounded-lg border border-transparent px-2.5 py-2 text-[13px] font-medium text-sidebar-muted transition-all duration-150 hover:bg-sidebar-accent/70 hover:text-sidebar-foreground data-[active=true]:border-sidebar-border data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground data-[active=true]:shadow-[0_8px_20px_-14px_var(--sidebar-primary)] group-data-[collapsible=icon]:mx-auto"
                             >
                               <Link
                                 to={item.to}
                                 activeOptions={{ exact: "exact" in item ? item.exact : false }}
                               >
-                                <span className="absolute top-1.5 bottom-1.5 -left-1 w-[3px] rounded-full bg-sidebar-primary opacity-0 transition-opacity group-data-[active=true]/btn:opacity-100" />
-                                <item.icon className="size-[15px] shrink-0 opacity-80" />
+                                 <span className="absolute top-1.5 bottom-1.5 -left-1 w-[3px] rounded-full bg-sidebar-primary opacity-0 transition-opacity group-data-[active=true]/btn:opacity-100 group-data-[collapsible=icon]:hidden" />
+                                 <item.icon className="size-[17px] shrink-0 opacity-80" />
                                 <span>{item.label}</span>
                               </Link>
                             </SidebarMenuButton>
@@ -306,7 +306,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               ))}
           </SidebarContent>
 
-          <SidebarFooter className="border-t border-sidebar-border p-2.5">
+          <SidebarFooter className="border-t border-sidebar-border p-2.5 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-2">
             <p className="px-1.5 pt-0.5 pb-2 text-[11px] text-sidebar-muted group-data-[collapsible=icon]:hidden">
               {role === "admin"
                 ? "All clients in view"

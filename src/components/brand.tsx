@@ -28,7 +28,7 @@ export function PayflowMark({ className }: { className?: string }) {
 export function PayflowWordmark({
   className,
   tagline: _tagline = false,
-  invert = false,
+  invert: _invert = false,
 }: {
   className?: string;
   tagline?: boolean;
@@ -40,7 +40,6 @@ export function PayflowWordmark({
       alt="PayFlow — Automate. Engage. Recover."
       className={cn(
         "h-11 w-auto max-w-full object-contain object-left",
-        invert && "brightness-0 invert",
         className,
       )}
     />
