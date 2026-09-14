@@ -215,12 +215,8 @@ function AccountDetail() {
             <Panel
               title="Current Workflow"
               description="The collection strategy currently applied to this case"
-              action={
-                <Link to="/journeys/$journeyId" params={{ journeyId: journeyState.journey.id }}>
-                  <Btn>View Workflow</Btn>
-                </Link>
-              }
             >
+
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-[14px] font-semibold text-foreground">
                   {journeyState.journey.name}
