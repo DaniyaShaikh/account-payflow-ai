@@ -57,16 +57,15 @@ function IntegrationsPage() {
 
   const [status, setStatus] = useState(search.status ?? "All Statuses");
   const [client, setClient] = useState("All Clients");
-  const [subClient, setSubClient] = useState(ALL_SUB_CLIENTS);
+  const [subClients, setSubClients] = useState<string[]>([]);
   const [category, setCategory] = useState("All Categories");
 
   const rows = integrations.filter((i) => {
     if (status !== "All Statuses" && i.status !== status) return false;
     if (client !== "All Clients" && i.clientName !== client) return false;
-    if (subClient !== ALL_SUB_CLIENTS) {
-      const owner = visibleClients.find((c) => c.name === i.clientName);
-      const pf = subClientOptions(visibleClients, owner?.name ?? null);
-      if (!pf.includes(subClient)) return false;
+    if (subClients.length > 0) {
+      const owned = subClientNamesForClient(visibleClients, i.clientName ?? "");
+      if (!subClients.some((s) => owned.includes(s))) return false;
     }
     if (category !== "All Categories" && i.category !== category) return false;
     return true;
