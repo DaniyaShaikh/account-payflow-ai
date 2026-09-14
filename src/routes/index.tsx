@@ -262,24 +262,26 @@ function Dashboard() {
 
   const [date, setDate] = useState("Today");
   const [client, setClient] = useState("All Clients");
-  const [subClient, setSubClient] = useState(ALL_SUB_CLIENTS);
+  const [subClients, setSubClients] = useState<string[]>([]);
   const [channel, setChannel] = useState("All Channels");
 
-  const selectedPortfolio =
-    subClient === ALL_SUB_CLIENTS ? undefined : portfolioByName(subClient);
+  const selectedPortfolios = subClients
+    .map((name) => portfolioByName(name))
+    .filter((p): p is NonNullable<typeof p> => !!p);
 
-  const scoped = selectedPortfolio
-    ? visibleClients.filter((c) => c.id === selectedPortfolio.clientId)
-    : client === "All Clients"
+  const scoped =
+    client === "All Clients"
       ? visibleClients
       : visibleClients.filter((c) => c.name === client);
 
-  const totalAccounts = selectedPortfolio
-    ? selectedPortfolio.accounts
-    : scoped.reduce((sum, c) => sum + c.accounts, 0);
-  const totalCases = selectedPortfolio
-    ? selectedPortfolio.cases
-    : scoped.reduce((sum, c) => sum + c.activeCases, 0);
+  const totalAccounts =
+    selectedPortfolios.length > 0
+      ? selectedPortfolios.reduce((sum, p) => sum + p.accounts, 0)
+      : scoped.reduce((sum, c) => sum + c.accounts, 0);
+  const totalCases =
+    selectedPortfolios.length > 0
+      ? selectedPortfolios.reduce((sum, p) => sum + p.cases, 0)
+      : scoped.reduce((sum, c) => sum + c.activeCases, 0);
   const recovered = scoped.reduce((sum, c) => sum + c.recovered, 0);
   const { counts: reviewCounts } = useReviews();
 
