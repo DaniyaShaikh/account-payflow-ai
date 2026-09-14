@@ -78,7 +78,7 @@ export function ReviewQueue({
           return false;
         if (client !== "All Clients" && clientName(visibleClients, r.clientId) !== client)
           return false;
-        if (!matchesSubClient(r.clientId, r.accountId, subClient)) return false;
+        if (!matchesSubClients(r.clientId, r.accountId, subClients)) return false;
         if (priority !== "All Priorities" && r.priority !== priority) return false;
         if (reason !== "All Reasons" && r.reason !== reason) return false;
         if (rule !== "All Rules" && r.ruleName !== rule) return false;
