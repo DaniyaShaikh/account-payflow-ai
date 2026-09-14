@@ -13,6 +13,11 @@ import { formatCurrency, formatNumber, journeys } from "@/lib/payflow-data";
 import { paymentOutcomeTotals } from "@/lib/payment-data";
 import { useVisibleCommunications } from "@/components/communication-table";
 import { buildIntegrations, integrationSummary } from "@/lib/integration-data";
+import {
+  ALL_SUB_CLIENTS,
+  portfolioByName,
+  subClientOptions,
+} from "@/lib/portfolio-data";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -69,8 +74,14 @@ function hashSeed(input: string) {
   return h;
 }
 
-function funnelVolumes(client: string, date: string, channel: string, journey: string) {
-  const seed = hashSeed(`${client}|${date}|${channel}|${journey}`);
+function funnelVolumes(
+  client: string,
+  subClient: string,
+  date: string,
+  channel: string,
+  journey: string,
+) {
+  const seed = hashSeed(`${client}|${subClient}|${date}|${channel}|${journey}`);
   const base = 5200 + (seed % 5200);
   let previous = base;
   return funnelStages.map((stage, i) => {
@@ -86,19 +97,22 @@ function funnelVolumes(client: string, date: string, channel: string, journey: s
 function CommunicationFunnel() {
   const { visibleClients } = useRole();
   const [client, setClient] = useState("All Clients");
+  const [subClient, setSubClient] = useState(ALL_SUB_CLIENTS);
   const [date, setDate] = useState("Today");
   const [channel, setChannel] = useState("All Channels");
   const [journey, setJourney] = useState("All Workflows");
 
   const isDefault =
     client === "All Clients" &&
+    subClient === ALL_SUB_CLIENTS &&
     date === "Today" &&
     channel === "All Channels" &&
     journey === "All Workflows";
 
-  const rows = funnelVolumes(client, date, channel, journey);
+  const rows = funnelVolumes(client, subClient, date, channel, journey);
   const activeParts = [
     client !== "All Clients" ? client : null,
+    subClient !== ALL_SUB_CLIENTS ? subClient : null,
     channel !== "All Channels" ? channel : null,
     date !== "Today" ? date : null,
     journey !== "All Workflows" ? journey : null,
@@ -114,6 +128,7 @@ function CommunicationFunnel() {
           <button
             onClick={() => {
               setClient("All Clients");
+              setSubClient(ALL_SUB_CLIENTS);
               setDate("Today");
               setChannel("All Channels");
               setJourney("All Workflows");
@@ -129,8 +144,17 @@ function CommunicationFunnel() {
         <FilterSelect
           label="Client"
           value={client}
-          onChange={setClient}
+          onChange={(v) => {
+            setClient(v);
+            setSubClient(ALL_SUB_CLIENTS);
+          }}
           options={["All Clients", ...visibleClients.map((c) => c.name)]}
+        />
+        <FilterSelect
+          label="Sub-Client"
+          value={subClient}
+          onChange={setSubClient}
+          options={subClientOptions(visibleClients, client)}
         />
         <FilterSelect
           label="Date"
@@ -234,15 +258,24 @@ function Dashboard() {
 
   const [date, setDate] = useState("Today");
   const [client, setClient] = useState("All Clients");
+  const [subClient, setSubClient] = useState(ALL_SUB_CLIENTS);
   const [channel, setChannel] = useState("All Channels");
 
-  const scoped =
-    client === "All Clients"
+  const selectedPortfolio =
+    subClient === ALL_SUB_CLIENTS ? undefined : portfolioByName(subClient);
+
+  const scoped = selectedPortfolio
+    ? visibleClients.filter((c) => c.id === selectedPortfolio.clientId)
+    : client === "All Clients"
       ? visibleClients
       : visibleClients.filter((c) => c.name === client);
 
-  const totalAccounts = scoped.reduce((sum, c) => sum + c.accounts, 0);
-  const totalCases = scoped.reduce((sum, c) => sum + c.activeCases, 0);
+  const totalAccounts = selectedPortfolio
+    ? selectedPortfolio.accounts
+    : scoped.reduce((sum, c) => sum + c.accounts, 0);
+  const totalCases = selectedPortfolio
+    ? selectedPortfolio.cases
+    : scoped.reduce((sum, c) => sum + c.activeCases, 0);
   const recovered = scoped.reduce((sum, c) => sum + c.recovered, 0);
   const { counts: reviewCounts } = useReviews();
 
@@ -278,8 +311,17 @@ function Dashboard() {
         <FilterSelect
           label="Client"
           value={client}
-          onChange={setClient}
+          onChange={(v) => {
+            setClient(v);
+            setSubClient(ALL_SUB_CLIENTS);
+          }}
           options={["All Clients", ...visibleClients.map((c) => c.name)]}
+        />
+        <FilterSelect
+          label="Sub-Client"
+          value={subClient}
+          onChange={setSubClient}
+          options={subClientOptions(visibleClients, client)}
         />
         <FilterSelect
           label="Channel"

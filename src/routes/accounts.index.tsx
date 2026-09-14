@@ -17,6 +17,12 @@ import {
   formatNumber,
 } from "@/lib/payflow-data";
 import { intakeSummary } from "@/lib/intake-data";
+import {
+  ALL_SUB_CLIENTS,
+  matchesSubClient,
+  subClientNameFor,
+  subClientOptions,
+} from "@/lib/portfolio-data";
 
 export const Route = createFileRoute("/accounts/")({
   head: () => ({
@@ -43,12 +49,14 @@ function AccountsPage() {
   const accounts = useVisibleAccounts();
 
   const [client, setClient] = useState("All Clients");
+  const [subClient, setSubClient] = useState(ALL_SUB_CLIENTS);
   const [status, setStatus] = useState("All Statuses");
   const [journey, setJourney] = useState("All Workflows");
   const [review, setReview] = useState("All");
 
   const rows = accounts.filter((a) => {
     if (client !== "All Clients" && clientName(a.clientId) !== client) return false;
+    if (!matchesSubClient(a.clientId, a.id, subClient)) return false;
     if (status !== "All Statuses" && a.status !== status) return false;
     if (journey !== "All Workflows" && a.journey !== journey) return false;
     if (review === "Yes" && !a.humanReview) return false;
@@ -92,8 +100,17 @@ function AccountsPage() {
         <FilterSelect
           label="Client"
           value={client}
-          onChange={setClient}
+          onChange={(v) => {
+            setClient(v);
+            setSubClient(ALL_SUB_CLIENTS);
+          }}
           options={["All Clients", ...visibleClients.map((c) => c.name)]}
+        />
+        <FilterSelect
+          label="Sub-Client"
+          value={subClient}
+          onChange={setSubClient}
+          options={subClientOptions(visibleClients, client)}
         />
         <FilterSelect
           label="Status"
