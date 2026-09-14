@@ -54,10 +54,10 @@ export const seedEntitlements: ProductEntitlement[] = [
 /** The organization behind the signed-in demo user. */
 export const currentOrganizationId = "org-payflow-ops";
 
-export function productStatusTone(status: ProductStatus) {
-  return status === "Active" ? "success" : status === "Draft" ? "warning" : "muted";
+export function productStatusTone(status: ProductStatus): "success" | "warning" | "neutral" {
+  return status === "Active" ? "success" : status === "Draft" ? "warning" : "neutral";
 }
 
-export function entitlementTone(status: EntitlementStatus) {
+export function entitlementTone(status: EntitlementStatus): "success" | "danger" {
   return status === "Granted" ? "success" : "danger";
 }
