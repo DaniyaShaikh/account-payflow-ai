@@ -13,6 +13,7 @@ import {
   Bell,
   LogOut,
   UserRound,
+  LayoutGrid,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { PayflowMark, PayflowWordmark } from "@/components/brand";
