@@ -147,16 +147,19 @@ function CommunicationFunnel() {
           value={client}
           onChange={(v) => {
             setClient(v);
-            setSubClient(ALL_SUB_CLIENTS);
+            setSubClients([]);
           }}
           options={["All Clients", ...visibleClients.map((c) => c.name)]}
         />
-        <FilterSelect
-          label="Sub-Client"
-          value={subClient}
-          onChange={setSubClient}
-          options={subClientOptions(visibleClients, client)}
-        />
+        {isSingleClientSelected(client) && (
+          <FilterMultiSelect
+            label="Sub-Client"
+            allLabel="All Sub-Clients"
+            selected={subClients}
+            onChange={setSubClients}
+            options={subClientNamesForClient(visibleClients, client)}
+          />
+        )}
         <FilterSelect
           label="Date"
           value={date}
