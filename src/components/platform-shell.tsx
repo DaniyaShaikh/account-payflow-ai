@@ -1,6 +1,6 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { LayoutDashboard, Boxes, ShieldCheck, Receipt, ArrowLeft } from "lucide-react";
+import { LayoutDashboard, Boxes, ShieldCheck, Receipt, ArrowLeft, Users } from "lucide-react";
 import { PayflowMark } from "@/components/brand";
 import { StatusPill } from "@/components/payflow-ui";
 import { cn } from "@/lib/utils";
@@ -12,6 +12,7 @@ const groups = [
       { to: "/platform", label: "Overview", icon: LayoutDashboard, exact: true },
       { to: "/platform/products", label: "Products", icon: Boxes },
       { to: "/platform/access", label: "Product Access", icon: ShieldCheck },
+      { to: "/platform/people", label: "People", icon: Users },
     ],
   },
 ] as const;
