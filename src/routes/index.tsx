@@ -129,7 +129,7 @@ function CommunicationFunnel() {
           <button
             onClick={() => {
               setClient("All Clients");
-              setSubClient(ALL_SUB_CLIENTS);
+              setSubClients([]);
               setDate("Today");
               setChannel("All Channels");
               setJourney("All Workflows");
