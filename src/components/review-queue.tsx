@@ -87,7 +87,19 @@ export function ReviewQueue({
         if (!inWaitingBucket(r.waitingMinutes, age)) return false;
         return true;
       }),
-    [scoped, search, client, subClient, priority, reason, rule, action, status, age, visibleClients],
+    [
+      scoped,
+      search,
+      client,
+      subClients,
+      priority,
+      reason,
+      rule,
+      action,
+      status,
+      age,
+      visibleClients,
+    ],
   );
 
   return (
