@@ -58,6 +58,7 @@ export function ReviewQueue({
   const [search, setSearch] = useState("");
   const [client, setClient] = useState("All Clients");
   const [subClients, setSubClients] = useState<string[]>([]);
+  const lockedClientName = clientId ? clientName(visibleClients, clientId) : null;
   const [priority, setPriority] = useState(initialPriority ?? "All Priorities");
   const [reason, setReason] = useState("All Reasons");
   const [rule, setRule] = useState("All Rules");
