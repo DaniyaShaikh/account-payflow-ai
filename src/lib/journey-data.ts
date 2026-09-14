@@ -111,7 +111,7 @@ const earlyStageSteps: JourneyStep[] = [
     kind: "Communication",
     title: "Initial reminder",
     channel: "Email",
-    timing: "Day 0",
+    timing: "Immediately when case is received",
     detail: "Client-branded reminder with secure payment link",
   },
   { kind: "Wait", title: "Wait / observe", timing: "2 days", detail: "Observation period" },
