@@ -1,36 +1,17 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Sparkles, Info } from "lucide-react";
-import {
-  PageHeader,
-  Panel,
-  StatusPill,
-  Btn,
-  Field,
-  SelectInput,
-  TextInput,
-  TextArea,
-} from "@/components/payflow-ui";
+import { PageHeader, Panel, StatusPill, Btn, Field, TextArea } from "@/components/payflow-ui";
 import { StrategyCanvas } from "@/components/strategy-canvas";
+import { StepConfigForm, StepEditorDialog } from "@/components/strategy-step-editor";
 import { useRole } from "@/lib/role-context";
 import { useStrategies } from "@/lib/strategy-context";
 import { clientName, formatNumber } from "@/lib/payflow-data";
 import {
-  caseActions,
-  channels,
-  conditionAttributes,
-  conditionOperators,
-  conditionValues,
-  messagePurposes,
-  outcomes,
-  paymentActions,
-  referenceEvents,
+  excludedTargetingAttributes,
+  segmentEntries,
   strategyStatusTone,
-  timeDirections,
-  timeUnits,
-  type StrategyNodeKind,
 } from "@/lib/strategy-data";
-import { seedStrategies } from "@/lib/strategy-data";
 
 export const Route = createFileRoute("/strategies/$strategyId")({
   head: () => ({
@@ -50,14 +31,9 @@ export const Route = createFileRoute("/strategies/$strategyId")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  loader: ({ params }) => {
-    if (!seedStrategies.some((s) => s.id === params.strategyId)) throw notFound();
-    return null;
-  },
   component: StrategyBuilder,
 });
 
-const addableKinds: StrategyNodeKind[] = ["Communication", "Wait", "AI Reassessment", "Case Action"];
 
 function StrategyBuilder() {
   const { strategyId } = Route.useParams();
@@ -79,7 +55,7 @@ function StrategyBuilder() {
   const [showAudit, setShowAudit] = useState(false);
   const [rejectNote, setRejectNote] = useState("");
   const [notice, setNotice] = useState<string | null>(null);
-  const [addKind, setAddKind] = useState<StrategyNodeKind>("Communication");
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   if (!strategy || !canSeeClient(strategy.clientId)) {
     return (
@@ -196,16 +172,43 @@ function StrategyBuilder() {
         </Panel>
       )}
 
+      {strategy.segment && (
+        <Panel
+          title="Who this strategy applies to"
+          description="Operational and geographic attributes only. Protected attributes are never used for targeting."
+          className="mb-4"
+        >
+          <div className="flex flex-wrap gap-1.5">
+            {segmentEntries(strategy.segment).map((item) => (
+              <span
+                key={item.label}
+                className="rounded-lg border border-border/70 bg-surface px-2.5 py-1.5 text-[11.5px]"
+              >
+                <span className="text-muted-foreground">{item.label}: </span>
+                <span className="font-medium text-foreground">{item.value}</span>
+              </span>
+            ))}
+          </div>
+          <p className="mt-2.5 text-[11.5px] text-muted-foreground">
+            Excluded from targeting: {excludedTargetingAttributes.join(", ")}.
+          </p>
+        </Panel>
+      )}
+
       <div className="grid gap-4 xl:grid-cols-[1fr_310px]">
         <Panel
           title="Strategy flow"
-          description="Select any step to review or adjust its configuration."
+          description="Click a step to review it, or use the expand icon to edit it in a popup."
           bodyClassName="p-3"
         >
           <StrategyCanvas
             strategy={strategy}
             selectedId={selectedId}
             onSelect={(id) => setSelectedId(id)}
+            onExpand={(id) => {
+              setSelectedId(id);
+              setDialogOpen(true);
+            }}
           />
         </Panel>
 
@@ -213,8 +216,8 @@ function StrategyBuilder() {
           {!node ? (
             <Panel title="Step configuration">
               <p className="text-[12.5px] leading-relaxed text-muted-foreground">
-                Select a step on the canvas to see its configuration. Timing, channels and conditions
-                use the values PayFlow allows for this client.
+                Select a step on the canvas to see its configuration. Timing, channels, templates and
+                conditions use the values PayFlow allows for this client.
               </p>
             </Panel>
           ) : (
@@ -222,186 +225,24 @@ function StrategyBuilder() {
               title={node.kind}
               description={node.title}
               action={
-                <StatusPill tone={node.origin === "AI Proposed" ? "ai" : "info"}>
-                  {node.origin}
-                </StatusPill>
+                <Btn variant="ghost" onClick={() => setDialogOpen(true)}>
+                  Expand
+                </Btn>
               }
             >
-              <div className="space-y-3">
-                {node.kind === "Communication" && (
-                  <>
-                    <Field label="Action">
-                      <TextInput value="Send Communication" onChange={() => {}} disabled />
-                    </Field>
-                    <Field label="Channel">
-                      <SelectInput
-                        value={node.config.channel ?? "Email"}
-                        options={channels}
-                        onChange={(v) => set({ channel: v })}
-                      />
-                    </Field>
-                    <Field label="Message Purpose">
-                      <SelectInput
-                        value={node.config.purpose ?? messagePurposes[0]!}
-                        options={messagePurposes}
-                        onChange={(v) => set({ purpose: v })}
-                      />
-                    </Field>
-                  </>
-                )}
-
-                {node.kind === "Payment Action" && (
-                  <Field label="Payment Action">
-                    <SelectInput
-                      value={node.config.action ?? paymentActions[0]!}
-                      options={paymentActions}
-                      onChange={(v) => set({ action: v })}
-                    />
-                  </Field>
-                )}
-
-                {node.kind === "Case Action" && (
-                  <Field label="Case Action">
-                    <SelectInput
-                      value={node.config.action ?? caseActions[0]!}
-                      options={caseActions}
-                      onChange={(v) => set({ action: v })}
-                    />
-                  </Field>
-                )}
-
-                {node.kind === "Outcome" && (
-                  <Field label="Outcome">
-                    <SelectInput
-                      value={node.config.outcome ?? outcomes[0]!}
-                      options={outcomes}
-                      onChange={(v) => set({ outcome: v })}
-                    />
-                  </Field>
-                )}
-
-                {node.kind === "Human Review" && (
-                  <Field label="Review Note" hint="Shown to the supervisor who picks up the review.">
-                    <TextArea
-                      value={node.config.note ?? ""}
-                      onChange={(v) => set({ note: v })}
-                    />
-                  </Field>
-                )}
-
-                {node.kind === "Condition" && (
-                  <>
-                    <Field label="Condition">
-                      <SelectInput
-                        value={node.config.attribute ?? conditionAttributes[0]!}
-                        options={conditionAttributes}
-                        onChange={(v) =>
-                          set({ attribute: v, value: conditionValues[v]?.[0] ?? "" })
-                        }
-                      />
-                    </Field>
-                    <Field label="Operator">
-                      <SelectInput
-                        value={node.config.operator ?? "Equals"}
-                        options={conditionOperators}
-                        onChange={(v) => set({ operator: v })}
-                      />
-                    </Field>
-                    <Field label="Value">
-                      <SelectInput
-                        value={node.config.value ?? ""}
-                        options={conditionValues[node.config.attribute ?? ""] ?? ["Unpaid"]}
-                        onChange={(v) => set({ value: v })}
-                      />
-                    </Field>
-                    <div className="rounded-lg border border-border/70 bg-surface px-3 py-2.5 text-[12px]">
-                      <p className="text-muted-foreground">
-                        <span className="font-semibold text-success">YES path</span> →{" "}
-                        {node.yes ? strategy.nodes[node.yes]?.title : "End of strategy"}
-                      </p>
-                      <p className="mt-1 text-muted-foreground">
-                        <span className="font-semibold text-destructive">NO path</span> →{" "}
-                        {node.no ? strategy.nodes[node.no]?.title : "End of strategy"}
-                      </p>
-                    </div>
-                  </>
-                )}
-
-                {node.config.referenceEvent && (
-                  <>
-                    <Field label="Timing Reference">
-                      <SelectInput
-                        value={node.config.referenceEvent}
-                        options={referenceEvents}
-                        onChange={(v) => set({ referenceEvent: v })}
-                      />
-                    </Field>
-                    <div className="grid grid-cols-3 gap-2">
-                      <Field label="Number">
-                        <TextInput
-                          value={String(node.config.amount ?? 0)}
-                          onChange={(v) => set({ amount: Math.max(0, Number(v.replace(/\D/g, "")) || 0) })}
-                        />
-                      </Field>
-                      <Field label="Unit">
-                        <SelectInput
-                          value={node.config.unit ?? "Days"}
-                          options={timeUnits}
-                          onChange={(v) => set({ unit: v })}
-                        />
-                      </Field>
-                      <Field label="Before / After">
-                        <SelectInput
-                          value={node.config.direction ?? "After"}
-                          options={timeDirections}
-                          onChange={(v) => set({ direction: v })}
-                        />
-                      </Field>
-                    </div>
-                    <p className="text-[11.5px] text-muted-foreground">
-                      {node.config.amount
-                        ? `Runs ${node.config.amount} ${(node.config.unit ?? "Days").toLowerCase()} ${(node.config.direction ?? "After").toLowerCase()} ${node.config.referenceEvent}.`
-                        : `Runs immediately when ${node.config.referenceEvent.toLowerCase()} occurs.`}
-                    </p>
-                  </>
-                )}
-
-                {node.kind !== "Trigger" && (
-                  <div className="flex flex-wrap gap-2 border-t border-border/60 pt-3">
-                    <Btn
-                      onClick={() => {
-                        toggleNodeDisabled(strategy.id, node.id);
-                        setNotice(
-                          node.disabled ? "Step re-enabled." : "Step disabled in this strategy.",
-                        );
-                      }}
-                    >
-                      {node.disabled ? "Enable step" : "Disable step"}
-                    </Btn>
-                  </div>
-                )}
-
-                {node.kind !== "Condition" && (
-                  <div className="border-t border-border/60 pt-3">
-                    <Field label="Add a step after this one">
-                      <SelectInput
-                        value={addKind}
-                        options={addableKinds}
-                        onChange={(v) => setAddKind(v as StrategyNodeKind)}
-                      />
-                    </Field>
-                    <Btn
-                      className="mt-2"
-                      onClick={() => {
-                        addNodeAfter(strategy.id, node.id, addKind);
-                        setNotice(`${addKind} step added and marked Human Modified.`);
-                      }}
-                    >
-                      Add step
-                    </Btn>
-                  </div>
-                )}
-              </div>
+              <StepConfigForm
+                strategy={strategy}
+                node={node}
+                onChange={set}
+                onToggleDisabled={() => {
+                  toggleNodeDisabled(strategy.id, node.id);
+                  setNotice(node.disabled ? "Step re-enabled." : "Step disabled in this strategy.");
+                }}
+                onAddAfter={(kind) => {
+                  addNodeAfter(strategy.id, node.id, kind);
+                  setNotice(`${kind} step added and marked Human Modified.`);
+                }}
+              />
             </Panel>
           )}
 
@@ -454,6 +295,21 @@ function StrategyBuilder() {
           </Panel>
         </div>
       </div>
+
+      <StepEditorDialog
+        strategy={strategy}
+        node={node}
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onChange={set}
+        onToggleDisabled={() => {
+          if (node) toggleNodeDisabled(strategy.id, node.id);
+        }}
+        onAddAfter={(kind) => {
+          if (node) addNodeAfter(strategy.id, node.id, kind);
+          setNotice(`${kind} step added and marked Human Modified.`);
+        }}
+      />
     </>
   );
 }
