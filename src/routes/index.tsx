@@ -98,22 +98,22 @@ function funnelVolumes(
 function CommunicationFunnel() {
   const { visibleClients } = useRole();
   const [client, setClient] = useState("All Clients");
-  const [subClient, setSubClient] = useState(ALL_SUB_CLIENTS);
+  const [subClients, setSubClients] = useState<string[]>([]);
   const [date, setDate] = useState("Today");
   const [channel, setChannel] = useState("All Channels");
   const [journey, setJourney] = useState("All Workflows");
 
   const isDefault =
     client === "All Clients" &&
-    subClient === ALL_SUB_CLIENTS &&
+    subClients.length === 0 &&
     date === "Today" &&
     channel === "All Channels" &&
     journey === "All Workflows";
 
-  const rows = funnelVolumes(client, subClient, date, channel, journey);
+  const rows = funnelVolumes(client, subClients.join(","), date, channel, journey);
   const activeParts = [
     client !== "All Clients" ? client : null,
-    subClient !== ALL_SUB_CLIENTS ? subClient : null,
+    subClients.length > 0 ? subClients.join(", ") : null,
     channel !== "All Channels" ? channel : null,
     date !== "Today" ? date : null,
     journey !== "All Workflows" ? journey : null,
