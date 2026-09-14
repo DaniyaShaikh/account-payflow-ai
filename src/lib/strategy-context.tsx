@@ -124,6 +124,37 @@ export function StrategyProvider({ children }: { children: ReactNode }) {
             },
           };
         }),
+      createStrategy: (input) => {
+        const id = `hs-${Date.now().toString(36)}`;
+        const created: Strategy = {
+          id,
+          name: input.name,
+          clientId: input.clientId,
+          portfolioId: input.portfolioId,
+          status: "Under Review",
+          origin: "Human Modified",
+          version: "v1.0",
+          lastUpdated: today,
+          coverage: 0,
+          summary: input.summary,
+          aiContext: [
+            { label: "Created by", value: input.author },
+            { label: "Age band", value: input.segment.ageBand },
+            { label: "Postal region", value: input.segment.postalRegion },
+            { label: "Balance band", value: input.segment.balanceBand },
+            { label: "Delinquency", value: input.segment.delinquency },
+            { label: "Language", value: input.segment.language },
+          ],
+          entryNodeId: "t1",
+          nodes: input.nodes,
+          segment: input.segment,
+          versions: [
+            { version: "v1.0", date: today, note: `Created by ${input.author} with AI assistance` },
+          ],
+        };
+        setStrategies((prev) => [created, ...prev]);
+        return id;
+      },
       approveStrategy: (strategyId, approver) =>
         patchStrategy(strategyId, (s) => ({
           ...s,
