@@ -737,3 +737,349 @@ export const seedStrategies: Strategy[] = [
     ],
   },
 ];
+
+/* ------------------------- message templates library ------------------------ */
+
+export interface MessageTemplate {
+  id: string;
+  name: string;
+  channel: string;
+  purpose: string;
+  subject?: string;
+  body: string;
+}
+
+export const messageTemplates: MessageTemplate[] = [
+  {
+    id: "em-reminder",
+    name: "Email — Friendly Payment Reminder",
+    channel: "Email",
+    purpose: "Payment Reminder",
+    subject: "A friendly reminder about your balance",
+    body: "Hi {{first_name}},\n\nOur records show an outstanding balance of {{outstanding_balance}} on account {{account_reference}}. You can settle it securely online at any time.\n\n{{payment_link}}\n\nIf you have already paid, please ignore this message.\n\n{{brand_name}}",
+  },
+  {
+    id: "em-firm",
+    name: "Email — Firm Reminder",
+    channel: "Email",
+    purpose: "Firm Reminder",
+    subject: "Action required on account {{account_reference}}",
+    body: "Hi {{first_name}},\n\nYour balance of {{outstanding_balance}} remains unpaid. Please arrange payment or set up a payment plan using the secure link below.\n\n{{payment_link}}\n\nIf you need support with affordability, reply to this email and we will help.\n\n{{brand_name}}",
+  },
+  {
+    id: "em-plan",
+    name: "Email — Payment Plan Option",
+    channel: "Email",
+    purpose: "Payment Plan Reminder",
+    subject: "Spread your balance over time",
+    body: "Hi {{first_name}},\n\nYou can pay {{outstanding_balance}} in daily, weekly or monthly instalments that suit you.\n\nSet up your plan: {{payment_link}}\n\n{{brand_name}}",
+  },
+  {
+    id: "em-link",
+    name: "Email — Secure Payment Link",
+    channel: "Email",
+    purpose: "Payment Link",
+    subject: "Your secure payment link",
+    body: "Hi {{first_name}},\n\nHere is your secure link to settle {{outstanding_balance}}:\n\n{{payment_link}}\n\nThe link is unique to account {{account_reference}}.\n\n{{brand_name}}",
+  },
+  {
+    id: "sms-link",
+    name: "SMS — Payment Link",
+    channel: "SMS",
+    purpose: "Payment Link",
+    body: "{{brand_name}}: balance {{outstanding_balance}} on {{account_reference}}. Pay securely: {{payment_link}}. Reply STOP to opt out.",
+  },
+  {
+    id: "sms-reminder",
+    name: "SMS — Payment Reminder",
+    channel: "SMS",
+    purpose: "Payment Reminder",
+    body: "{{brand_name}}: a reminder that {{outstanding_balance}} is outstanding. Pay or set up a plan: {{payment_link}}. Reply STOP to opt out.",
+  },
+  {
+    id: "sms-promise",
+    name: "SMS — Promise-to-Pay Reminder",
+    channel: "SMS",
+    purpose: "Promise-to-Pay Reminder",
+    body: "{{brand_name}}: your promised payment of {{promise_amount}} is due {{promise_date}}. Pay now: {{payment_link}}. Reply STOP to opt out.",
+  },
+  {
+    id: "sms-plan",
+    name: "SMS — Payment Plan Option",
+    channel: "SMS",
+    purpose: "Payment Plan Reminder",
+    body: "{{brand_name}}: you can spread {{outstanding_balance}} into instalments. Choose a plan: {{payment_link}}. Reply STOP to opt out.",
+  },
+  {
+    id: "sms-contact",
+    name: "SMS — Contact Details Update",
+    channel: "SMS",
+    purpose: "Contact Details Update Request",
+    body: "{{brand_name}}: we could not reach you by email regarding {{account_reference}}. Update your details: {{payment_link}}. Reply STOP to opt out.",
+  },
+  {
+    id: "em-contact",
+    name: "Email — Contact Details Update",
+    channel: "Email",
+    purpose: "Contact Details Update Request",
+    subject: "Please confirm your contact details",
+    body: "Hi {{first_name}},\n\nWe were unable to reach you about account {{account_reference}}. Please confirm your email and mobile number so we can keep you updated.\n\n{{payment_link}}\n\n{{brand_name}}",
+  },
+];
+
+export function templatesFor(channel?: string, purpose?: string): MessageTemplate[] {
+  const byChannel = messageTemplates.filter((t) => !channel || t.channel === channel);
+  const exact = byChannel.filter((t) => !purpose || t.purpose === purpose);
+  return exact.length > 0 ? exact : byChannel;
+}
+
+export function templateForNode(node: StrategyNode): MessageTemplate | undefined {
+  if (node.kind !== "Communication") return undefined;
+  const byId = node.config.templateId
+    ? messageTemplates.find((t) => t.id === node.config.templateId)
+    : undefined;
+  return byId ?? templatesFor(node.config.channel, node.config.purpose)[0];
+}
+
+/* ------------------------------ segment scope ----------------------------- */
+
+export const ageBands = [
+  "All ages",
+  "18 – 24",
+  "25 – 34",
+  "35 – 49",
+  "50 – 64",
+  "65 and over",
+];
+export const postalRegions = [
+  "All regions",
+  "Ontario (M, L, K, N, P)",
+  "Quebec (H, J, G)",
+  "British Columbia (V)",
+  "Alberta (T)",
+  "Atlantic (A, B, C, E)",
+  "Prairies (R, S)",
+];
+export const balanceBands = [
+  "All balances",
+  "Under $500",
+  "$500 – $1,500",
+  "$1,500 – $5,000",
+  "$5,000 and over",
+];
+export const delinquencyBands = [
+  "All stages",
+  "1 – 29 days past due",
+  "30 – 59 days past due",
+  "60 – 89 days past due",
+  "90+ days past due",
+];
+export const languagePreferences = ["All languages", "English", "French", "English + French"];
+export const tenureBands = [
+  "All customers",
+  "New customer (under 6 months)",
+  "Established (6 – 24 months)",
+  "Long-standing (2 years+)",
+];
+
+/** Attributes PayFlow never targets on, shown in the UI for transparency. */
+export const excludedTargetingAttributes = [
+  "Ethnicity",
+  "Religion",
+  "Gender",
+  "Health status",
+  "Marital status",
+];
+
+export const defaultSegment: StrategySegment = {
+  ageBand: "All ages",
+  postalRegion: "All regions",
+  balanceBand: "All balances",
+  delinquency: "All stages",
+  language: "All languages",
+  tenure: "All customers",
+};
+
+export function segmentEntries(segment: StrategySegment): { label: string; value: string }[] {
+  return [
+    { label: "Age band", value: segment.ageBand },
+    { label: "Postal region", value: segment.postalRegion },
+    { label: "Balance band", value: segment.balanceBand },
+    { label: "Delinquency stage", value: segment.delinquency },
+    { label: "Language", value: segment.language },
+    { label: "Customer tenure", value: segment.tenure },
+  ];
+}
+
+const seedSegments: Record<string, StrategySegment> = {
+  "pp-loans-early-recovery": {
+    ageBand: "25 – 34",
+    postalRegion: "Ontario (M, L, K, N, P)",
+    balanceBand: "$500 – $1,500",
+    delinquency: "30 – 59 days past due",
+    language: "English",
+    tenure: "Established (6 – 24 months)",
+  },
+  "pp-finance-engaged-sms": {
+    ageBand: "35 – 49",
+    postalRegion: "All regions",
+    balanceBand: "$1,500 – $5,000",
+    delinquency: "60 – 89 days past due",
+    language: "English + French",
+    tenure: "Long-standing (2 years+)",
+  },
+  "pp-third-party-proposal": {
+    ageBand: "All ages",
+    postalRegion: "All regions",
+    balanceBand: "Under $500",
+    delinquency: "90+ days past due",
+    language: "All languages",
+    tenure: "New customer (under 6 months)",
+  },
+  "ct-seasonal-recovery": {
+    ageBand: "25 – 34",
+    postalRegion: "Prairies (R, S)",
+    balanceBand: "$500 – $1,500",
+    delinquency: "1 – 29 days past due",
+    language: "English",
+    tenure: "Established (6 – 24 months)",
+  },
+  "ns-winter-arrears": {
+    ageBand: "50 – 64",
+    postalRegion: "Atlantic (A, B, C, E)",
+    balanceBand: "$1,500 – $5,000",
+    delinquency: "30 – 59 days past due",
+    language: "English + French",
+    tenure: "Long-standing (2 years+)",
+  },
+};
+
+for (const strategy of seedStrategies) {
+  strategy.segment = seedSegments[strategy.id] ?? defaultSegment;
+}
+
+/* --------------------- AI-assisted starter flow for humans -------------------- */
+
+/**
+ * Starter flow suggested by PayFlow when a person creates a new strategy.
+ * The human keeps full control of every step afterwards.
+ */
+export function suggestedNodes(segment: StrategySegment): Record<string, StrategyNode> {
+  const smsFirst = segment.balanceBand === "Under $500" || segment.delinquency === "90+ days past due";
+  const first: StrategyNode = {
+    id: "c1",
+    kind: "Communication",
+    title: smsFirst ? "Send SMS with payment link" : "Send email reminder",
+    origin: "AI Proposed",
+    config: {
+      channel: smsFirst ? "SMS" : "Email",
+      purpose: smsFirst ? "Payment Link" : "Payment Reminder",
+      templateId: smsFirst ? "sms-link" : "em-reminder",
+      referenceEvent: "Case Received",
+      amount: 0,
+      unit: "Days",
+      direction: "After",
+    },
+    next: "w1",
+  };
+  const list: StrategyNode[] = [
+    {
+      id: "t1",
+      kind: "Trigger",
+      title: "Case received from source file",
+      origin: "AI Proposed",
+      config: { referenceEvent: "Case Received", amount: 0, unit: "Days", direction: "After" },
+      next: "c1",
+    },
+    first,
+    {
+      id: "w1",
+      kind: "Wait",
+      title: "Observe response",
+      origin: "AI Proposed",
+      config: {
+        referenceEvent: smsFirst ? "Previous SMS" : "Previous Email",
+        amount: 3,
+        unit: "Days",
+        direction: "After",
+      },
+      next: "q1",
+    },
+    {
+      id: "q1",
+      kind: "Condition",
+      title: "Payment received?",
+      origin: "AI Proposed",
+      config: { attribute: "Payment Status", operator: "Equals", value: "Paid In Full" },
+      yes: "o1",
+      no: "c2",
+    },
+    {
+      id: "o1",
+      kind: "Outcome",
+      title: "Case closed — paid",
+      origin: "AI Proposed",
+      config: { outcome: "Paid In Full" },
+    },
+    {
+      id: "c2",
+      kind: "Communication",
+      title: smsFirst ? "Send email reminder" : "Send SMS with payment link",
+      origin: "AI Proposed",
+      config: {
+        channel: smsFirst ? "Email" : "SMS",
+        purpose: "Payment Link",
+        templateId: smsFirst ? "em-link" : "sms-link",
+        referenceEvent: smsFirst ? "Previous SMS" : "Previous Email",
+        amount: 2,
+        unit: "Days",
+        direction: "After",
+      },
+      next: "r1",
+    },
+    {
+      id: "r1",
+      kind: "AI Reassessment",
+      title: "Reassess next best action",
+      origin: "AI Proposed",
+      config: { referenceEvent: "Previous Action", amount: 2, unit: "Days", direction: "After" },
+      next: "p1",
+    },
+    {
+      id: "p1",
+      kind: "Payment Action",
+      title: "Offer payment plan",
+      origin: "AI Proposed",
+      config: { action: "Offer Payment Plan" },
+      next: "o2",
+    },
+    {
+      id: "o2",
+      kind: "Outcome",
+      title: "Payment plan active",
+      origin: "AI Proposed",
+      config: { outcome: "Payment Plan Active" },
+    },
+  ];
+  return Object.fromEntries(list.map((node) => [node.id, node]));
+}
+
+/** Short, plain-language suggestions shown while a person builds a strategy. */
+export function aiSuggestions(segment: StrategySegment): string[] {
+  const tips: string[] = [];
+  tips.push(
+    segment.balanceBand === "$5,000 and over"
+      ? "Larger balances respond better to a payment plan offer early in the flow."
+      : "Start with the cheapest contactable channel and confirm delivery before adding contact.",
+  );
+  if (segment.delinquency === "90+ days past due")
+    tips.push("At 90+ days past due, confirm contactability first — reach is the main constraint.");
+  if (segment.language === "French" || segment.language === "English + French")
+    tips.push("Send in the customer's preferred language to lift response rates.");
+  if (segment.ageBand === "18 – 24" || segment.ageBand === "25 – 34")
+    tips.push("Younger age bands engage more with SMS payment links than with email.");
+  if (segment.ageBand === "65 and over")
+    tips.push("Allow longer observation windows between contacts for this age band.");
+  tips.push("Add a supervisor review step before any escalated treatment.");
+  return tips;
+}
