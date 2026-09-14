@@ -28,7 +28,13 @@ import {
   type StrategyNodeKind,
 } from "@/lib/strategy-data";
 
-const addableKinds: StrategyNodeKind[] = ["Communication", "Wait", "AI Reassessment", "Case Action"];
+const addableKinds: StrategyNodeKind[] = [
+  "Communication",
+  "Wait",
+  "Condition",
+  "AI Reassessment",
+  "Case Action",
+];
 
 export function TemplatePreview({ node }: { node: StrategyNode }) {
   const template = templateForNode(node);
@@ -246,7 +252,10 @@ export function StepConfigForm({
 
       {canEdit && node.kind !== "Condition" && (
         <div className="border-t border-border/60 pt-3">
-          <Field label="Add a step after this one">
+          <Field
+            label="Add a step after this one"
+            hint="Choose Condition to split the flow into YES / NO paths, then click the new condition card to edit what it checks."
+          >
             <SelectInput
               value={addKind}
               options={addableKinds}
@@ -254,7 +263,7 @@ export function StepConfigForm({
             />
           </Field>
           <Btn className="mt-2" onClick={() => onAddAfter(addKind)}>
-            Add step
+            {addKind === "Condition" ? "Add condition" : "Add step"}
           </Btn>
         </div>
       )}

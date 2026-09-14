@@ -88,30 +88,66 @@ export function StrategyProvider({ children }: { children: ReactNode }) {
         patchStrategy(strategyId, (s) => {
           const node = s.nodes[nodeId];
           if (!node || node.kind === "Condition") return s;
-          const newId = `h-${Date.now().toString(36)}`;
-          const created: StrategyNode = {
-            id: newId,
-            kind,
-            title:
-              kind === "Communication"
-                ? "Send communication"
-                : kind === "Wait"
-                  ? "Wait / observe"
-                  : `${kind} step`,
-            origin: "Human Modified",
-            config:
-              kind === "Communication"
-                ? {
-                    channel: "Email",
-                    purpose: "Payment Reminder",
-                    referenceEvent: "Previous Action",
-                    amount: 2,
-                    unit: "Days",
-                    direction: "After",
-                  }
-                : { referenceEvent: "Previous Action", amount: 2, unit: "Days", direction: "After" },
-            next: node.next ?? null,
-          };
+          const stamp = Date.now().toString(36);
+          const newId = `h-${stamp}`;
+          const extra: Record<string, StrategyNode> = {};
+
+          let created: StrategyNode;
+          if (kind === "Condition") {
+            const outcomeId = `h-${stamp}-yes`;
+            extra[outcomeId] = {
+              id: outcomeId,
+              kind: "Outcome",
+              title: "Case closed — paid",
+              origin: "Human Modified",
+              config: { outcome: "Paid In Full" },
+              next: null,
+            };
+            created = {
+              id: newId,
+              kind: "Condition",
+              title: "Payment received?",
+              origin: "Human Modified",
+              config: {
+                attribute: "Payment Status",
+                operator: "Equals",
+                value: "Paid In Full",
+              },
+              next: null,
+              yes: outcomeId,
+              no: node.next ?? null,
+            };
+          } else {
+            created = {
+              id: newId,
+              kind,
+              title:
+                kind === "Communication"
+                  ? "Send communication"
+                  : kind === "Wait"
+                    ? "Wait / observe"
+                    : `${kind} step`,
+              origin: "Human Modified",
+              config:
+                kind === "Communication"
+                  ? {
+                      channel: "Email",
+                      purpose: "Payment Reminder",
+                      referenceEvent: "Previous Action",
+                      amount: 2,
+                      unit: "Days",
+                      direction: "After",
+                    }
+                  : {
+                      referenceEvent: "Previous Action",
+                      amount: 2,
+                      unit: "Days",
+                      direction: "After",
+                    },
+              next: node.next ?? null,
+            };
+          }
+
           return {
             ...s,
             origin: "Human Modified",
@@ -119,6 +155,7 @@ export function StrategyProvider({ children }: { children: ReactNode }) {
             status: s.status === "AI Proposed" ? "Under Review" : s.status,
             nodes: {
               ...s.nodes,
+              ...extra,
               [newId]: created,
               [nodeId]: { ...node, next: newId },
             },
