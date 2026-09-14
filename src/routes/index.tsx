@@ -6,6 +6,7 @@ import {
   KpiCard,
   StatusPill,
   FilterSelect,
+  FilterMultiSelect,
 } from "@/components/payflow-ui";
 import { useRole, useVisibleAccounts, useVisibleActivity } from "@/lib/role-context";
 import { useReviews } from "@/lib/reviews-context";
@@ -14,9 +15,9 @@ import { paymentOutcomeTotals } from "@/lib/payment-data";
 import { useVisibleCommunications } from "@/components/communication-table";
 import { buildIntegrations, integrationSummary } from "@/lib/integration-data";
 import {
-  ALL_SUB_CLIENTS,
+  isSingleClientSelected,
   portfolioByName,
-  subClientOptions,
+  subClientNamesForClient,
 } from "@/lib/portfolio-data";
 
 export const Route = createFileRoute("/")({
@@ -97,22 +98,22 @@ function funnelVolumes(
 function CommunicationFunnel() {
   const { visibleClients } = useRole();
   const [client, setClient] = useState("All Clients");
-  const [subClient, setSubClient] = useState(ALL_SUB_CLIENTS);
+  const [subClients, setSubClients] = useState<string[]>([]);
   const [date, setDate] = useState("Today");
   const [channel, setChannel] = useState("All Channels");
   const [journey, setJourney] = useState("All Workflows");
 
   const isDefault =
     client === "All Clients" &&
-    subClient === ALL_SUB_CLIENTS &&
+    subClients.length === 0 &&
     date === "Today" &&
     channel === "All Channels" &&
     journey === "All Workflows";
 
-  const rows = funnelVolumes(client, subClient, date, channel, journey);
+  const rows = funnelVolumes(client, subClients.join(","), date, channel, journey);
   const activeParts = [
     client !== "All Clients" ? client : null,
-    subClient !== ALL_SUB_CLIENTS ? subClient : null,
+    subClients.length > 0 ? subClients.join(", ") : null,
     channel !== "All Channels" ? channel : null,
     date !== "Today" ? date : null,
     journey !== "All Workflows" ? journey : null,
@@ -128,7 +129,7 @@ function CommunicationFunnel() {
           <button
             onClick={() => {
               setClient("All Clients");
-              setSubClient(ALL_SUB_CLIENTS);
+              setSubClients([]);
               setDate("Today");
               setChannel("All Channels");
               setJourney("All Workflows");
@@ -146,16 +147,19 @@ function CommunicationFunnel() {
           value={client}
           onChange={(v) => {
             setClient(v);
-            setSubClient(ALL_SUB_CLIENTS);
+            setSubClients([]);
           }}
           options={["All Clients", ...visibleClients.map((c) => c.name)]}
         />
-        <FilterSelect
-          label="Sub-Client"
-          value={subClient}
-          onChange={setSubClient}
-          options={subClientOptions(visibleClients, client)}
-        />
+        {isSingleClientSelected(client) && (
+          <FilterMultiSelect
+            label="Sub-Client"
+            allLabel="All Sub-Clients"
+            selected={subClients}
+            onChange={setSubClients}
+            options={subClientNamesForClient(visibleClients, client)}
+          />
+        )}
         <FilterSelect
           label="Date"
           value={date}
@@ -258,24 +262,26 @@ function Dashboard() {
 
   const [date, setDate] = useState("Today");
   const [client, setClient] = useState("All Clients");
-  const [subClient, setSubClient] = useState(ALL_SUB_CLIENTS);
+  const [subClients, setSubClients] = useState<string[]>([]);
   const [channel, setChannel] = useState("All Channels");
 
-  const selectedPortfolio =
-    subClient === ALL_SUB_CLIENTS ? undefined : portfolioByName(subClient);
+  const selectedPortfolios = subClients
+    .map((name) => portfolioByName(name))
+    .filter((p): p is NonNullable<typeof p> => !!p);
 
-  const scoped = selectedPortfolio
-    ? visibleClients.filter((c) => c.id === selectedPortfolio.clientId)
-    : client === "All Clients"
+  const scoped =
+    client === "All Clients"
       ? visibleClients
       : visibleClients.filter((c) => c.name === client);
 
-  const totalAccounts = selectedPortfolio
-    ? selectedPortfolio.accounts
-    : scoped.reduce((sum, c) => sum + c.accounts, 0);
-  const totalCases = selectedPortfolio
-    ? selectedPortfolio.cases
-    : scoped.reduce((sum, c) => sum + c.activeCases, 0);
+  const totalAccounts =
+    selectedPortfolios.length > 0
+      ? selectedPortfolios.reduce((sum, p) => sum + p.accounts, 0)
+      : scoped.reduce((sum, c) => sum + c.accounts, 0);
+  const totalCases =
+    selectedPortfolios.length > 0
+      ? selectedPortfolios.reduce((sum, p) => sum + p.cases, 0)
+      : scoped.reduce((sum, c) => sum + c.activeCases, 0);
   const recovered = scoped.reduce((sum, c) => sum + c.recovered, 0);
   const { counts: reviewCounts } = useReviews();
 
@@ -313,16 +319,19 @@ function Dashboard() {
           value={client}
           onChange={(v) => {
             setClient(v);
-            setSubClient(ALL_SUB_CLIENTS);
+            setSubClients([]);
           }}
           options={["All Clients", ...visibleClients.map((c) => c.name)]}
         />
-        <FilterSelect
-          label="Sub-Client"
-          value={subClient}
-          onChange={setSubClient}
-          options={subClientOptions(visibleClients, client)}
-        />
+        {isSingleClientSelected(client) && (
+          <FilterMultiSelect
+            label="Sub-Client"
+            allLabel="All Sub-Clients"
+            selected={subClients}
+            onChange={setSubClients}
+            options={subClientNamesForClient(visibleClients, client)}
+          />
+        )}
         <FilterSelect
           label="Channel"
           value={channel}

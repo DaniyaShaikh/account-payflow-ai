@@ -7,6 +7,7 @@ import {
   StatusPill,
   SearchInput,
   FilterSelect,
+  FilterMultiSelect,
   PrimaryCell,
   EmptyState,
 } from "@/components/payflow-ui";
@@ -33,9 +34,9 @@ export function useVisibleCommunications() {
 }
 
 import {
-  ALL_SUB_CLIENTS,
-  matchesSubClient,
-  subClientOptions,
+  isSingleClientSelected,
+  matchesSubClients,
+  subClientNamesForClient,
 } from "@/lib/portfolio-data";
 
 export function CommunicationTable({
@@ -57,7 +58,7 @@ export function CommunicationTable({
   const [query, setQuery] = useState("");
   const [date, setDate] = useState("All Dates");
   const [client, setClient] = useState(initialClient);
-  const [subClient, setSubClient] = useState(ALL_SUB_CLIENTS);
+  const [subClients, setSubClients] = useState<string[]>([]);
   const [channel, setChannel] = useState(initialChannel);
   const [status, setStatus] = useState(initialStatus);
   const [journey, setJourney] = useState(initialJourney);
@@ -83,7 +84,7 @@ export function CommunicationTable({
     if (date !== "All Dates" && c.dateBucket !== date) return false;
     if (showClientFilter && client !== "All Clients" && clientName(c.clientId) !== client)
       return false;
-    if (!matchesSubClient(c.clientId, c.accountId, subClient)) return false;
+    if (!matchesSubClients(c.clientId, c.accountId, subClients)) return false;
     if (channel !== "All Channels" && c.channel !== channel) return false;
     if (status !== "All Statuses" && c.status !== status) return false;
     if (journey !== "All Workflows" && journeyById(c.journeyId)?.name !== journey) return false;
@@ -112,17 +113,20 @@ export function CommunicationTable({
             value={client}
             onChange={(v) => {
               setClient(v);
-              setSubClient(ALL_SUB_CLIENTS);
+              setSubClients([]);
             }}
             options={["All Clients", ...visibleClients.map((c) => c.name)]}
           />
         )}
-        <FilterSelect
-          label="Sub-Client"
-          value={subClient}
-          onChange={setSubClient}
-          options={subClientOptions(visibleClients, showClientFilter ? client : null)}
-        />
+        {isSingleClientSelected(client) && (
+          <FilterMultiSelect
+            label="Sub-Client"
+            allLabel="All Sub-Clients"
+            selected={subClients}
+            onChange={setSubClients}
+            options={subClientNamesForClient(visibleClients, client)}
+          />
+        )}
         <FilterSelect
           label="Channel"
           value={channel}

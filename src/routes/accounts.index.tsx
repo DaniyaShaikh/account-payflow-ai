@@ -7,6 +7,7 @@ import {
   StatusPill,
   statusTone,
   FilterSelect,
+  FilterMultiSelect,
 } from "@/components/payflow-ui";
 import { useRole, useVisibleAccounts } from "@/lib/role-context";
 import {
@@ -18,10 +19,10 @@ import {
 } from "@/lib/payflow-data";
 import { intakeSummary } from "@/lib/intake-data";
 import {
-  ALL_SUB_CLIENTS,
-  matchesSubClient,
+  isSingleClientSelected,
+  matchesSubClients,
   subClientNameFor,
-  subClientOptions,
+  subClientNamesForClient,
 } from "@/lib/portfolio-data";
 
 export const Route = createFileRoute("/accounts/")({
@@ -49,14 +50,14 @@ function AccountsPage() {
   const accounts = useVisibleAccounts();
 
   const [client, setClient] = useState("All Clients");
-  const [subClient, setSubClient] = useState(ALL_SUB_CLIENTS);
+  const [subClients, setSubClients] = useState<string[]>([]);
   const [status, setStatus] = useState("All Statuses");
   const [journey, setJourney] = useState("All Workflows");
   const [review, setReview] = useState("All");
 
   const rows = accounts.filter((a) => {
     if (client !== "All Clients" && clientName(a.clientId) !== client) return false;
-    if (!matchesSubClient(a.clientId, a.id, subClient)) return false;
+    if (!matchesSubClients(a.clientId, a.id, subClients)) return false;
     if (status !== "All Statuses" && a.status !== status) return false;
     if (journey !== "All Workflows" && a.journey !== journey) return false;
     if (review === "Yes" && !a.humanReview) return false;
@@ -102,16 +103,19 @@ function AccountsPage() {
           value={client}
           onChange={(v) => {
             setClient(v);
-            setSubClient(ALL_SUB_CLIENTS);
+            setSubClients([]);
           }}
           options={["All Clients", ...visibleClients.map((c) => c.name)]}
         />
-        <FilterSelect
-          label="Sub-Client"
-          value={subClient}
-          onChange={setSubClient}
-          options={subClientOptions(visibleClients, client)}
-        />
+        {isSingleClientSelected(client) && (
+          <FilterMultiSelect
+            label="Sub-Client"
+            allLabel="All Sub-Clients"
+            selected={subClients}
+            onChange={setSubClients}
+            options={subClientNamesForClient(visibleClients, client)}
+          />
+        )}
         <FilterSelect
           label="Status"
           value={status}

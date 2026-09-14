@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { Inbox, Search } from "lucide-react";
+import { Check, ChevronDown, Inbox, Search } from "lucide-react";
 import type { ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 export function PageHeader({
@@ -389,6 +390,117 @@ export function FilterSelect({
     </label>
   );
 }
+
+/**
+ * Multi-select filter. An empty selection reads as "all" and stays quiet; any
+ * selection picks up the same subtle emphasis as an applied FilterSelect.
+ */
+export function FilterMultiSelect({
+  label,
+  allLabel,
+  selected,
+  options,
+  onChange,
+}: {
+  label: string;
+  allLabel: string;
+  selected: string[];
+  options: string[];
+  onChange: (value: string[]) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const applied = selected.length > 0;
+
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [open]);
+
+  const summary =
+    selected.length === 0
+      ? allLabel
+      : selected.length === 1
+        ? selected[0]!
+        : `${selected.length} selected`;
+
+  const toggle = (option: string) => {
+    onChange(
+      selected.includes(option) ? selected.filter((s) => s !== option) : [...selected, option],
+    );
+  };
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className={cn(
+          "flex h-9 items-center gap-2 rounded-md border px-3 shadow-subtle transition-all",
+          applied
+            ? "border-primary/40 bg-primary/[0.06]"
+            : "border-border bg-card hover:border-border-strong",
+        )}
+      >
+        <span
+          className={cn(
+            "text-[11px] font-medium",
+            applied ? "text-primary" : "text-muted-foreground",
+          )}
+        >
+          {label}
+        </span>
+        <span
+          className={cn(
+            "max-w-[180px] truncate text-[13px] font-medium",
+            applied ? "text-primary" : "text-foreground",
+          )}
+        >
+          {summary}
+        </span>
+        <ChevronDown className={cn("size-3.5", applied ? "text-primary" : "text-muted-foreground")} />
+      </button>
+
+      {open && (
+        <div className="absolute z-30 mt-1.5 min-w-[220px] rounded-md border border-border bg-popover p-1 shadow-lg">
+          <button
+            type="button"
+            onClick={() => onChange([])}
+            className="flex w-full items-center justify-between rounded px-2.5 py-1.5 text-left text-[12.5px] text-muted-foreground hover:bg-accent"
+          >
+            {allLabel}
+            {selected.length === 0 && <Check className="size-3.5 text-primary" />}
+          </button>
+          <div className="my-1 h-px bg-border" />
+          {options.map((option) => {
+            const on = selected.includes(option);
+            return (
+              <button
+                key={option}
+                type="button"
+                onClick={() => toggle(option)}
+                className="flex w-full items-center justify-between gap-3 rounded px-2.5 py-1.5 text-left text-[12.5px] text-foreground hover:bg-accent"
+              >
+                <span className="truncate">{option}</span>
+                {on && <Check className="size-3.5 shrink-0 text-primary" />}
+              </button>
+            );
+          })}
+          {options.length === 0 && (
+            <p className="px-2.5 py-1.5 text-[12px] text-muted-foreground">
+              No sub-clients available
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 
 export function TabBar<T extends string>({
   tabs,

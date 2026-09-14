@@ -170,6 +170,27 @@ export function matchesSubClient(clientId: string, key: string, selected: string
   return subClientNameFor(clientId, key) === selected;
 }
 
+/** Multi-select variant: an empty selection means every sub-client. */
+export function matchesSubClients(clientId: string, key: string, selected: string[]): boolean {
+  if (selected.length === 0) return true;
+  return selected.includes(subClientNameFor(clientId, key));
+}
+
+/** Sub-client names for exactly one selected client name (no "All …" entry). */
+export function subClientNamesForClient(
+  clients: { id: string; name: string }[],
+  selectedClient: string,
+): string[] {
+  const owner = clients.find((c) => c.name === selectedClient);
+  if (!owner) return [];
+  return seedPortfolios.filter((p) => p.clientId === owner.id).map((p) => p.name);
+}
+
+/** True when a single client is selected (i.e. not an "All …" option). */
+export function isSingleClientSelected(selectedClient?: string | null): boolean {
+  return !!selectedClient && !selectedClient.startsWith("All ");
+}
+
 /**
  * Sub-client options for the clients in scope, narrowed to one client when a
  * client filter is applied.
