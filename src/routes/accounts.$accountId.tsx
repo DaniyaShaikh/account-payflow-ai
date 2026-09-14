@@ -6,6 +6,7 @@ import { useReviews } from "@/lib/reviews-context";
 import { reviewStatusTone } from "@/lib/review-data";
 import { accounts, clientName, formatCurrency } from "@/lib/payflow-data";
 import { journeyStateForAccount, journeyStatusTone, journeyTypeTone } from "@/lib/journey-data";
+import { WorkflowFlowPanel } from "@/components/workflow-flow-panel";
 import {
   commStatusTone,
   communicationTimelineEvents,
