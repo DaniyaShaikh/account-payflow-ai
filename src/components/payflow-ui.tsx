@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { Inbox, Search } from "lucide-react";
+import { Check, ChevronDown, Inbox, Search } from "lucide-react";
 import type { ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 export function PageHeader({
