@@ -156,6 +156,15 @@ function ReviewDetail() {
             )}
           </Panel>
 
+          <WorkflowFlowPanel
+            clientId={review.clientId}
+            workflowName={review.journey}
+            title="Workflow Map"
+            description={`Where this exception sits in the ${review.journey} strategy. Click any step to review or adjust it.`}
+          />
+
+
+
           <Panel title="Recent Activity" description="Events relevant to this decision">
             <ol className="relative space-y-3.5 pl-5">
               <span className="absolute top-1.5 bottom-1.5 left-[5px] w-px bg-border" />
