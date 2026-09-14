@@ -262,7 +262,7 @@ function PlatformPeoplePage() {
                         return (
                           <Btn
                             key={p.id}
-                            variant={assigned ? "danger" : undefined}
+                            variant={assigned ? "danger" : "secondary"}
                             onClick={() =>
                               updatePerson(person.id, {
                                 productIds: assigned
