@@ -15,6 +15,7 @@ import {
 } from "@/components/payflow-ui";
 import { useRole } from "@/lib/role-context";
 import {
+import { ALL_SUB_CLIENTS, subClientOptions } from "@/lib/portfolio-data";
   buildIntegrations,
   integrationCategories,
   integrationStatuses,
@@ -55,11 +56,17 @@ function IntegrationsPage() {
 
   const [status, setStatus] = useState(search.status ?? "All Statuses");
   const [client, setClient] = useState("All Clients");
+  const [subClient, setSubClient] = useState(ALL_SUB_CLIENTS);
   const [category, setCategory] = useState("All Categories");
 
   const rows = integrations.filter((i) => {
     if (status !== "All Statuses" && i.status !== status) return false;
     if (client !== "All Clients" && i.clientName !== client) return false;
+    if (subClient !== ALL_SUB_CLIENTS) {
+      const owner = visibleClients.find((c) => c.name === i.clientName);
+      const pf = subClientOptions(visibleClients, owner?.name ?? null);
+      if (!pf.includes(subClient)) return false;
+    }
     if (category !== "All Categories" && i.category !== category) return false;
     return true;
   });
@@ -93,8 +100,17 @@ function IntegrationsPage() {
         <FilterSelect
           label="Client"
           value={client}
-          onChange={setClient}
+          onChange={(v) => {
+            setClient(v);
+            setSubClient(ALL_SUB_CLIENTS);
+          }}
           options={["All Clients", ...visibleClients.map((c) => c.name)]}
+        />
+        <FilterSelect
+          label="Sub-Client"
+          value={subClient}
+          onChange={setSubClient}
+          options={subClientOptions(visibleClients, client)}
         />
         <FilterSelect
           label="Category"
