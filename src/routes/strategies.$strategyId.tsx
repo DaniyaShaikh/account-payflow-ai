@@ -1,36 +1,17 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Sparkles, Info } from "lucide-react";
-import {
-  PageHeader,
-  Panel,
-  StatusPill,
-  Btn,
-  Field,
-  SelectInput,
-  TextInput,
-  TextArea,
-} from "@/components/payflow-ui";
+import { PageHeader, Panel, StatusPill, Btn, Field, TextArea } from "@/components/payflow-ui";
 import { StrategyCanvas } from "@/components/strategy-canvas";
+import { StepConfigForm, StepEditorDialog } from "@/components/strategy-step-editor";
 import { useRole } from "@/lib/role-context";
 import { useStrategies } from "@/lib/strategy-context";
 import { clientName, formatNumber } from "@/lib/payflow-data";
 import {
-  caseActions,
-  channels,
-  conditionAttributes,
-  conditionOperators,
-  conditionValues,
-  messagePurposes,
-  outcomes,
-  paymentActions,
-  referenceEvents,
+  excludedTargetingAttributes,
+  segmentEntries,
   strategyStatusTone,
-  timeDirections,
-  timeUnits,
-  type StrategyNodeKind,
 } from "@/lib/strategy-data";
-import { seedStrategies } from "@/lib/strategy-data";
 
 export const Route = createFileRoute("/strategies/$strategyId")({
   head: () => ({
