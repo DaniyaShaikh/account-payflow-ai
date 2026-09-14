@@ -83,7 +83,7 @@ export function CommunicationTable({
     if (date !== "All Dates" && c.dateBucket !== date) return false;
     if (showClientFilter && client !== "All Clients" && clientName(c.clientId) !== client)
       return false;
-    if (!matchesSubClient(c.clientId, c.accountId, subClient)) return false;
+    if (!matchesSubClients(c.clientId, c.accountId, subClients)) return false;
     if (channel !== "All Channels" && c.channel !== channel) return false;
     if (status !== "All Statuses" && c.status !== status) return false;
     if (journey !== "All Workflows" && journeyById(c.journeyId)?.name !== journey) return false;
