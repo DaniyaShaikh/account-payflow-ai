@@ -21,6 +21,9 @@ import { useRole } from "@/lib/role-context";
 import { useReviews } from "@/lib/reviews-context";
 import { formatWaiting } from "@/lib/review-data";
 import { markSignedOut } from "@/lib/session";
+import { usePlatform } from "@/lib/platform-context";
+import { PAYFLOW_PRODUCT_ID } from "@/lib/platform-data";
+import { Btn } from "@/components/payflow-ui";
 import {
   DropdownMenu,
   DropdownMenuContent,
