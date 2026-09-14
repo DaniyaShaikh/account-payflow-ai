@@ -11,6 +11,7 @@ import {
   journeyTypeTone,
 } from "@/lib/journey-data";
 import { communicationsForJourney } from "@/lib/communication-data";
+import { WorkflowFlowPanel } from "@/components/workflow-flow-panel";
 
 export const Route = createFileRoute("/journeys/$journeyId")({
   head: () => ({
@@ -49,7 +50,7 @@ function JourneyDetail() {
         <p className="text-sm text-muted-foreground">
           This journey belongs to a client that is not assigned to your supervisor account.
         </p>
-        <Link to="/journeys" className="mt-3 inline-block text-[13px] font-medium text-primary">
+        <Link to="/strategies" className="mt-3 inline-block text-[13px] font-medium text-primary">
           Back to workflows
         </Link>
       </Panel>
@@ -77,7 +78,10 @@ function JourneyDetail() {
   return (
     <>
       <PageHeader
-        breadcrumb={[{ label: "Workflows", to: "/journeys" }, { label: journey.name }]}
+        breadcrumb={[
+          { label: "Strategies / Workflows", to: "/strategies" },
+          { label: journey.name },
+        ]}
         title={journey.name}
         description={`${journey.scope} · ${journey.type}`}
         actions={
@@ -146,40 +150,13 @@ function JourneyDetail() {
         </div>
 
         <div className="space-y-5">
-          <Panel
+          <WorkflowFlowPanel
+            {...(journey.clientId ? { clientId: journey.clientId } : {})}
+            workflowName={journey.name}
             title="Collection Strategy"
-            description="Stages are adaptive guidance, not a fixed script. PayFlow reassesses the next action whenever a payment, communication response, promise-to-pay, dispute, or failure event occurs."
-          >
-            <ol className="space-y-2">
-              {journey.steps.map((step, i) => (
-                <li key={`${step.title}-${i}`}>
-                  <div className="flex items-start gap-3 rounded-lg border border-border bg-card px-3.5 py-2.5">
-                    <span className="tabular mt-0.5 w-4 shrink-0 text-[11px] text-muted-foreground">
-                      {i + 1}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-[13px] font-semibold text-foreground">
-                          {step.title}
-                        </span>
-                        <StatusPill tone={journeyStepTone(step.kind)}>{step.kind}</StatusPill>
-                        {step.channel && <StatusPill>{step.channel}</StatusPill>}
-                        {step.timing && (
-                          <span className="text-[11px] text-muted-foreground">{step.timing}</span>
-                        )}
-                      </div>
-                      {step.detail && (
-                        <p className="mt-0.5 text-xs text-muted-foreground">{step.detail}</p>
-                      )}
-                    </div>
-                  </div>
-                  {i < journey.steps.length - 1 && (
-                    <div className="ml-[26px] h-3 w-px bg-border" aria-hidden />
-                  )}
-                </li>
-              ))}
-            </ol>
-          </Panel>
+            description="Adaptive guidance, not a fixed script. PayFlow reassesses the next action on every payment, response, promise-to-pay, dispute or failure event. Click a step to review or adjust it."
+          />
+
 
           <Panel
             title="Accounts on this Workflow"

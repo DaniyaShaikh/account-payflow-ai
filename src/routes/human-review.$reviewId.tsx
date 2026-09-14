@@ -13,6 +13,7 @@ import {
   SectionHeading,
 } from "@/components/payflow-ui";
 import { useReviews } from "@/lib/reviews-context";
+import { WorkflowFlowPanel } from "@/components/workflow-flow-panel";
 import { formatCurrency } from "@/lib/payflow-data";
 import { useRole } from "@/lib/role-context";
 import {
@@ -155,6 +156,15 @@ function ReviewDetail() {
               </ul>
             )}
           </Panel>
+
+          <WorkflowFlowPanel
+            clientId={review.clientId}
+            workflowName={review.journey}
+            title="Workflow Map"
+            description={`Where this exception sits in the ${review.journey} strategy. Click any step to review or adjust it.`}
+          />
+
+
 
           <Panel title="Recent Activity" description="Events relevant to this decision">
             <ol className="relative space-y-3.5 pl-5">

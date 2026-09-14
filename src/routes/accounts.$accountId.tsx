@@ -6,6 +6,7 @@ import { useReviews } from "@/lib/reviews-context";
 import { reviewStatusTone } from "@/lib/review-data";
 import { accounts, clientName, formatCurrency } from "@/lib/payflow-data";
 import { journeyStateForAccount, journeyStatusTone, journeyTypeTone } from "@/lib/journey-data";
+import { WorkflowFlowPanel } from "@/components/workflow-flow-panel";
 import {
   commStatusTone,
   communicationTimelineEvents,
@@ -215,12 +216,8 @@ function AccountDetail() {
             <Panel
               title="Current Workflow"
               description="The collection strategy currently applied to this case"
-              action={
-                <Link to="/journeys/$journeyId" params={{ journeyId: journeyState.journey.id }}>
-                  <Btn>View Workflow</Btn>
-                </Link>
-              }
             >
+
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-[14px] font-semibold text-foreground">
                   {journeyState.journey.name}
@@ -258,6 +255,16 @@ function AccountDetail() {
               </p>
             </Panel>
           )}
+
+          {journeyState?.journey && (
+            <WorkflowFlowPanel
+              clientId={account.clientId}
+              workflowName={journeyState.journey.name}
+              title="Workflow Map"
+              description="The live visual strategy for this case. Click any step to review or adjust it."
+            />
+          )}
+
 
           {accountComms.length > 0 && (
             <Panel

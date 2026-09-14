@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { PageHeader, Panel, KpiCard } from "@/components/payflow-ui";
 import { JourneyLibrary, useVisibleJourneys } from "@/components/journey-library";
 import { formatNumber } from "@/lib/payflow-data";
@@ -21,8 +21,13 @@ export const Route = createFileRoute("/journeys/")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
+  // Single workflow home: the visual Strategies / Workflows library.
+  beforeLoad: () => {
+    throw redirect({ to: "/strategies" });
+  },
   component: JourneysPage,
 });
+
 
 function JourneysPage() {
   const journeys = useVisibleJourneys();
