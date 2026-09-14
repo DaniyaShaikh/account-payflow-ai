@@ -286,7 +286,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                               asChild
                               isActive={isActive}
                               tooltip={item.label}
-                              className="group/btn relative flex items-center gap-2.5 rounded-lg border border-transparent px-2.5 py-2 text-[13px] font-medium text-sidebar-muted transition-all duration-150 hover:bg-sidebar-accent/70 hover:text-sidebar-foreground data-[active=true]:border-sidebar-border data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground data-[active=true]:shadow-[0_8px_20px_-14px_var(--sidebar-primary)] group-data-[collapsible=icon]:mx-auto"
+                              className="group/btn relative flex items-center gap-2.5 rounded-lg border border-transparent px-2.5 py-2 text-[13px] font-medium text-sidebar-muted transition-all duration-150 hover:bg-sidebar-accent/70 hover:text-sidebar-foreground data-[active=true]:border-sidebar-border data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground data-[active=true]:shadow-[0_8px_20px_-14px_var(--sidebar-primary)] group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:[&>span:last-child]:hidden"
                             >
                               <Link
                                 to={item.to}
