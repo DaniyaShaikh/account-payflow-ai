@@ -132,3 +132,59 @@ export const seedPortfolios: Portfolio[] = [
     lastFileReceived: "11 Sep 2026",
   },
 ];
+
+/* ---------------------------------------------------------------------------
+ * Sub-client / portfolio filtering helpers
+ *
+ * Accounts, communications and reviews in this prototype are illustrative and
+ * carry no stored portfolio column, so a stable deterministic mapping assigns
+ * each record to one of its client's sub-client portfolios. The mapping is
+ * consistent for the same record across every screen.
+ * ------------------------------------------------------------------------- */
+
+export const ALL_SUB_CLIENTS = "All Sub-Clients";
+
+export function portfoliosForClientId(clientId: string): Portfolio[] {
+  return seedPortfolios.filter((p) => p.clientId === clientId);
+}
+
+export function portfolioByName(name: string): Portfolio | undefined {
+  return seedPortfolios.find((p) => p.name === name);
+}
+
+function stableIndex(key: string, length: number) {
+  let h = 0;
+  for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) >>> 0;
+  return h % length;
+}
+
+/** Deterministic sub-client portfolio for a record belonging to a client. */
+export function subClientNameFor(clientId: string, key: string): string {
+  const list = portfoliosForClientId(clientId);
+  if (list.length === 0) return "—";
+  return list[stableIndex(key, list.length)]!.name;
+}
+
+export function matchesSubClient(clientId: string, key: string, selected: string): boolean {
+  if (selected === ALL_SUB_CLIENTS) return true;
+  return subClientNameFor(clientId, key) === selected;
+}
+
+/**
+ * Sub-client options for the clients in scope, narrowed to one client when a
+ * client filter is applied.
+ */
+export function subClientOptions(
+  clients: { id: string; name: string }[],
+  selectedClient?: string | null,
+): string[] {
+  const scoped =
+    selectedClient && !selectedClient.startsWith("All ")
+      ? clients.filter((c) => c.name === selectedClient)
+      : clients;
+  const ids = scoped.map((c) => c.id);
+  return [
+    ALL_SUB_CLIENTS,
+    ...seedPortfolios.filter((p) => ids.includes(p.clientId)).map((p) => p.name),
+  ];
+}
