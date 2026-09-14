@@ -78,7 +78,10 @@ function JourneyDetail() {
   return (
     <>
       <PageHeader
-        breadcrumb={[{ label: "Workflows", to: "/journeys" }, { label: journey.name }]}
+        breadcrumb={[
+          { label: "Strategies / Workflows", to: "/strategies" },
+          { label: journey.name },
+        ]}
         title={journey.name}
         description={`${journey.scope} · ${journey.type}`}
         actions={
