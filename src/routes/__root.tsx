@@ -16,6 +16,7 @@ import { RoleProvider } from "../lib/role-context";
 import { UsersProvider } from "../lib/users-context";
 import { RulesProvider } from "../lib/rules-context";
 import { ReviewsProvider } from "../lib/reviews-context";
+import { StrategyProvider } from "../lib/strategy-context";
 import { AppShell } from "../components/app-shell";
 import { isSignedIn } from "../lib/session";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -140,7 +141,9 @@ function RootShell({ children }: { children: ReactNode }) {
           <UsersProvider>
             <RoleProvider>
               <RulesProvider>
-                <ReviewsProvider>{children}</ReviewsProvider>
+                <ReviewsProvider>
+                  <StrategyProvider>{children}</StrategyProvider>
+                </ReviewsProvider>
               </RulesProvider>
             </RoleProvider>
           </UsersProvider>

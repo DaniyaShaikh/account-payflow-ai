@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { ReviewQueue } from "@/components/review-queue";
 import { JourneyLibrary } from "@/components/journey-library";
+import { PortfolioSection } from "@/components/portfolio-section";
 import { CommunicationTable } from "@/components/communication-table";
 import { journeysForClient } from "@/lib/journey-data";
 import { communicationsForClient } from "@/lib/communication-data";
@@ -75,6 +76,7 @@ export const Route = createFileRoute("/clients/$clientId")({
 
 const tabs = [
   "Overview",
+  "Sub-Clients / Portfolios",
   "Accounts",
   "Workflows",
   "Communications",
@@ -170,6 +172,10 @@ function ClientDetail() {
           activityItems={clientActivity}
           reviewCount={accounts.filter((a) => a.humanReview).length}
         />
+      )}
+
+      {tab === "Sub-Clients / Portfolios" && (
+        <PortfolioSection clientId={client.id} clientName={client.name} canEdit={isAdmin} />
       )}
 
       {tab === "Accounts" && <ClientAccounts clientName={client.name} accounts={accounts} />}
