@@ -47,25 +47,33 @@ function NodeIcon({ kind, channel }: { kind: StrategyNodeKind; channel?: string 
   }
 }
 
+function Arrow() {
+  return (
+    <span
+      className="absolute -bottom-[1px] left-1/2 size-0 -translate-x-1/2 border-x-[4px] border-t-[6px] border-x-transparent border-t-border-strong"
+      aria-hidden
+    />
+  );
+}
+
 function Connector({ label, tone }: { label?: string; tone?: "success" | "danger" }) {
   return (
-    <div className="flex flex-col items-center">
-      <span className="size-1.5 rounded-full bg-primary/50" aria-hidden />
-      <span className="h-5 w-px bg-gradient-to-b from-primary/40 to-border-strong" aria-hidden />
+    <div className="relative h-11 w-px bg-border-strong" aria-hidden>
       {label && (
         <span
           className={cn(
-            "rounded-full border px-2 py-[1px] text-[10px] font-bold tracking-wide shadow-subtle",
+            "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border px-2 py-[1px] text-[10px] font-bold tracking-wide whitespace-nowrap shadow-subtle",
             tone === "success"
-              ? "border-success/30 bg-success/10 text-success"
-              : "border-destructive/30 bg-destructive/10 text-destructive",
+              ? "border-success/40 bg-success/10 text-success"
+              : tone === "danger"
+                ? "border-destructive/40 bg-destructive/10 text-destructive"
+                : "border-border bg-card text-muted-foreground",
           )}
         >
           {label}
         </span>
       )}
-      <span className="h-5 w-px bg-gradient-to-b from-border-strong to-primary/40" aria-hidden />
-      <span className="-mt-1 size-1.5 rotate-45 border-r border-b border-primary/60" aria-hidden />
+      <Arrow />
     </div>
   );
 }
