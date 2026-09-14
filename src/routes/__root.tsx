@@ -180,8 +180,23 @@ function RootComponent() {
       s.location.pathname.startsWith("/activate"),
   });
 
+  // Platform administration and product selection sit above PayFlow: they are
+  // authenticated, but render their own shell instead of the PayFlow shell.
+  const isPlatformSurface = useRouterState({
+    select: (s) =>
+      s.location.pathname.startsWith("/platform") || s.location.pathname.startsWith("/products"),
+  });
+
   if (isBareSurface) {
     return <Outlet />;
+  }
+
+  if (isPlatformSurface) {
+    return (
+      <SessionGate>
+        <Outlet />
+      </SessionGate>
+    );
   }
 
   return (
