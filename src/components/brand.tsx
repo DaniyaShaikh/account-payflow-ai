@@ -40,6 +40,7 @@ export function PayflowWordmark({
       alt="PayFlow — Automate. Engage. Recover."
       className={cn(
         "h-11 w-auto max-w-full object-contain object-left",
+        _invert && "brightness-0 invert",
         className,
       )}
     />
