@@ -413,6 +413,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               </p>
             </div>
             <div className="flex items-center gap-1.5">
+              <ProductSwitcher />
               <ReviewBell />
               <span className="mx-1 hidden h-7 w-px bg-border lg:block" />
               <UserMenu compact />
