@@ -49,7 +49,7 @@ function AccountsPage() {
   const accounts = useVisibleAccounts();
 
   const [client, setClient] = useState("All Clients");
-  const [subClient, setSubClient] = useState(ALL_SUB_CLIENTS);
+  const [subClients, setSubClients] = useState<string[]>([]);
   const [status, setStatus] = useState("All Statuses");
   const [journey, setJourney] = useState("All Workflows");
   const [review, setReview] = useState("All");
