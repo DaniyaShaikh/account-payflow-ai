@@ -15,7 +15,7 @@ export function PageHeader({
   breadcrumb?: { label: string; to?: string }[];
 }) {
   return (
-    <div className="mb-7">
+    <div className="mb-8">
       {breadcrumb && (
         <nav className="mb-2 flex items-center gap-1.5 text-xs text-muted-foreground">
           {breadcrumb.map((crumb, i) => (
@@ -32,13 +32,13 @@ export function PageHeader({
           ))}
         </nav>
       )}
-      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-border/60 pb-6">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-5 pb-2 sm:flex sm:flex-wrap sm:justify-between">
         <div className="min-w-0">
-          <h1 className="text-[24px] leading-tight font-bold text-foreground">
+          <h1 className="font-display text-[28px] leading-tight font-semibold text-foreground">
             {title}
           </h1>
           {description && (
-            <p className="mt-1 max-w-2xl text-[13px] leading-relaxed text-muted-foreground">
+            <p className="mt-1.5 max-w-2xl text-[13.5px] leading-relaxed text-muted-foreground">
               {description}
             </p>
           )}
@@ -87,9 +87,9 @@ export function Panel({
   bodyClassName?: string;
 }) {
   return (
-    <section className={cn("panel overflow-hidden transition-all duration-300 hover:border-primary/30 hover:shadow-panel-hover ring-1 ring-inset ring-foreground/5", className)}>
+    <section className={cn("panel overflow-hidden transition-[border-color,box-shadow] duration-200", className)}>
       {title && (
-        <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 bg-card/80 px-5 py-4">
+        <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border/40 px-5 py-4.5">
           <div>
             <h2 className="text-[13.5px] font-semibold tracking-tight text-foreground">{title}</h2>
             {description && (
@@ -126,7 +126,7 @@ export function KpiCard({
   return (
     <div
       className={cn(
-        "group relative min-h-[106px] overflow-hidden rounded-lg border border-border/80 bg-card px-4 py-4 shadow-subtle transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-panel ring-1 ring-inset ring-foreground/[0.02]",
+         "group relative min-h-[112px] overflow-hidden rounded-lg border border-border/55 bg-card px-5 py-4.5 shadow-subtle transition-all duration-200 hover:border-primary/25 hover:shadow-panel",
         tone === "primary" && "border-primary/40 bg-gradient-to-br from-primary/[0.08] to-transparent shadow-brand",
       )}
     >
@@ -187,7 +187,7 @@ export function StatusPill({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-md border px-2 py-[3px] text-[11px] font-semibold whitespace-nowrap",
+        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-[3px] text-[11px] font-medium whitespace-nowrap",
         toneStyles[tone],
       )}
     >
@@ -229,7 +229,7 @@ export function DataTable({
   minWidth?: number;
 }) {
   return (
-    <div className="panel max-h-[70vh] overflow-auto shadow-panel">
+    <div className="panel max-h-[70vh] overflow-auto">
       <table className="w-full border-collapse text-[13px]" style={{ minWidth }}>
         <thead className="sticky top-0 z-10">
           <tr>

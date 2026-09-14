@@ -16,7 +16,7 @@ import {
   Layout,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
-import { PayflowWordmark } from "@/components/brand";
+import { PayflowMark, PayflowWordmark } from "@/components/brand";
 import { useRole } from "@/lib/role-context";
 import { useReviews } from "@/lib/reviews-context";
 import { formatWaiting } from "@/lib/review-data";
@@ -51,7 +51,7 @@ const navGroups = [
     label: "Overview",
     items: [
       { to: "/", label: "Dashboard", icon: LayoutDashboard, exact: true },
-      { to: "/showcase", label: "Showcase", icon: Layout },
+      { to: "/showcase", label: "Navigation Showcase", icon: Layout, adminOnly: true },
     ],
   },
   {
@@ -256,7 +256,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <SidebarHeader className="flex h-[68px] items-center px-4">
             <PayflowWordmark tagline invert className="group-data-[collapsible=icon]:hidden" />
             <div className="hidden group-data-[collapsible=icon]:block">
-              <PayflowWordmark invert />
+              <PayflowMark className="size-8" />
             </div>
           </SidebarHeader>
 
@@ -339,8 +339,8 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           </header>
 
-          <main className="relative flex-1 px-5 py-7 lg:px-9 lg:py-8">
-            <div className="mx-auto w-full max-w-[1220px]">{children}</div>
+          <main className="relative flex-1 px-5 py-7 lg:px-10 lg:py-9">
+            <div className="mx-auto w-full max-w-[1280px]">{children}</div>
           </main>
         </SidebarInset>
       </div>
