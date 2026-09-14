@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ActivateRouteImport } from './routes/activate'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as ProductsRouteImport } from './routes/products'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ShowcaseRouteImport } from './routes/showcase'
 import { Route as AccountsIndexRouteImport } from './routes/accounts.index'
@@ -55,6 +56,11 @@ const ActivateRoute = ActivateRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProductsRoute = ProductsRouteImport.update({
+  id: '/products',
+  path: '/products',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -210,6 +216,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/activate': typeof ActivateRoute
   '/login': typeof LoginRoute
+  '/products': typeof ProductsRoute
   '/profile': typeof ProfileRoute
   '/showcase': typeof ShowcaseRoute
   '/accounts/$accountId': typeof AccountsAccountIdRoute
@@ -244,6 +251,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/activate': typeof ActivateRoute
   '/login': typeof LoginRoute
+  '/products': typeof ProductsRoute
   '/profile': typeof ProfileRoute
   '/showcase': typeof ShowcaseRoute
   '/accounts/$accountId': typeof AccountsAccountIdRoute
@@ -279,6 +287,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/activate': typeof ActivateRoute
   '/login': typeof LoginRoute
+  '/products': typeof ProductsRoute
   '/profile': typeof ProfileRoute
   '/showcase': typeof ShowcaseRoute
   '/accounts/$accountId': typeof AccountsAccountIdRoute
@@ -315,6 +324,7 @@ export interface FileRouteTypes {
     | '/'
     | '/activate'
     | '/login'
+    | '/products'
     | '/profile'
     | '/showcase'
     | '/accounts/$accountId'
@@ -349,6 +359,7 @@ export interface FileRouteTypes {
     | '/'
     | '/activate'
     | '/login'
+    | '/products'
     | '/profile'
     | '/showcase'
     | '/accounts/$accountId'
@@ -383,6 +394,7 @@ export interface FileRouteTypes {
     | '/'
     | '/activate'
     | '/login'
+    | '/products'
     | '/profile'
     | '/showcase'
     | '/accounts/$accountId'
@@ -418,6 +430,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ActivateRoute: typeof ActivateRoute
   LoginRoute: typeof LoginRoute
+  ProductsRoute: typeof ProductsRoute
   ProfileRoute: typeof ProfileRoute
   ShowcaseRoute: typeof ShowcaseRoute
   AccountsAccountIdRoute: typeof AccountsAccountIdRoute
@@ -470,6 +483,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/products': {
+      id: '/products'
+      path: '/products'
+      fullPath: '/products'
+      preLoaderRoute: typeof ProductsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -682,6 +702,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ActivateRoute: ActivateRoute,
   LoginRoute: LoginRoute,
+  ProductsRoute: ProductsRoute,
   ProfileRoute: ProfileRoute,
   ShowcaseRoute: ShowcaseRoute,
   AccountsAccountIdRoute: AccountsAccountIdRoute,
