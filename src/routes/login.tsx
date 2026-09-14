@@ -33,7 +33,8 @@ function LoginPage() {
 
   const signIn = () => {
     markSignedIn();
-    navigate({ to: "/" });
+    // The platform product selector is always the first screen after sign-in.
+    navigate({ to: "/products" });
   };
 
   return (

@@ -31,6 +31,7 @@ import { Route as JourneysJourneyIdRouteImport } from './routes/journeys.$journe
 import { Route as PayTokenRouteImport } from './routes/pay.$token'
 import { Route as PlatformIndexRouteImport } from './routes/platform.index'
 import { Route as PlatformAccessRouteImport } from './routes/platform.access'
+import { Route as PlatformPeopleRouteImport } from './routes/platform.people'
 import { Route as PortfoliosPortfolioIdRouteImport } from './routes/portfolios.$portfolioId'
 import { Route as RulesIndexRouteImport } from './routes/rules.index'
 import { Route as RulesRuleIdRouteImport } from './routes/rules.$ruleId'
@@ -155,6 +156,11 @@ const PlatformAccessRoute = PlatformAccessRouteImport.update({
   path: '/platform/access',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlatformPeopleRoute = PlatformPeopleRouteImport.update({
+  id: '/platform/people',
+  path: '/platform/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PortfoliosPortfolioIdRoute = PortfoliosPortfolioIdRouteImport.update({
   id: '/portfolios/$portfolioId',
   path: '/portfolios/$portfolioId',
@@ -228,6 +234,7 @@ export interface FileRoutesByFullPath {
   '/journeys/$journeyId': typeof JourneysJourneyIdRoute
   '/pay/$token': typeof PayTokenRoute
   '/platform/access': typeof PlatformAccessRoute
+  '/platform/people': typeof PlatformPeopleRoute
   '/portfolios/$portfolioId': typeof PortfoliosPortfolioIdRoute
   '/rules/$ruleId': typeof RulesRuleIdRoute
   '/rules/new': typeof RulesNewRoute
@@ -263,6 +270,7 @@ export interface FileRoutesByTo {
   '/journeys/$journeyId': typeof JourneysJourneyIdRoute
   '/pay/$token': typeof PayTokenRoute
   '/platform/access': typeof PlatformAccessRoute
+  '/platform/people': typeof PlatformPeopleRoute
   '/portfolios/$portfolioId': typeof PortfoliosPortfolioIdRoute
   '/rules/$ruleId': typeof RulesRuleIdRoute
   '/rules/new': typeof RulesNewRoute
@@ -299,6 +307,7 @@ export interface FileRoutesById {
   '/journeys/$journeyId': typeof JourneysJourneyIdRoute
   '/pay/$token': typeof PayTokenRoute
   '/platform/access': typeof PlatformAccessRoute
+  '/platform/people': typeof PlatformPeopleRoute
   '/portfolios/$portfolioId': typeof PortfoliosPortfolioIdRoute
   '/rules/$ruleId': typeof RulesRuleIdRoute
   '/rules/new': typeof RulesNewRoute
@@ -336,6 +345,7 @@ export interface FileRouteTypes {
     | '/journeys/$journeyId'
     | '/pay/$token'
     | '/platform/access'
+    | '/platform/people'
     | '/portfolios/$portfolioId'
     | '/rules/$ruleId'
     | '/rules/new'
@@ -371,6 +381,7 @@ export interface FileRouteTypes {
     | '/journeys/$journeyId'
     | '/pay/$token'
     | '/platform/access'
+    | '/platform/people'
     | '/portfolios/$portfolioId'
     | '/rules/$ruleId'
     | '/rules/new'
@@ -406,6 +417,7 @@ export interface FileRouteTypes {
     | '/journeys/$journeyId'
     | '/pay/$token'
     | '/platform/access'
+    | '/platform/people'
     | '/portfolios/$portfolioId'
     | '/rules/$ruleId'
     | '/rules/new'
@@ -442,6 +454,7 @@ export interface RootRouteChildren {
   JourneysJourneyIdRoute: typeof JourneysJourneyIdRoute
   PayTokenRoute: typeof PayTokenRoute
   PlatformAccessRoute: typeof PlatformAccessRoute
+  PlatformPeopleRoute: typeof PlatformPeopleRoute
   PortfoliosPortfolioIdRoute: typeof PortfoliosPortfolioIdRoute
   RulesRuleIdRoute: typeof RulesRuleIdRoute
   RulesNewRoute: typeof RulesNewRoute
@@ -618,6 +631,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlatformAccessRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/platform/people': {
+      id: '/platform/people'
+      path: '/platform/people'
+      fullPath: '/platform/people'
+      preLoaderRoute: typeof PlatformPeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/portfolios/$portfolioId': {
       id: '/portfolios/$portfolioId'
       path: '/portfolios/$portfolioId'
@@ -714,6 +734,7 @@ const rootRouteChildren: RootRouteChildren = {
   JourneysJourneyIdRoute: JourneysJourneyIdRoute,
   PayTokenRoute: PayTokenRoute,
   PlatformAccessRoute: PlatformAccessRoute,
+  PlatformPeopleRoute: PlatformPeopleRoute,
   PortfoliosPortfolioIdRoute: PortfoliosPortfolioIdRoute,
   RulesRuleIdRoute: RulesRuleIdRoute,
   RulesNewRoute: RulesNewRoute,
