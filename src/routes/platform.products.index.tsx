@@ -114,7 +114,9 @@ function ProductsPage() {
                 <PrimaryCell title={p.name} />
               </Td>
               <Td className="text-muted-foreground">{p.code}</Td>
-              <Td className="max-w-[420px] text-muted-foreground">{p.description}</Td>
+              <Td className="min-w-[240px] max-w-[420px] whitespace-normal align-top text-muted-foreground">
+                {p.description}
+              </Td>
               <Td>
                 <StatusPill tone={productStatusTone(p.status)} dot>
                   {p.status}
