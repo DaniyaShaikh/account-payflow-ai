@@ -57,6 +57,8 @@ import { cn } from "@/lib/utils";
 import { useStrategies } from "@/lib/strategy-context";
 
 export const Route = createFileRoute("/clients/$clientId")({
+  validateSearch: (search: Record<string, unknown>): { tab?: string } =>
+    typeof search["tab"] === "string" ? { tab: search["tab"] } : {},
   head: () => ({
     meta: [
       { title: "Client detail — PayFlow Collections" },
@@ -100,7 +102,10 @@ function ClientDetail() {
   const { canSeeClient, allClients, updateClient, isAdmin } = useRole();
   const { supervisorsForClient } = useUsers();
   const assignedSupervisors = supervisorsForClient(clientId);
-  const [tab, setTab] = useState<(typeof tabs)[number]>("Overview");
+  const { tab: initialTab } = Route.useSearch();
+  const [tab, setTab] = useState<(typeof tabs)[number]>(
+    tabs.find((t) => t === initialTab) ?? "Overview",
+  );
 
   const client = allClients.find((c) => c.id === clientId);
   const accounts = useMemo(
@@ -148,6 +153,14 @@ function ClientDetail() {
         description={`${client.industry} · ${client.config.code || "No client code"} · ${client.config.clientType}`}
         actions={
           <div className="flex flex-wrap items-center gap-2">
+            <Link to="/clients" className="text-[12.5px] font-semibold text-primary hover:underline">
+              ← Back to Clients
+            </Link>
+            {isAdmin && (client.status === "Draft" || client.status === "Onboarding") && (
+              <Btn variant="primary" onClick={() => setTab("Configuration")}>
+                Edit draft client
+              </Btn>
+            )}
             <StatusPill tone={client.status === "Active" ? "success" : "neutral"}>
               {client.status}
             </StatusPill>
@@ -704,7 +717,18 @@ function ConfigurationOverview({
         </div>
       </div>
 
-      <div className="mt-4">
+      <OnboardingStepper
+        stages={[
+          { label: "Client Profile", done: checks[0]!.done, blocked: false, go: onJump && (() => onJump("General")) },
+          { label: "Portfolios", done: portfolios.length > 0, blocked: false, go: onOpenPortfolios },
+          { label: "Data Source", done: checks[1]!.done && checks[2]!.done, blocked: false, go: onJump && (() => onJump("Data Source")) },
+          { label: "Data Mapping", done: checks[3]!.done, blocked: !checks[1]!.done, go: onJump && (() => onJump("Data Mapping")) },
+          { label: "Branding & Channels", done: checks[4]!.done && checks[5]!.done, blocked: false, go: onJump && (() => onJump("Branding & Channels")) },
+          { label: "Review & Activation", done: ready, blocked: !ready, go: () => document.getElementById("activation-readiness")?.scrollIntoView({ behavior: "smooth" }) },
+        ]}
+      />
+
+      <div className="mt-4" id="activation-readiness">
         <SectionHeading title="Activation readiness" />
         <ul className="mt-2 grid gap-1.5 sm:grid-cols-2">
           {checks.map((x) => (
@@ -821,6 +845,51 @@ function ClientRules({ clientId, clientName }: { clientId: string; clientName: s
         />
         {table(clientRules, "No client rules configured yet")}
       </div>
+    </div>
+  );
+}
+
+type Stage = { label: string; done: boolean; blocked: boolean; go: (() => void) | undefined };
+
+function OnboardingStepper({ stages }: { stages: Stage[] }) {
+  return (
+    <div className="mt-4">
+      <SectionHeading title="Onboarding progress" />
+      <ol className="mt-2 grid gap-2 sm:grid-cols-3 xl:grid-cols-6">
+        {stages.map((st, i) => {
+          const state = st.done ? "Completed" : st.blocked ? "Blocked" : "Pending";
+          const tone = st.done ? "success" : st.blocked ? "danger" : "warning";
+          const clickable = !st.done && !!st.go;
+          return (
+            <li key={st.label}>
+              <button
+                type="button"
+                disabled={!st.go}
+                onClick={st.go}
+                title={clickable ? `Go to ${st.label}` : undefined}
+                className={cn(
+                  "flex h-full w-full flex-col gap-1.5 rounded-lg border p-3 text-left transition-colors",
+                  st.done ? "border-success/40 bg-success/5" : st.blocked ? "border-destructive/40 bg-destructive/5" : "border-border bg-surface",
+                  st.go && "hover:border-primary",
+                )}
+              >
+                <span className="flex items-center gap-2 text-[11px] font-semibold text-muted-foreground">
+                  <span className={cn(
+                    "grid h-5 w-5 place-items-center rounded-full text-[10px] font-bold",
+                    st.done ? "bg-success text-success-foreground" : st.blocked ? "bg-destructive text-destructive-foreground" : "bg-secondary text-foreground",
+                  )}>
+                    {st.done ? "✓" : st.blocked ? "!" : i + 1}
+                  </span>
+                  Step {i + 1}
+                </span>
+                <span className="text-[12.5px] font-semibold text-foreground">{st.label}</span>
+                <StatusPill tone={tone} dot>{state}</StatusPill>
+                {clickable && <span className="text-[11px] font-semibold text-primary">Complete step →</span>}
+              </button>
+            </li>
+          );
+        })}
+      </ol>
     </div>
   );
 }

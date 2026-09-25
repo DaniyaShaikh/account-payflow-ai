@@ -122,6 +122,7 @@ function ClientsPage() {
           "AI Mode",
           "Supervisor",
           "Status",
+          "",
         ]}
       >
         {rows.map((c) => {
@@ -160,6 +161,18 @@ function ClientsPage() {
               <Td className="text-muted-foreground">{c.supervisors.join(", ") || "—"}</Td>
               <Td>
                 <StatusPill tone={clientStatusTone(c.status)}>{c.status}</StatusPill>
+              </Td>
+              <Td>
+                {isAdmin && (c.status === "Draft" || c.status === "Onboarding") ? (
+                  <Link
+                    to="/clients/$clientId"
+                    params={{ clientId: c.id }}
+                    search={{ tab: "Configuration" }}
+                    className="text-[12.5px] font-semibold text-primary hover:underline"
+                  >
+                    Edit draft
+                  </Link>
+                ) : null}
               </Td>
             </Tr>
           );
