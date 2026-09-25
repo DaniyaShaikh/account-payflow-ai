@@ -58,7 +58,7 @@ import { useStrategies } from "@/lib/strategy-context";
 
 export const Route = createFileRoute("/clients/$clientId")({
   validateSearch: (search: Record<string, unknown>): { tab?: string } =>
-    typeof search.tab === "string" ? { tab: search.tab } : {},
+    typeof search["tab"] === "string" ? { tab: search["tab"] } : {},
   head: () => ({
     meta: [
       { title: "Client detail — PayFlow Collections" },
