@@ -604,7 +604,7 @@ function ConfigurationOverview({
 }: {
   clientId: string;
   draft: ClientDraft;
-  onJump?: (s: (typeof configSections)[number]) => void;
+  onJump: ((s: (typeof configSections)[number]) => void) | undefined;
   onOpenPortfolios: () => void;
 }) {
   const { portfoliosForClient } = useStrategies();
@@ -616,7 +616,9 @@ function ConfigurationOverview({
   const totalFields = c.mappings.length;
   const channels = [c.channels.email && "Email", c.channels.sms && "SMS"].filter(Boolean) as string[];
   const supervisorCount = supervisorsForClient(clientId).length;
-  const intake = intakeForClient(clientId);
+  const { allClients } = useRole();
+  const fullClient = allClients.find((x) => x.id === clientId);
+  const intake = fullClient ? intakeForClient(fullClient) : undefined;
 
   const checks: Check[] = [
     { label: "Client profile", done: !!draft.name && !!c.code, detail: c.code || "Client code missing", required: true },
@@ -636,7 +638,7 @@ function ConfigurationOverview({
 
   const card = (
     title: string,
-    tone: Parameters<typeof StatusPill>[0]["tone"],
+    tone: NonNullable<Parameters<typeof StatusPill>[0]["tone"]>,
     status: string,
     lines: string[],
     onClick?: () => void,
