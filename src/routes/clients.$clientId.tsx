@@ -54,6 +54,7 @@ import {
   type CustomerAccount,
 } from "@/lib/payflow-data";
 import { cn } from "@/lib/utils";
+import { useStrategies } from "@/lib/strategy-context";
 
 export const Route = createFileRoute("/clients/$clientId")({
   head: () => ({
@@ -213,6 +214,7 @@ function ClientDetail() {
           draft={draft}
           patch={patch}
           patchConfig={patchConfig}
+          onOpenPortfolios={() => setTab("Sub-Clients / Portfolios")}
         />
       )}
     </>
@@ -496,22 +498,34 @@ function ClientConfiguration({
   draft,
   patch,
   patchConfig,
+  onOpenPortfolios,
 }: {
   readOnly: boolean;
   clientId: string;
   draft: ClientDraft;
   patch: (p: Partial<ClientDraft>) => void;
   patchConfig: (p: Partial<ClientConfig>) => void;
+  onOpenPortfolios: () => void;
 }) {
   const [section, setSection] = useState<(typeof configSections)[number]>("General");
   const { permissionsForClient } = useRole();
   const myPermissions = permissionsForClient(clientId);
   const summary = mappingSummary(draft.config);
   const props = { draft, patch, patchConfig };
+  const jump = readOnly ? undefined : (s: (typeof configSections)[number]) => setSection(s);
+  const overviewPanel = (
+    <ConfigurationOverview
+      clientId={clientId}
+      draft={draft}
+      onJump={jump}
+      onOpenPortfolios={onOpenPortfolios}
+    />
+  );
 
   if (readOnly) {
     return (
       <div className="space-y-4">
+        {overviewPanel}
         <Panel title="Configuration is read-only">
           <p className="text-sm text-muted-foreground">
             Supervisors can view client operations but not change client configuration. Switch the
@@ -540,43 +554,172 @@ function ClientConfiguration({
   }
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[210px_1fr]">
-      <nav className="panel h-fit p-1.5">
-        {configSections.map((s) => (
-          <button
-            key={s}
-            onClick={() => setSection(s)}
-            className={cn(
-              "block w-full rounded-md px-2.5 py-1.5 text-left text-[13px] font-medium transition-colors",
-              section === s
-                ? "bg-secondary text-foreground"
-                : "text-muted-foreground hover:text-foreground",
-            )}
-          >
-            {s}
-          </button>
-        ))}
-      </nav>
+    <div className="space-y-4">
+      {overviewPanel}
+      <div className="grid gap-4 lg:grid-cols-[210px_1fr]">
+        <nav className="panel h-fit p-1.5">
+          {configSections.map((s) => (
+            <button
+              key={s}
+              onClick={() => setSection(s)}
+              className={cn(
+                "block w-full rounded-md px-2.5 py-1.5 text-left text-[13px] font-medium transition-colors",
+                section === s
+                  ? "bg-secondary text-foreground"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {s}
+            </button>
+          ))}
+        </nav>
 
-      <Panel
-        title={section}
-        action={<Btn variant="ghost">Changes save automatically</Btn>}
-      >
-        {section === "General" && <ProfileSection {...props} />}
-        {section === "Data Source" && (
-          <div className="space-y-4">
-            <ClientDataSourceIntegration clientId={clientId} />
-            <DataSourceSection {...props} />
-          </div>
-        )}
-        {section === "Data Mapping" && <MappingSection {...props} />}
-        {section === "Branding & Channels" && <BrandingSection {...props} />}
-        {section === "AI & Governance" && <AiGovernanceSection {...props} />}
-        {section === "Supervisors & Permissions" && (
-          <ClientSupervisorAccess clientId={clientId} clientName={draft.name} editable />
-        )}
-      </Panel>
+        <Panel title={section} action={<Btn variant="ghost">Changes save automatically</Btn>}>
+          {section === "General" && <ProfileSection {...props} />}
+          {section === "Data Source" && (
+            <div className="space-y-4">
+              <ClientDataSourceIntegration clientId={clientId} />
+              <DataSourceSection {...props} />
+            </div>
+          )}
+          {section === "Data Mapping" && <MappingSection {...props} />}
+          {section === "Branding & Channels" && <BrandingSection {...props} />}
+          {section === "AI & Governance" && <AiGovernanceSection {...props} />}
+          {section === "Supervisors & Permissions" && (
+            <ClientSupervisorAccess clientId={clientId} clientName={draft.name} editable />
+          )}
+        </Panel>
+      </div>
     </div>
+  );
+}
+
+type Check = { label: string; done: boolean; detail: string; required: boolean };
+
+function ConfigurationOverview({
+  clientId,
+  draft,
+  onJump,
+  onOpenPortfolios,
+}: {
+  clientId: string;
+  draft: ClientDraft;
+  onJump: ((s: (typeof configSections)[number]) => void) | undefined;
+  onOpenPortfolios: () => void;
+}) {
+  const { portfoliosForClient } = useStrategies();
+  const { supervisorsForClient } = useUsers();
+  const portfolios = portfoliosForClient(clientId);
+  const activePf = portfolios.filter((p) => p.status === "Active").length;
+  const c = draft.config;
+  const m = mappingSummary(c);
+  const totalFields = c.mappings.length;
+  const channels = [c.channels.email && "Email", c.channels.sms && "SMS"].filter(Boolean) as string[];
+  const supervisorCount = supervisorsForClient(clientId).length;
+  const { allClients } = useRole();
+  const fullClient = allClients.find((x) => x.id === clientId);
+  const intake = fullClient ? intakeForClient(fullClient) : undefined;
+
+  const checks: Check[] = [
+    { label: "Client profile", done: !!draft.name && !!c.code, detail: c.code || "Client code missing", required: true },
+    { label: "Data source selected", done: !!c.dataSource, detail: c.dataSource ?? "Not selected", required: true },
+    { label: "Data source connected", done: c.connection === "Connected", detail: c.connection, required: true },
+    { label: "Required fields mapped", done: m.unmapped === 0 && m.attention === 0 && m.mapped > 0, detail: `${m.mapped}/${totalFields} mapped`, required: true },
+    { label: "Branding configured", done: !!c.brandName && !!c.senderName, detail: c.brandName || "Brand name missing", required: true },
+    { label: "Channel enabled", done: channels.length > 0, detail: channels.join(", ") || "None", required: true },
+    { label: "Supervisor assigned", done: supervisorCount > 0, detail: `${supervisorCount} assigned`, required: true },
+    { label: "Sub-Client / Portfolio", done: portfolios.length > 0, detail: `${portfolios.length} configured`, required: false },
+    { label: "Client governance rules", done: c.governanceRules.length > 0, detail: c.governanceRules.length ? `${c.governanceRules.length} applied` : "System rules apply", required: false },
+  ];
+  const done = checks.filter((x) => x.done).length;
+  const pct = Math.round((done / checks.length) * 100);
+  const blockers = checks.filter((x) => x.required && !x.done);
+  const ready = blockers.length === 0;
+
+  const card = (
+    title: string,
+    tone: NonNullable<Parameters<typeof StatusPill>[0]["tone"]>,
+    status: string,
+    lines: string[],
+    onClick?: () => void,
+    cta?: string,
+  ) => (
+    <div className="rounded-lg border border-border bg-surface p-4">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-[12px] font-semibold uppercase tracking-wide text-muted-foreground">{title}</p>
+        <StatusPill tone={tone} dot>{status}</StatusPill>
+      </div>
+      <ul className="mt-2 space-y-0.5 text-[12.5px] text-foreground">
+        {lines.map((l) => <li key={l}>{l}</li>)}
+      </ul>
+      {onClick && (
+        <button onClick={onClick} className="mt-2 text-[12px] font-semibold text-primary hover:underline">
+          {cta ?? "Configure"}
+        </button>
+      )}
+    </div>
+  );
+
+  return (
+    <Panel
+      title="Client configuration overview"
+      description="Single source of truth for how this client is set up. Account and case activity lives in the Accounts tab."
+      action={
+        <StatusPill tone={ready ? "success" : "warning"} dot>
+          {ready ? "Ready for activation" : `${blockers.length} blocker${blockers.length > 1 ? "s" : ""}`}
+        </StatusPill>
+      }
+    >
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        {card("Client", statusTone(draft.config.connection === "Connected" ? "Active" : "Onboarding"), c.clientType, [
+          draft.name,
+          `${draft.industry} · ${c.code || "No code"}`,
+          `${c.useCase} · ${draft.aiMode}`,
+        ], onJump && (() => onJump("General")))}
+        {card("Sub-Clients / Portfolios", portfolios.length ? "success" : "neutral", `${portfolios.length} total`, [
+          `${activePf} active`,
+          `${portfolios.length - activePf} onboarding / other`,
+        ], onOpenPortfolios, "Manage portfolios")}
+        {card("Data Source", connectionTone(c.connection), c.connection, [
+          c.dataSource ?? "No source selected",
+          `Last file: ${intake?.receivedAt ?? "—"}`,
+        ], onJump && (() => onJump("Data Source")))}
+        {card("Data Mapping", m.unmapped || m.attention ? "warning" : "success", `${m.mapped}/${totalFields} mapped`, [
+          `${m.attention} need attention`,
+          `${m.unmapped} unmapped`,
+        ], onJump && (() => onJump("Data Mapping")))}
+        {card("Branding & Communication", c.brandName && channels.length ? "success" : "warning", c.clientType === "First Party" ? "Client branded" : "PayFlow branded", [
+          `${c.senderName || "No sender"} · ${c.emailFrom}`,
+          `Channels: ${channels.join(", ") || "None"} · WhatsApp coming later`,
+        ], onJump && (() => onJump("Branding & Channels")))}
+        <div className="rounded-lg border border-border bg-surface p-4">
+          <div className="flex items-center justify-between">
+            <p className="text-[12px] font-semibold uppercase tracking-wide text-muted-foreground">Onboarding progress</p>
+            <span className="tabular text-[13px] font-semibold">{pct}%</span>
+          </div>
+          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-secondary">
+            <div className="h-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+          </div>
+          <p className="mt-2 text-[12px] text-muted-foreground">{done} of {checks.length} steps complete</p>
+        </div>
+      </div>
+
+      <div className="mt-4">
+        <SectionHeading title="Activation readiness" />
+        <ul className="mt-2 grid gap-1.5 sm:grid-cols-2">
+          {checks.map((x) => (
+            <li key={x.label} className="flex items-center justify-between gap-2 rounded-md border border-border px-3 py-2 text-[12.5px]">
+              <span className="flex items-center gap-2">
+                <span className={cn("inline-block h-2 w-2 rounded-full", x.done ? "bg-success" : x.required ? "bg-warning" : "bg-muted-foreground")} />
+                {x.label}
+                {!x.required && <span className="text-[11px] text-muted-foreground">(informational)</span>}
+              </span>
+              <span className="text-muted-foreground">{x.detail}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </Panel>
   );
 }
 
