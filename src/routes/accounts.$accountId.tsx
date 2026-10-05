@@ -5,6 +5,7 @@ import { useRole } from "@/lib/role-context";
 import { useReviews } from "@/lib/reviews-context";
 import { reviewStatusTone } from "@/lib/review-data";
 import { accounts, clientName, formatCurrency } from "@/lib/payflow-data";
+import { lastCrmRefresh } from "@/lib/import-data";
 import { journeyStateForAccount, journeyStatusTone, journeyTypeTone } from "@/lib/journey-data";
 import { WorkflowFlowPanel } from "@/components/workflow-flow-panel";
 import {
@@ -114,7 +115,7 @@ function AccountDetail() {
           { label: account.customer },
         ]}
         title={account.customer}
-        description={`Account ${account.reference} · Case ${account.caseReference}`}
+        description={`Account ${account.reference} · Case ${account.caseReference} · Last updated from CRM: ${lastCrmRefresh(account.id)}`}
         actions={
           <div className="flex items-center gap-2">
             <StatusPill tone={statusTone(account.status)}>{account.status}</StatusPill>
