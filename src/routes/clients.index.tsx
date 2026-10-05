@@ -75,9 +75,17 @@ function ClientsPage() {
         description="Manage organizations and their collection operations."
         actions={
           isAdmin ? (
-            <Link to="/clients/new">
-              <Btn variant="primary">+ Add Client</Btn>
-            </Link>
+            <>
+              <Link to="/imports" search={{ type: "client" }}>
+                <Btn variant="ghost">Import History</Btn>
+              </Link>
+              <Link to="/clients/import">
+                <Btn>Import from File</Btn>
+              </Link>
+              <Link to="/clients/new">
+                <Btn variant="primary">+ Add Client</Btn>
+              </Link>
+            </>
           ) : undefined
         }
       />

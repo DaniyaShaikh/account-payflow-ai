@@ -74,6 +74,16 @@ function AccountsPage() {
       <PageHeader
         title="Accounts / Cases"
         description="Customer accounts under collection across all clients in your access scope."
+        actions={
+          <>
+            <Link to="/imports" search={{ type: "account" }}>
+              <Btn variant="ghost">Import History</Btn>
+            </Link>
+            <Link to="/accounts/import">
+              <Btn variant="primary">Upload Daily CRM File</Btn>
+            </Link>
+          </>
+        }
       />
 
       <div className="mb-4 flex flex-wrap items-center gap-x-6 gap-y-2 rounded-lg border border-border bg-card px-4 py-3">
