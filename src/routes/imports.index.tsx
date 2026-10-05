@@ -5,7 +5,7 @@ import { importKindLabel, importStatusTone, listImports, type ImportKind } from 
 
 export const Route = createFileRoute("/imports/")({
   validateSearch: (s: Record<string, unknown>): { type?: ImportKind } =>
-    s.type === "client" || s.type === "account" ? { type: s.type } : {},
+    s["type"] === "client" || s["type"] === "account" ? { type: s["type"] as ImportKind } : {},
   head: () => ({
     meta: [
       { title: "Import History — PayFlow Collections" },

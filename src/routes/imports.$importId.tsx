@@ -4,7 +4,7 @@ import { ImportErrorTable, ImportResult } from "@/components/import-flow";
 import { getImport, importKindLabel } from "@/lib/import-data";
 
 export const Route = createFileRoute("/imports/$importId")({
-  validateSearch: (s: Record<string, unknown>): { errors?: boolean } => (s.errors ? { errors: true } : {}),
+  validateSearch: (s: Record<string, unknown>): { errors?: boolean } => (s["errors"] ? { errors: true } : {}),
   head: () => ({
     meta: [
       { title: "Import Details — PayFlow Collections" },

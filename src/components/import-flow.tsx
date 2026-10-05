@@ -263,9 +263,9 @@ function ClientPreviewTable({ records }: { records: ImportRecord[] }) {
               <span className="ml-2 text-[11.5px] text-muted-foreground">{rows.length} sub-clients</span>
             </Td>
             <Td className="tabular text-muted-foreground">{rows.find((r) => r.clientId)?.clientId || "—"}</Td>
-            <Td />
-            <Td />
-            <Td />
+            <Td>{null}</Td>
+            <Td>{null}</Td>
+            <Td>{null}</Td>
           </tr>
           {rows.map((r, i) => (
             <Tr key={r.id}>
