@@ -127,6 +127,28 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 function RootShell({ children }: { children: ReactNode }) {
   const { queryClient } = Route.useRouteContext();
   useEffect(() => {
+    // After a new version is published, old page chunks disappear. Reload once
+    // to pick up the latest files instead of showing a blank screen.
+    const onChunkError = (e: Event) => {
+      e.preventDefault();
+      const key = "payflow.chunk-reload";
+      if (window.sessionStorage.getItem(key) === window.location.pathname) return;
+      window.sessionStorage.setItem(key, window.location.pathname);
+      window.location.reload();
+    };
+    const onRejection = (e: PromiseRejectionEvent) => {
+      if (String(e.reason?.message ?? e.reason).includes("dynamically imported module")) onChunkError(e);
+    };
+    window.addEventListener("vite:preloadError", onChunkError);
+    window.addEventListener("unhandledrejection", onRejection);
+    const clear = setTimeout(() => window.sessionStorage.removeItem("payflow.chunk-reload"), 10000);
+    return () => {
+      window.removeEventListener("vite:preloadError", onChunkError);
+      window.removeEventListener("unhandledrejection", onRejection);
+      clearTimeout(clear);
+    };
+  }, []);
+  useEffect(() => {
     const preference = window.localStorage.getItem("payflow.theme");
     const dark =
       preference === "dark" ||
