@@ -170,18 +170,20 @@ function ClientDetail() {
                 <Btn variant="primary" onClick={() => setTab("Configuration")}>
                   Edit configuration
                 </Btn>
-                <Btn
-                  variant="primary"
-                  disabled={!canActivate}
-                  title={
-                    canActivate
-                      ? "Activate this client"
-                      : "Complete all required setup steps before activating"
-                  }
-                  onClick={() => updateClient(client.id, { status: "Active" })}
-                >
-                  Activate Client
-                </Btn>
+                <span className="flex items-center gap-1.5">
+                  <Btn
+                    variant="primary"
+                    disabled={!canActivate}
+                    onClick={() => updateClient(client.id, { status: "Active" })}
+                  >
+                    Activate Client
+                  </Btn>
+                  {!canActivate && (
+                    <span className="text-[11px] text-muted-foreground">
+                      Complete all required setup first
+                    </span>
+                  )}
+                </span>
               </>
             )}
             <StatusPill tone={client.status === "Active" ? "success" : "neutral"}>
