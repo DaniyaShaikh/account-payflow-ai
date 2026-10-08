@@ -146,6 +146,14 @@ function ClientDetail() {
   const patchConfig = (p: Partial<ClientConfig>) =>
     updateClient(client.id, { config: { ...client.config, ...p } });
 
+  const missingSetup = incompleteSetupSections(
+    client.name,
+    client.config,
+    assignedSupervisors.length,
+  );
+  const canActivate =
+    (client.status === "Draft" || client.status === "Onboarding") && missingSetup.length === 0;
+
   return (
     <>
       <PageHeader
@@ -158,9 +166,25 @@ function ClientDetail() {
               ← Back to Clients
             </Link>
             {isAdmin && (client.status === "Draft" || client.status === "Onboarding") && (
-              <Btn variant="primary" onClick={() => setTab("Configuration")}>
-                Edit configuration
-              </Btn>
+              <>
+                <Btn variant="primary" onClick={() => setTab("Configuration")}>
+                  Edit configuration
+                </Btn>
+                <span className="flex items-center gap-1.5">
+                  <Btn
+                    variant="primary"
+                    disabled={!canActivate}
+                    onClick={() => updateClient(client.id, { status: "Active" })}
+                  >
+                    Activate Client
+                  </Btn>
+                  {!canActivate && (
+                    <span className="text-[11px] text-muted-foreground">
+                      Complete all required setup first
+                    </span>
+                  )}
+                </span>
+              </>
             )}
             <StatusPill tone={client.status === "Active" ? "success" : "neutral"}>
               {client.status}
