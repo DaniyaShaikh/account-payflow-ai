@@ -11,8 +11,7 @@ import {
 } from "@/components/payflow-ui";
 import {
   AccessHistoryPanel,
-  AssignmentAccessEditor,
-  ClientAssignmentPicker,
+  RolePermissionSummary,
 } from "@/components/user-access";
 import { useRole } from "@/lib/role-context";
 import { useUsers } from "@/lib/users-context";
@@ -44,15 +43,12 @@ function UserDetail() {
     userById,
     updateUser,
     setUserStatus,
-    assignClient,
-    removeAssignment,
     roles,
     roleNames,
     isPlatformRoleName,
   } = useUsers();
   const user = userById(userId);
   const [editing, setEditing] = useState(false);
-  const [assigning, setAssigning] = useState(false);
 
   if (!isAdmin) {
     return (
@@ -133,44 +129,31 @@ function UserDetail() {
         <div className="space-y-5">
           {isSupervisor ? (
             <Panel
-              title="Assigned Clients & Access"
-              description="Assignment decides where access applies. Permissions decide what is allowed there."
-              action={
-                <Btn onClick={() => setAssigning((v) => !v)}>
-                  {assigning ? "Done" : "Change assignments"}
-                </Btn>
-              }
+              title="Assigned Clients"
+              description="Visibility only. Assign or remove clients from each Client's Assigned Users section."
             >
-              {assigning && (
-                <div className="mb-4">
-                  <ClientAssignmentPicker
-                    selectedIds={user.assignments.map((a) => a.clientId)}
-                    onToggle={(id) =>
-                      user.assignments.some((a) => a.clientId === id)
-                        ? removeAssignment(user.id, id, clientName(id))
-                        : assignClient(user.id, id, clientName(id))
-                    }
-                  />
-                </div>
-              )}
               {user.assignments.length === 0 ? (
                 <p className="rounded-lg border border-dashed border-border-strong px-3 py-6 text-center text-[12px] text-muted-foreground">
-                  No clients assigned. This supervisor cannot see any operational data.
+                  No clients assigned. This user cannot see any operational data.
                 </p>
               ) : (
-                <div className="space-y-2">
+                <div className="divide-y divide-border rounded-lg border border-border bg-card">
                   {user.assignments.map((a) => (
-                    <AssignmentAccessEditor
+                    <Link
                       key={a.clientId}
-                      user={user}
-                      clientId={a.clientId}
-                      clientName={clientName(a.clientId)}
-                      editable
-                      onRemove={() => removeAssignment(user.id, a.clientId, clientName(a.clientId))}
-                    />
+                      to="/clients/$clientId"
+                      params={{ clientId: a.clientId }}
+                      search={{ tab: "Configuration" }}
+                      className="block px-3.5 py-2.5 text-[13px] font-medium text-primary hover:underline"
+                    >
+                      {clientName(a.clientId)}
+                    </Link>
                   ))}
                 </div>
               )}
+              <div className="mt-4">
+                <RolePermissionSummary roleName={user.role} />
+              </div>
             </Panel>
           ) : (
             <Panel title="Platform Access">

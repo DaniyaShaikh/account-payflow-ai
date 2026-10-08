@@ -70,7 +70,7 @@ export function RolesPanel() {
                     variant="ghost"
                     onClick={() => setEditingId(editingId === r.id ? null : r.id)}
                   >
-                    {editingId === r.id ? "Hide" : r.builtIn ? "View access" : "Edit access"}
+                    {editingId === r.id ? "Hide" : r.scope === "Platform-wide" ? "View access" : "Edit access"}
                   </Btn>
                   {!r.builtIn && (
                     <Btn variant="danger" disabled={count > 0} onClick={() => deleteRole(r.id)}>
@@ -94,7 +94,9 @@ function RolePermissions({ roleId }: { roleId: string }) {
   const role = roles.find((r) => r.id === roleId);
   if (!role) return null;
 
-  const editable = !role.builtIn && role.scope === "Client-scoped";
+  const { usersWithRole } = useUsers();
+  const editable = role.scope === "Client-scoped";
+  const affected = usersWithRole(role.name).length;
 
   return (
     <div className="mt-4 rounded-lg border border-border bg-surface px-3.5 py-3">
@@ -103,9 +105,14 @@ function RolePermissions({ roleId }: { roleId: string }) {
         {role.scope === "Platform-wide"
           ? "A platform-wide role holds every permission across all clients."
           : editable
-            ? "These permissions apply when this role is assigned to a client. Existing users keep their per-client access."
-            : "Built-in role — its default permission set cannot be changed, but each assignment can be tuned per client."}
+            ? "Users with this role inherit these permissions inside their assigned clients."
+            : ""}
       </p>
+      {editable && affected > 0 && (
+        <p className="mb-3 rounded-lg border border-warning/40 bg-warning/8 px-3 py-2 text-[12px] text-foreground">
+          Changes apply immediately to {affected} user{affected === 1 ? "" : "s"} with this role.
+        </p>
+      )}
       <PermissionPicker
         selected={role.permissions}
         disabled={!editable}

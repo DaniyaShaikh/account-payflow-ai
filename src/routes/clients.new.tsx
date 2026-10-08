@@ -42,7 +42,7 @@ const steps = [
   "Data Mapping",
   "Branding & Channels",
   "AI & Governance",
-  "Supervisor & Permissions",
+  "Assigned Users",
   "Review & Activate",
 ] as const;
 

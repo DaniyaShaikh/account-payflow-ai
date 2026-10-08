@@ -17,7 +17,7 @@ import {
   SelectInput,
   EmptyState,
 } from "@/components/payflow-ui";
-import { ClientAssignmentPicker, PermissionPicker } from "@/components/user-access";
+import { RolePermissionSummary } from "@/components/user-access";
 import { RolesPanel } from "@/components/role-manager";
 import { useRole } from "@/lib/role-context";
 import { useUsers } from "@/lib/users-context";
@@ -220,27 +220,19 @@ function AddUserForm({
     assignments: { clientId: string; permissions: string[] }[];
   }) => void;
 }) {
-  const { roleNames, isPlatformRoleName, defaultPermissions } = useUsers();
+  const { roleNames } = useUsers();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<UserRole>(roleNames[1] ?? roleNames[0] ?? "Supervisor");
   const [status, setStatus] = useState<UserStatus>("Active");
-  const [clientIds, setClientIds] = useState<string[]>([]);
-  const [permissions, setPermissions] = useState<string[]>(() => defaultPermissions(role));
-  const platform = isPlatformRoleName(role);
 
-  /** Switching role loads that role's default permission set. */
-  const pickRole = (next: string) => {
-    setRole(next);
-    setPermissions(defaultPermissions(next));
-    if (isPlatformRoleName(next)) setClientIds([]);
-  };
-
-  const valid =
-    name.trim().length > 1 && /.+@.+\..+/.test(email) && (platform || clientIds.length > 0);
+  const valid = name.trim().length > 1 && /.+@.+\..+/.test(email);
 
   return (
-    <Panel title="Add User" description="Client assignment decides where. Permissions decide what.">
+    <Panel
+      title="Add User"
+      description="The role decides what this user may do. Client assignment is managed in Client Management."
+    >
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Full Name">
           <TextInput value={name} onChange={setName} placeholder="Amara Okafor" />
@@ -249,7 +241,7 @@ function AddUserForm({
           <TextInput value={email} onChange={setEmail} placeholder="name@payflow.io" />
         </Field>
         <Field label="Role">
-          <SelectInput value={role} options={roleNames} onChange={pickRole} />
+          <SelectInput value={role} options={roleNames} onChange={setRole} />
         </Field>
         <Field label="Status">
           <SelectInput
@@ -260,44 +252,9 @@ function AddUserForm({
         </Field>
       </div>
 
-      {platform ? (
-        <p className="mt-4 rounded-lg border border-border bg-surface px-3.5 py-3 text-[12px] text-muted-foreground">
-          {role} is a platform-wide role with access across every client. No client assignment is
-          required.
-        </p>
-      ) : (
-        <div className="mt-4 grid gap-5 lg:grid-cols-2">
-          <div>
-            <p className="mb-1.5 text-[12px] font-medium text-foreground">
-              Assigned Clients — where access applies
-            </p>
-            <ClientAssignmentPicker
-              selectedIds={clientIds}
-              onToggle={(id) =>
-                setClientIds((prev) =>
-                  prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id],
-                )
-              }
-            />
-          </div>
-          <div>
-            <p className="mb-1.5 text-[12px] font-medium text-foreground">
-              Permissions — what this user may do (defaults from {role})
-            </p>
-            <PermissionPicker
-              selected={permissions}
-              onToggle={(perm) =>
-                setPermissions((prev) =>
-                  prev.includes(perm) ? prev.filter((p) => p !== perm) : [...prev, perm],
-                )
-              }
-            />
-            <p className="mt-1.5 text-[11px] text-muted-foreground">
-              Access can later be tuned per assigned client from User Detail.
-            </p>
-          </div>
-        </div>
-      )}
+      <div className="mt-4">
+        <RolePermissionSummary roleName={role} />
+      </div>
 
       <div className="mt-4 flex gap-2">
         <Btn
@@ -309,7 +266,7 @@ function AddUserForm({
               email: email.trim(),
               role,
               status,
-              assignments: clientIds.map((clientId) => ({ clientId, permissions })),
+              assignments: [],
             })
           }
         >
