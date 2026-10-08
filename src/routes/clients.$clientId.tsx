@@ -166,9 +166,23 @@ function ClientDetail() {
               ← Back to Clients
             </Link>
             {isAdmin && (client.status === "Draft" || client.status === "Onboarding") && (
-              <Btn variant="primary" onClick={() => setTab("Configuration")}>
-                Edit configuration
-              </Btn>
+              <>
+                <Btn variant="primary" onClick={() => setTab("Configuration")}>
+                  Edit configuration
+                </Btn>
+                <Btn
+                  variant="primary"
+                  disabled={!canActivate}
+                  title={
+                    canActivate
+                      ? "Activate this client"
+                      : "Complete all required setup steps before activating"
+                  }
+                  onClick={() => updateClient(client.id, { status: "Active" })}
+                >
+                  Activate Client
+                </Btn>
+              </>
             )}
             <StatusPill tone={client.status === "Active" ? "success" : "neutral"}>
               {client.status}
