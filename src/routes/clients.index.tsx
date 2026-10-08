@@ -32,6 +32,8 @@ export const Route = createFileRoute("/clients/")({
         property: "og:description",
         content: "Client portfolios with account volume, active collection cases and AI mode.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: ClientsPage,
@@ -133,11 +135,14 @@ function ClientsPage() {
           "AI Mode",
           "Supervisor",
           "Status",
-          "",
         ]}
       >
         {rows.map((c) => {
           const intake = intakeForClient(c);
+          const isSettingUp = c.status === "Draft" || c.status === "Onboarding";
+          const remaining = isSettingUp
+            ? incompleteSetupSections(c.name, c.config, supervisorsForClient(c.id).length).length
+            : 0;
           return (
             <Tr key={c.id}>
               <Td>
@@ -148,6 +153,25 @@ function ClientsPage() {
                 >
                   <PrimaryCell title={c.name} subtitle={`${c.industry} · ${c.config.code || "—"}`} />
                 </Link>
+                {isSettingUp && (
+                  <div className="mt-2 flex flex-col items-start gap-1.5">
+                    {remaining > 0 && (
+                      <StatusPill tone="warning">
+                        ⚠ {remaining} step{remaining > 1 ? "s" : ""} left
+                      </StatusPill>
+                    )}
+                    {isAdmin && (
+                      <Link
+                        to="/clients/$clientId"
+                        params={{ clientId: c.id }}
+                        search={{ tab: "Configuration" }}
+                        className="text-[12.5px] font-semibold text-primary hover:underline"
+                      >
+                        {remaining > 0 ? "Complete setup →" : "Edit draft"}
+                      </Link>
+                    )}
+                  </div>
+                )}
               </Td>
               <Td className="text-muted-foreground">
                 <PrimaryCell title={intake.receivedAt} subtitle={intake.fileName} />
@@ -171,40 +195,7 @@ function ClientsPage() {
               </Td>
               <Td className="text-muted-foreground">{c.supervisors.join(", ") || "—"}</Td>
               <Td>
-                <span className="inline-flex items-center gap-1.5">
-                  <StatusPill tone={clientStatusTone(c.status)}>{c.status}</StatusPill>
-                  {(() => {
-                    const left =
-                      c.status === "Draft"
-                        ? incompleteSetupSections(c.name, c.config, supervisorsForClient(c.id).length)
-                            .length
-                        : 0;
-                    return left > 0 ? (
-                      <span
-                        title="Client setup incomplete. Additional configuration is required before activation."
-                        className="inline-flex cursor-help items-center gap-1 whitespace-nowrap text-[11.5px] font-medium text-warning"
-                      >
-                        ⚠ {left} step{left > 1 ? "s" : ""} left
-                      </span>
-                    ) : null;
-                  })()}
-                </span>
-              </Td>
-              <Td>
-                {isAdmin && (c.status === "Draft" || c.status === "Onboarding") ? (
-                  <Link
-                    to="/clients/$clientId"
-                    params={{ clientId: c.id }}
-                    search={{ tab: "Configuration" }}
-                    className="text-[12.5px] font-semibold text-primary hover:underline"
-                  >
-                    {c.status === "Draft" &&
-                    incompleteSetupSections(c.name, c.config, supervisorsForClient(c.id).length)
-                      .length > 0
-                      ? "Complete setup →"
-                      : "Edit draft"}
-                  </Link>
-                ) : null}
+                <StatusPill tone={clientStatusTone(c.status)}>{c.status}</StatusPill>
               </Td>
             </Tr>
           );
