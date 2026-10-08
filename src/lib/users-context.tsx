@@ -221,7 +221,9 @@ export function UsersProvider({ children }: { children: ReactNode }) {
         const user = users.find((u) => u.id === id);
         if (!user) return [];
         if (platform(user.role)) return [...allPermissions];
-        return user.assignments.find((a) => a.clientId === clientId)?.permissions ?? [];
+        /** Effective access = role permissions, only inside assigned clients. */
+        if (!user.assignments.some((a) => a.clientId === clientId)) return [];
+        return defaultPermissionsForRole(user.role, roles);
       },
     };
   }, [users, roles]);

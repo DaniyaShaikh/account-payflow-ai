@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Btn, SearchInput, StatusPill, Panel } from "@/components/payflow-ui";
-import { permissionGroups, profileFor, type PayflowUser } from "@/lib/users-data";
+import { permissionGroups, type PayflowUser } from "@/lib/users-data";
 import { useUsers } from "@/lib/users-context";
 import { useRole } from "@/lib/role-context";
 import { cn } from "@/lib/utils";
@@ -86,67 +86,7 @@ export function ClientAssignmentPicker({
   );
 }
 
-/**
- * Per-client access settings for a supervisor. Used on User Detail and on
- * Client Detail → Supervisors & Permissions, so both share one access model.
- */
-export function AssignmentAccessEditor({
-  user,
-  clientId,
-  clientName,
-  editable,
-  onRemove,
-}: {
-  user: PayflowUser;
-  clientId: string;
-  clientName: string;
-  editable: boolean;
-  onRemove?: () => void;
-}) {
-  const { setAssignmentPermissions, roles } = useUsers();
-  const permissions = user.assignments.find((a) => a.clientId === clientId)?.permissions ?? [];
-  const [open, setOpen] = useState(false);
-  const profile = profileFor(permissions, roles);
-
-  const toggle = (perm: string) =>
-    setAssignmentPermissions(
-      user.id,
-      clientId,
-      clientName,
-      permissions.includes(perm)
-        ? permissions.filter((p) => p !== perm)
-        : [...permissions, perm],
-    );
-
-  return (
-    <div className="rounded-lg border border-border bg-surface px-3.5 py-3">
-      <div className="flex flex-wrap items-center gap-2">
-        <p className="text-[13px] font-semibold text-foreground">{clientName}</p>
-        <StatusPill tone={profile === "Custom" ? "neutral" : "info"}>{profile}</StatusPill>
-        <span className="text-[11px] text-muted-foreground">
-          {permissions.length} permission{permissions.length === 1 ? "" : "s"}
-        </span>
-        <div className="ml-auto flex gap-1.5">
-          <Btn variant="ghost" onClick={() => setOpen((v) => !v)}>
-            {open ? "Hide access" : editable ? "Edit access" : "View access"}
-          </Btn>
-          {editable && onRemove && (
-            <Btn variant="danger" onClick={onRemove}>
-              Remove
-            </Btn>
-          )}
-        </div>
-      </div>
-      {open && (
-        <div className="mt-3">
-          <PermissionPicker selected={permissions} onToggle={toggle} disabled={!editable} />
-        </div>
-      )}
-    </div>
-  );
-}
-
-/** Client Detail → Configuration → Supervisors & Permissions. */
+/** Client Detail → Assigned Users. Assignment decides WHERE; the role decides WHAT. */
 export function ClientSupervisorAccess({
   clientId,
   clientName,
@@ -156,7 +96,7 @@ export function ClientSupervisorAccess({
   clientName: string;
   editable: boolean;
 }) {
-  const { users, supervisorsForClient, assignClient, removeAssignment, isPlatformRoleName } =
+  const { users, supervisorsForClient, assignClient, removeAssignment, isPlatformRoleName, roleByName } =
     useUsers();
   const assigned = supervisorsForClient(clientId);
   /** Only client-scoped roles can be assigned to a client. */
@@ -168,41 +108,42 @@ export function ClientSupervisorAccess({
   return (
     <div className="space-y-4">
       <div>
-        <p className="text-[13px] font-semibold text-foreground">Assigned Supervisors</p>
+        <p className="text-[13px] font-semibold text-foreground">Assigned Users</p>
         <p className="text-[11px] text-muted-foreground">
-          Assignment decides where a supervisor works. Access settings decide what they may do for
-          this client.
+          Assignment decides where a user works. What they may do comes from their role, managed in
+          Users &amp; Permissions. Sub-Clients/Portfolios inherit this access.
         </p>
       </div>
 
       {assigned.length === 0 ? (
         <p className="rounded-lg border border-dashed border-border-strong px-3 py-6 text-center text-[12px] text-muted-foreground">
-          No supervisor is assigned to {clientName} yet.
+          No user is assigned to {clientName} yet.
         </p>
       ) : (
-        <div className="space-y-2">
+        <div className="divide-y divide-border rounded-lg border border-border bg-card">
           {assigned.map((u) => (
-            <div key={u.id}>
-              <div className="mb-1 flex flex-wrap items-center gap-2">
-                <Link
-                  to="/users/$userId"
-                  params={{ userId: u.id }}
-                  className="text-[13px] font-medium text-primary hover:underline"
-                >
-                  {u.name}
-                </Link>
-                <StatusPill>{u.role}</StatusPill>
-                <StatusPill tone={u.status === "Active" ? "success" : "neutral"}>
-                  {u.status}
-                </StatusPill>
-              </div>
-              <AssignmentAccessEditor
-                user={u}
-                clientId={clientId}
-                clientName={clientName}
-                editable={editable}
-                onRemove={() => removeAssignment(u.id, clientId, clientName)}
-              />
+            <div key={u.id} className="flex flex-wrap items-center gap-2 px-3.5 py-2.5">
+              <Link
+                to="/users/$userId"
+                params={{ userId: u.id }}
+                className="text-[13px] font-medium text-primary hover:underline"
+              >
+                {u.name}
+              </Link>
+              <StatusPill>{u.role}</StatusPill>
+              <StatusPill tone={u.status === "Active" ? "success" : "neutral"}>
+                {u.status}
+              </StatusPill>
+              <span className="text-[11px] text-muted-foreground">
+                {roleByName(u.role)?.permissions.length ?? 0} role permissions
+              </span>
+              {editable && (
+                <div className="ml-auto">
+                  <Btn variant="danger" onClick={() => removeAssignment(u.id, clientId, clientName)}>
+                    Remove
+                  </Btn>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -211,18 +152,16 @@ export function ClientSupervisorAccess({
       {editable && available.length > 0 && (
         <div className="flex flex-wrap items-end gap-2">
           <label className="block">
-            <span className="mb-1.5 block text-[12px] font-medium text-foreground">
-              Assign supervisor
-            </span>
+            <span className="mb-1.5 block text-[12px] font-medium text-foreground">Assign user</span>
             <select
               value={pick}
               onChange={(e) => setPick(e.target.value)}
               className="h-8 rounded-md border border-border bg-card px-2.5 text-[13px] outline-none"
             >
-              <option value="">Select a supervisor</option>
+              <option value="">Select a user</option>
               {available.map((u) => (
                 <option key={u.id} value={u.id}>
-                  {u.name}
+                  {u.name} — {u.role}
                 </option>
               ))}
             </select>
@@ -238,6 +177,29 @@ export function ClientSupervisorAccess({
           >
             Assign
           </Btn>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Read-only summary of a role's permissions. */
+export function RolePermissionSummary({ roleName }: { roleName: string }) {
+  const { roleByName, isPlatformRoleName } = useUsers();
+  const role = roleByName(roleName);
+  if (!role) return null;
+  return (
+    <div className="rounded-lg border border-border bg-surface px-3.5 py-3">
+      <p className="text-[12px] font-medium text-foreground">{role.name} permissions (read-only)</p>
+      {isPlatformRoleName(role.name) ? (
+        <p className="mt-1 text-[12px] text-muted-foreground">
+          Platform-wide — every permission across all clients.
+        </p>
+      ) : (
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {role.permissions.map((p) => (
+            <StatusPill key={p}>{p}</StatusPill>
+          ))}
         </div>
       )}
     </div>
