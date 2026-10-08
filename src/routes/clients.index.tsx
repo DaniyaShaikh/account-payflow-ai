@@ -189,8 +189,6 @@ function ClientsPage() {
                     ) : null;
                   })()}
                 </span>
-                    )}
-                </span>
               </Td>
               <Td>
                 {isAdmin && (c.status === "Draft" || c.status === "Onboarding") ? (
