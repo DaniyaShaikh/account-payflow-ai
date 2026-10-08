@@ -159,7 +159,7 @@ function ClientDetail() {
             </Link>
             {isAdmin && (client.status === "Draft" || client.status === "Onboarding") && (
               <Btn variant="primary" onClick={() => setTab("Configuration")}>
-                Edit draft client
+                Edit configuration
               </Btn>
             )}
             <StatusPill tone={client.status === "Active" ? "success" : "neutral"}>
@@ -180,19 +180,44 @@ function ClientDetail() {
       />
 
       {client.status === "Draft" &&
-        incompleteSetupSections(client.name, client.config, assignedSupervisors.length).length >
-          0 && (
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-warning/40 bg-warning/8 px-4 py-2.5">
-            <p className="text-[12.5px] text-foreground">
-              Client setup incomplete. Complete the remaining configuration to activate this Client.
-            </p>
-            {isAdmin && (
-              <Btn variant="secondary" onClick={() => setTab("Configuration")}>
-                Complete Setup
-              </Btn>
-            )}
-          </div>
-        )}
+        (() => {
+          const missing = incompleteSetupSections(
+            client.name,
+            client.config,
+            assignedSupervisors.length,
+          );
+          if (missing.length === 0) return null;
+          const label = (m: string) =>
+            m === "General" ? "Client Profile" : m === "Assigned Users" ? "Supervisor Assignment" : m;
+          return (
+            <div className="mb-4 rounded-lg border border-warning/40 bg-warning/8 px-4 py-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <p className="text-[13px] font-semibold text-foreground">
+                    ⚠ Client setup incomplete — {missing.length} step
+                    {missing.length > 1 ? "s" : ""} left
+                  </p>
+                  <p className="text-[12px] text-muted-foreground">
+                    Complete the remaining configuration to activate this Client. It stays in Draft
+                    until an Operations Admin activates it.
+                  </p>
+                </div>
+                {isAdmin && (
+                  <Btn variant="primary" onClick={() => setTab("Configuration")}>
+                    Complete Setup
+                  </Btn>
+                )}
+              </div>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {missing.map((m) => (
+                  <StatusPill key={m} tone="warning">
+                    {label(m)}
+                  </StatusPill>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
 
       <TabBar tabs={tabs} active={tab} onChange={setTab} />
 

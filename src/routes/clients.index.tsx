@@ -173,17 +173,21 @@ function ClientsPage() {
               <Td>
                 <span className="inline-flex items-center gap-1.5">
                   <StatusPill tone={clientStatusTone(c.status)}>{c.status}</StatusPill>
-                  {c.status === "Draft" &&
-                    incompleteSetupSections(c.name, c.config, supervisorsForClient(c.id).length)
-                      .length > 0 && (
+                  {(() => {
+                    const left =
+                      c.status === "Draft"
+                        ? incompleteSetupSections(c.name, c.config, supervisorsForClient(c.id).length)
+                            .length
+                        : 0;
+                    return left > 0 ? (
                       <span
                         title="Client setup incomplete. Additional configuration is required before activation."
-                        aria-label="Client setup incomplete. Additional configuration is required before activation."
-                        className="cursor-help text-[14px] leading-none text-warning"
+                        className="inline-flex cursor-help items-center gap-1 whitespace-nowrap text-[11.5px] font-medium text-warning"
                       >
-                        ⚠
+                        ⚠ {left} step{left > 1 ? "s" : ""} left
                       </span>
-                    )}
+                    ) : null;
+                  })()}
                 </span>
               </Td>
               <Td>
@@ -194,7 +198,11 @@ function ClientsPage() {
                     search={{ tab: "Configuration" }}
                     className="text-[12.5px] font-semibold text-primary hover:underline"
                   >
-                    Edit draft
+                    {c.status === "Draft" &&
+                    incompleteSetupSections(c.name, c.config, supervisorsForClient(c.id).length)
+                      .length > 0
+                      ? "Complete setup →"
+                      : "Edit draft"}
                   </Link>
                 ) : null}
               </Td>
