@@ -146,6 +146,14 @@ function ClientDetail() {
   const patchConfig = (p: Partial<ClientConfig>) =>
     updateClient(client.id, { config: { ...client.config, ...p } });
 
+  const missingSetup = incompleteSetupSections(
+    client.name,
+    client.config,
+    assignedSupervisors.length,
+  );
+  const canActivate =
+    (client.status === "Draft" || client.status === "Onboarding") && missingSetup.length === 0;
+
   return (
     <>
       <PageHeader
