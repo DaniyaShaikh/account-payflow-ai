@@ -15,6 +15,8 @@ import {
 import { useRole } from "@/lib/role-context";
 import { formatCurrency, formatNumber, supervisorDirectory } from "@/lib/payflow-data";
 import { intakeForClient } from "@/lib/intake-data";
+import { incompleteSetupSections } from "@/lib/client-setup";
+import { useUsers } from "@/lib/users-context";
 
 export const Route = createFileRoute("/clients/")({
   head: () => ({
@@ -50,6 +52,7 @@ function clientStatusTone(status: string): Tone {
 
 function ClientsPage() {
   const { visibleClients, isAdmin } = useRole();
+  const { supervisorsForClient } = useUsers();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("All Statuses");
   const [aiMode, setAiMode] = useState("All AI Modes");
@@ -168,7 +171,20 @@ function ClientsPage() {
               </Td>
               <Td className="text-muted-foreground">{c.supervisors.join(", ") || "—"}</Td>
               <Td>
-                <StatusPill tone={clientStatusTone(c.status)}>{c.status}</StatusPill>
+                <span className="inline-flex items-center gap-1.5">
+                  <StatusPill tone={clientStatusTone(c.status)}>{c.status}</StatusPill>
+                  {c.status === "Draft" &&
+                    incompleteSetupSections(c.name, c.config, supervisorsForClient(c.id).length)
+                      .length > 0 && (
+                      <span
+                        title="Client setup incomplete. Additional configuration is required before activation."
+                        aria-label="Client setup incomplete. Additional configuration is required before activation."
+                        className="cursor-help text-[14px] leading-none text-warning"
+                      >
+                        ⚠
+                      </span>
+                    )}
+                </span>
               </Td>
               <Td>
                 {isAdmin && (c.status === "Draft" || c.status === "Onboarding") ? (

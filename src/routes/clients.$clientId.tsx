@@ -42,6 +42,7 @@ import { buildIntegrations, integrationTone } from "@/lib/integration-data";
 import { intakeForClient } from "@/lib/intake-data";
 import { useUsers } from "@/lib/users-context";
 import { ClientSupervisorAccess } from "@/components/user-access";
+import { incompleteSetupSections } from "@/lib/client-setup";
 import {
   accounts as allAccounts,
   activity,
@@ -177,6 +178,21 @@ function ClientDetail() {
           </div>
         }
       />
+
+      {client.status === "Draft" &&
+        incompleteSetupSections(client.name, client.config, assignedSupervisors.length).length >
+          0 && (
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-warning/40 bg-warning/8 px-4 py-2.5">
+            <p className="text-[12.5px] text-foreground">
+              Client setup incomplete. Complete the remaining configuration to activate this Client.
+            </p>
+            {isAdmin && (
+              <Btn variant="secondary" onClick={() => setTab("Configuration")}>
+                Complete Setup
+              </Btn>
+            )}
+          </div>
+        )}
 
       <TabBar tabs={tabs} active={tab} onChange={setTab} />
 
@@ -520,7 +536,15 @@ function ClientConfiguration({
   patchConfig: (p: Partial<ClientConfig>) => void;
   onOpenPortfolios: () => void;
 }) {
-  const [section, setSection] = useState<(typeof configSections)[number]>("General");
+  const { supervisorsForClient } = useUsers();
+  const incomplete = incompleteSetupSections(
+    draft.name,
+    draft.config,
+    supervisorsForClient(clientId).length,
+  );
+  const [section, setSection] = useState<(typeof configSections)[number]>(
+    () => (configSections.find((s) => incomplete.includes(s)) ?? "General") as (typeof configSections)[number],
+  );
   const { permissionsForClient } = useRole();
   const myPermissions = permissionsForClient(clientId);
   const summary = mappingSummary(draft.config);
@@ -582,7 +606,14 @@ function ClientConfiguration({
                   : "text-muted-foreground hover:text-foreground",
               )}
             >
-              {s}
+              <span className="flex items-center justify-between gap-2">
+                {s}
+                {incomplete.includes(s) ? (
+                  <span className="text-[10.5px] font-semibold text-warning">Needs attention</span>
+                ) : (
+                  <span className="text-[11px] text-success">✓</span>
+                )}
+              </span>
             </button>
           ))}
         </nav>
@@ -724,6 +755,8 @@ function ConfigurationOverview({
           { label: "Data Source", done: checks[1]!.done && checks[2]!.done, blocked: false, go: onJump && (() => onJump("Data Source")) },
           { label: "Data Mapping", done: checks[3]!.done, blocked: !checks[1]!.done, go: onJump && (() => onJump("Data Mapping")) },
           { label: "Branding & Channels", done: checks[4]!.done && checks[5]!.done, blocked: false, go: onJump && (() => onJump("Branding & Channels")) },
+          { label: "AI Mode & Governance", done: true, blocked: false, go: onJump && (() => onJump("AI & Governance")) },
+          { label: "Supervisor Assignment", done: checks[6]!.done, blocked: false, go: onJump && (() => onJump("Assigned Users")) },
           { label: "Review & Activation", done: ready, blocked: !ready, go: () => document.getElementById("activation-readiness")?.scrollIntoView({ behavior: "smooth" }) },
         ]}
       />
