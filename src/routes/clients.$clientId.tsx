@@ -94,7 +94,7 @@ const configSections = [
   "Data Mapping",
   "Branding & Channels",
   "AI & Governance",
-  "Supervisors & Permissions",
+  "Assigned Users",
 ] as const;
 
 function ClientDetail() {
@@ -598,7 +598,7 @@ function ClientConfiguration({
           {section === "Data Mapping" && <MappingSection {...props} />}
           {section === "Branding & Channels" && <BrandingSection {...props} />}
           {section === "AI & Governance" && <AiGovernanceSection {...props} />}
-          {section === "Supervisors & Permissions" && (
+          {section === "Assigned Users" && (
             <ClientSupervisorAccess clientId={clientId} clientName={draft.name} editable />
           )}
         </Panel>
