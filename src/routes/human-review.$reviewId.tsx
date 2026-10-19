@@ -100,8 +100,8 @@ function ReviewDetail() {
         />
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[1fr_330px]">
-        <div className="space-y-5">
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_330px]">
+        <div className="min-w-0 space-y-5">
           <section className="rounded-lg border border-warning/40 bg-warning/8 px-5 py-4">
             <p className="text-eyebrow">Why this requires review</p>
             <dl className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -281,7 +281,7 @@ function ReviewDetail() {
           </div>
         </div>
 
-        <div className="space-y-5">
+        <div className="min-w-0 space-y-5">
           <Panel title="Customer & Account" bodyClassName="px-5 pb-4">
             <dl className="divide-y divide-border">
               {[
