@@ -127,7 +127,7 @@ function CommunicationDetail() {
         </div>
       )}
 
-      <div className="grid gap-5 lg:grid-cols-[1fr_1.1fr]">
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
         <div className="space-y-5">
           <Panel title="Communication Summary" bodyClassName="p-0">
             <dl className="divide-y divide-border">
