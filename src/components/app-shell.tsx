@@ -420,7 +420,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           </header>
 
-          <main className="relative flex-1 px-5 py-7 lg:px-10 lg:py-9">
+          <main className="relative min-w-0 flex-1 px-5 py-7 lg:px-10 lg:py-9">
             <div className="mx-auto w-full max-w-[1280px]">{children}</div>
           </main>
         </SidebarInset>
