@@ -1,6 +1,6 @@
 import type { Tone } from "@/components/payflow-ui";
 
-export type StrategyStatus = "AI Proposed" | "Under Review" | "Approved" | "Active" | "Inactive";
+export type StrategyStatus = "Draft" | "AI Proposed" | "Under Review" | "Approved" | "Active" | "Inactive";
 
 export type StrategyNodeKind =
   | "Trigger"
@@ -14,6 +14,7 @@ export type StrategyNodeKind =
   | "Outcome";
 
 export type NodeOrigin = "AI Proposed" | "Human Modified";
+export type StrategyOrigin = NodeOrigin | "Human Created";
 
 export interface NodeConfig {
   channel?: string;
@@ -58,7 +59,7 @@ export interface Strategy {
   clientId: string;
   portfolioId: string;
   status: StrategyStatus;
-  origin: NodeOrigin;
+  origin: StrategyOrigin;
   version: string;
   lastUpdated: string;
   /** Accounts / cases the strategy covers or is proposed for. */
@@ -89,6 +90,7 @@ export interface StrategySegment {
 }
 
 export const strategyStatuses: StrategyStatus[] = [
+  "Draft",
   "AI Proposed",
   "Under Review",
   "Approved",

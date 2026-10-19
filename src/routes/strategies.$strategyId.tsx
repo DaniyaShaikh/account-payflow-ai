@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Sparkles, Info } from "lucide-react";
 import { PageHeader, Panel, StatusPill, Btn, Field, TextArea } from "@/components/payflow-ui";
@@ -47,7 +47,9 @@ function StrategyBuilder() {
     approveStrategy,
     rejectStrategy,
     saveDraft,
+    deleteStrategy,
   } = useStrategies();
+  const navigate = useNavigate();
 
   const strategy = strategyById(strategyId);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -77,6 +79,7 @@ function StrategyBuilder() {
   ).length;
   // Supervisors approve strategies for their assigned clients; admins for all.
   const canDecide = isAdmin || canSeeClient(strategy.clientId);
+  const humanCreated = strategy.origin === "Human Created";
 
   const set = (patch: Parameters<typeof updateNodeConfig>[2]) => {
     if (!node) return;
@@ -104,16 +107,29 @@ function StrategyBuilder() {
             <Btn onClick={() => { saveDraft(strategy.id); setNotice("Draft saved."); }}>
               Save Draft
             </Btn>
-            <Btn
-              variant="danger"
-              disabled={!canDecide}
-              onClick={() => {
-                rejectStrategy(strategy.id, rejectNote);
-                setNotice("Regeneration requested. PayFlow will propose a revised strategy.");
-              }}
-            >
-              Reject / Request Regeneration
-            </Btn>
+            {humanCreated ? (
+              <Btn
+                variant="danger"
+                onClick={() => {
+                  if (!window.confirm(`Delete "${strategy.name}"? This cannot be undone.`)) return;
+                  deleteStrategy(strategy.id);
+                  navigate({ to: "/strategies" });
+                }}
+              >
+                Delete
+              </Btn>
+            ) : (
+              <Btn
+                variant="danger"
+                disabled={!canDecide}
+                onClick={() => {
+                  rejectStrategy(strategy.id, rejectNote);
+                  setNotice("Regeneration requested. PayFlow will propose a revised strategy.");
+                }}
+              >
+                Reject / Request Regeneration
+              </Btn>
+            )}
             <Btn
               variant="primary"
               disabled={!canDecide}
@@ -257,7 +273,7 @@ function StrategyBuilder() {
             <dl className="space-y-1.5 text-[12.5px]">
               {[
                 ["Origin", strategy.origin],
-                ["Human modified steps", String(humanModified)],
+                ...(humanCreated ? [] : [["Human modified steps", String(humanModified)]]),
                 ["Approved By", strategy.approvedBy ?? "Not yet approved"],
                 ["Approval Date", strategy.approvalDate ?? "—"],
                 ["Strategy Version", strategy.version],
@@ -284,6 +300,7 @@ function StrategyBuilder() {
             )}
           </Panel>
 
+          {!humanCreated && (
           <Panel title="Request regeneration">
             <Field label="Note for PayFlow" hint="Optional. Explain what should change.">
               <TextArea
@@ -293,6 +310,7 @@ function StrategyBuilder() {
               />
             </Field>
           </Panel>
+          )}
         </div>
       </div>
 
