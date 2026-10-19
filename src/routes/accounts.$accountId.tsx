@@ -124,7 +124,7 @@ function AccountDetail() {
         }
       />
 
-      <div className="grid gap-5 lg:grid-cols-[1.1fr_1fr]">
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] [&>*]:min-w-0">
         <div className="space-y-5">
           <Panel title="Case Summary" bodyClassName="p-0">
             <dl className="divide-y divide-border">
