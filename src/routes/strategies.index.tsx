@@ -194,7 +194,7 @@ function StrategiesPage() {
                         <Sparkles className="size-3" /> AI Proposed
                       </>
                     ) : (
-                      "Human Modified"
+                      s.origin
                     )}
                   </StatusPill>
                   <StatusPill>{s.version}</StatusPill>

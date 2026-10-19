@@ -34,6 +34,7 @@ interface StrategyContextValue {
   approveStrategy: (strategyId: string, approver: string) => void;
   rejectStrategy: (strategyId: string, note: string) => void;
   saveDraft: (strategyId: string) => void;
+  deleteStrategy: (strategyId: string) => void;
 }
 
 const StrategyContext = createStableContext<StrategyContextValue | null>("strategies", null);
@@ -56,7 +57,7 @@ export function StrategyProvider({ children }: { children: ReactNode }) {
 
     const markHuman = (strategy: Strategy, nodeId: string, node: StrategyNode): Strategy => ({
       ...strategy,
-      origin: "Human Modified",
+      origin: strategy.origin === "Human Created" ? "Human Created" : "Human Modified",
       lastUpdated: today,
       status: strategy.status === "AI Proposed" ? "Under Review" : strategy.status,
       nodes: { ...strategy.nodes, [nodeId]: { ...node, origin: "Human Modified" } },
@@ -150,7 +151,7 @@ export function StrategyProvider({ children }: { children: ReactNode }) {
 
           return {
             ...s,
-            origin: "Human Modified",
+            origin: s.origin === "Human Created" ? "Human Created" : "Human Modified",
             lastUpdated: today,
             status: s.status === "AI Proposed" ? "Under Review" : s.status,
             nodes: {
@@ -168,8 +169,8 @@ export function StrategyProvider({ children }: { children: ReactNode }) {
           name: input.name,
           clientId: input.clientId,
           portfolioId: input.portfolioId,
-          status: "Under Review",
-          origin: "Human Modified",
+          status: "Draft",
+          origin: "Human Created",
           version: "v1.0",
           lastUpdated: today,
           coverage: 0,
@@ -219,6 +220,8 @@ export function StrategyProvider({ children }: { children: ReactNode }) {
             ...s.versions,
           ],
         })),
+      deleteStrategy: (strategyId) =>
+        setStrategies((prev) => prev.filter((s) => s.id !== strategyId)),
       saveDraft: (strategyId) =>
         patchStrategy(strategyId, (s) => ({
           ...s,
