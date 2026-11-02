@@ -123,79 +123,60 @@ function ClientsPage() {
       </div>
 
       <DataTable
-        minWidth={1180}
         head={[
-          "Client",
-          "Last File Received",
-          "File Assigned",
-          "Accounts In File",
-          "Active Cases",
-          "Outstanding",
-          "Recovered",
-          "AI Mode",
-          "Supervisor",
+          "Client Name",
+          "Client Code / Reference",
+          "Client Type",
+          "Business Use Case",
           "Status",
+          "Last Updated",
+          "",
         ]}
       >
         {rows.map((c) => {
           const intake = intakeForClient(c);
           const isSettingUp = c.status === "Draft" || c.status === "Onboarding";
-          const remaining = isSettingUp
-            ? incompleteSetupSections(c.name, c.config, supervisorsForClient(c.id).length).length
-            : 0;
+          const missing = isSettingUp
+            ? incompleteSetupSections(c.name, c.config, supervisorsForClient(c.id).length)
+            : [];
+          const remaining = missing.length;
           return (
             <Tr key={c.id}>
               <Td>
                 <Link
                   to="/clients/$clientId"
                   params={{ clientId: c.id }}
-                  className="hover:underline"
+                  className="font-semibold text-foreground hover:underline"
                 >
-                  <PrimaryCell title={c.name} subtitle={`${c.industry} · ${c.config.code || "—"}`} />
+                  {c.name}
                 </Link>
-                {isSettingUp && (
-                  <div className="mt-2 flex flex-col items-start gap-1.5">
-                    {remaining > 0 && (
+                <div className="text-xs text-muted-foreground">{c.industry}</div>
+              </Td>
+              <Td className="text-muted-foreground">{c.config.code || "—"}</Td>
+              <Td className="text-muted-foreground">{c.config.clientType}</Td>
+              <Td className="text-muted-foreground">{c.config.useCase || "—"}</Td>
+              <Td>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <StatusPill tone={clientStatusTone(c.status)}>{c.status}</StatusPill>
+                  {remaining > 0 && (
+                    <span title={missing.map((m) => String(m)).join(", ")}>
                       <StatusPill tone="warning">
                         ⚠ {remaining} step{remaining > 1 ? "s" : ""} left
                       </StatusPill>
-                    )}
-                    {isAdmin && (
-                      <Link
-                        to="/clients/$clientId"
-                        params={{ clientId: c.id }}
-                        search={{ tab: "Configuration" }}
-                        className="text-[12.5px] font-semibold text-primary hover:underline"
-                      >
-                        {remaining > 0 ? "Complete setup →" : "Edit draft"}
-                      </Link>
-                    )}
-                  </div>
-                )}
+                    </span>
+                  )}
+                </div>
               </Td>
-              <Td className="text-muted-foreground">
-                <PrimaryCell title={intake.receivedAt} subtitle={intake.fileName} />
-              </Td>
-              <Td className="text-muted-foreground">{intake.assignedAt}</Td>
-              <Td className="tabular">
-                <PrimaryCell
-                  title={formatNumber(intake.accountsInFile)}
-                  subtitle={`+${formatNumber(intake.newAccounts)} new · −${formatNumber(intake.removedAccounts)} removed`}
-                />
-              </Td>
-              <Td className="tabular">{formatNumber(c.activeCases)}</Td>
-              <Td className="tabular font-medium">{formatCurrency(c.outstanding, true)}</Td>
-              <Td className="tabular font-medium text-success">
-                {formatCurrency(c.recovered, true)}
-              </Td>
-              <Td>
-                <StatusPill tone={c.aiMode === "Autopilot" ? "ai" : "neutral"}>
-                  {c.aiMode}
-                </StatusPill>
-              </Td>
-              <Td className="text-muted-foreground">{c.supervisors.join(", ") || "—"}</Td>
-              <Td>
-                <StatusPill tone={clientStatusTone(c.status)}>{c.status}</StatusPill>
+              <Td className="text-muted-foreground">{intake.receivedAt}</Td>
+              <Td className="text-right">
+                <Link
+                  to="/clients/$clientId"
+                  params={{ clientId: c.id }}
+                  search={isSettingUp && isAdmin ? { tab: "Configuration" } : {}}
+                  className="text-[12.5px] font-semibold text-primary hover:underline"
+                >
+                  {isSettingUp && isAdmin ? (remaining > 0 ? "Complete setup →" : "Edit draft") : "View →"}
+                </Link>
               </Td>
             </Tr>
           );
