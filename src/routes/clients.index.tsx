@@ -58,6 +58,29 @@ function setupStepLabel(m: string): string {
   return m;
 }
 
+function fmtDate(iso: string, withTime = false): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleString("en-US", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+    ...(withTime ? { hour: "2-digit", minute: "2-digit" } : {}),
+  });
+}
+
+/** Stable fallback created date for seeded clients without one. */
+function createdFor(c: { id: string; createdAt?: string }): string {
+  if (c.createdAt) return c.createdAt;
+  let h = 0;
+  for (const ch of c.id) h = (h * 31 + ch.charCodeAt(0)) % 9973;
+  return new Date(Date.UTC(2026, 5 + (h % 4), 1 + (h % 27), 9, 0)).toISOString();
+}
+
+function addedViaFor(c: { id: string; addedVia?: string }): string {
+  return c.addedVia ?? (c.id.startsWith("imp-") ? "File Import" : "Manual");
+}
+
 function ClientsPage() {
   const { visibleClients, isAdmin } = useRole();
   const { supervisorsForClient } = useUsers();
@@ -65,6 +88,7 @@ function ClientsPage() {
   const [status, setStatus] = useState("All Statuses");
   const [aiMode, setAiMode] = useState("All AI Modes");
   const [supervisor, setSupervisor] = useState("All Supervisors");
+  const [source, setSource] = useState("All Sources");
 
   const rows = useMemo(
     () =>
@@ -74,9 +98,10 @@ function ClientsPage() {
         if (status !== "All Statuses" && c.status !== status) return false;
         if (aiMode !== "All AI Modes" && c.aiMode !== aiMode) return false;
         if (supervisor !== "All Supervisors" && !c.supervisors.includes(supervisor)) return false;
+        if (source !== "All Sources" && addedViaFor(c) !== source) return false;
         return true;
       }),
-    [visibleClients, search, status, aiMode, supervisor],
+    [visibleClients, search, status, aiMode, supervisor, source],
   );
 
   return (
@@ -126,6 +151,12 @@ function ClientsPage() {
           onChange={setSupervisor}
           options={["All Supervisors", ...supervisorDirectory]}
         />
+        <FilterSelect
+          label="Added through"
+          value={source}
+          onChange={setSource}
+          options={["All Sources", "Manual", "File Import"]}
+        />
       </div>
 
       <DataTable
@@ -135,7 +166,9 @@ function ClientsPage() {
           "Client Type",
           "Business Use Case",
           "Status",
-          "Last Updated",
+          "Added Through",
+          "Created Date",
+          "Last Updated Date",
           "",
         ]}
       >
@@ -195,7 +228,11 @@ function ClientsPage() {
                   <StatusPill tone={clientStatusTone(c.status)}>{c.status}</StatusPill>
                 </div>
               </Td>
-              <Td className="text-muted-foreground">{intake.receivedAt}</Td>
+              <Td className="text-muted-foreground">{addedViaFor(c)}</Td>
+              <Td className="whitespace-nowrap text-muted-foreground">{fmtDate(createdFor(c))}</Td>
+              <Td className="whitespace-nowrap text-muted-foreground">
+                {fmtDate(c.createdAt && !c.config.dataSource ? c.createdAt : intake.receivedAt, true)}
+              </Td>
               <Td className="text-right">
                 <Link
                   to="/clients/$clientId"

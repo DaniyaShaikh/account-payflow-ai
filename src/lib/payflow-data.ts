@@ -48,6 +48,10 @@ export interface Client {
   recovered: number;
   reviewsPending: number;
   attention?: string;
+  /** ISO date the client was created. */
+  createdAt?: string;
+  /** How the client was added. */
+  addedVia?: "Manual" | "File Import";
   config: ClientConfig;
 }
 

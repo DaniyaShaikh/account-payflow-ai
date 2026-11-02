@@ -100,6 +100,8 @@ function AddClientPage() {
     outstanding: 0,
     recovered: 0,
     reviewsPending: 0,
+    createdAt: new Date().toISOString(),
+    addedVia: "Manual",
     config: {
       ...draft.config,
       brandName: draft.config.brandName || draft.name.trim(),

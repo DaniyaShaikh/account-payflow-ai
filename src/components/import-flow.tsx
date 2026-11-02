@@ -443,6 +443,8 @@ export function ImportFlow({ kind }: { kind: ImportKind }) {
           ...template,
           id: clientId,
           name,
+          createdAt: new Date().toISOString(),
+          addedVia: "File Import",
           industry: "Imported from CRM",
           accounts: 0,
           activeCases: 0,
