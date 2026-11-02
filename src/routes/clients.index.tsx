@@ -158,25 +158,41 @@ function ClientsPage() {
               <Td>
                 <div className="flex flex-wrap items-center gap-1.5">
                   <StatusPill tone={clientStatusTone(c.status)}>{c.status}</StatusPill>
-                  {remaining > 0 && (
-                    <span title={missing.map((m) => String(m)).join(", ")}>
-                      <StatusPill tone="warning">
-                        ⚠ {remaining} step{remaining > 1 ? "s" : ""} left
-                      </StatusPill>
-                    </span>
-                  )}
                 </div>
+                {remaining > 0 && (
+                  <div
+                    className="mt-1.5 flex flex-wrap gap-1.5"
+                    title={missing.map((m) => setupStepLabel(m)).join(", ")}
+                  >
+                    {missing.map((m) => (
+                      <StatusPill key={m} tone="warning">
+                        {setupStepLabel(m)}
+                      </StatusPill>
+                    ))}
+                  </div>
+                )}
               </Td>
               <Td className="text-muted-foreground">{intake.receivedAt}</Td>
               <Td className="text-right">
-                <Link
-                  to="/clients/$clientId"
-                  params={{ clientId: c.id }}
-                  search={isSettingUp && isAdmin ? { tab: "Configuration" } : {}}
-                  className="text-[12.5px] font-semibold text-primary hover:underline"
-                >
-                  {isSettingUp && isAdmin ? (remaining > 0 ? "Complete setup →" : "Edit draft") : "View →"}
-                </Link>
+                {isSettingUp && isAdmin ? (
+                  <Link
+                    to="/clients/$clientId"
+                    params={{ clientId: c.id }}
+                    search={{ tab: "Configuration" }}
+                  >
+                    <Btn variant={remaining > 0 ? "primary" : "ghost"}>
+                      {remaining > 0 ? "Complete Setup" : "Edit Draft"}
+                    </Btn>
+                  </Link>
+                ) : (
+                  <Link
+                    to="/clients/$clientId"
+                    params={{ clientId: c.id }}
+                    className="text-[12.5px] font-semibold text-primary hover:underline"
+                  >
+                    View →
+                  </Link>
+                )}
               </Td>
             </Tr>
           );
