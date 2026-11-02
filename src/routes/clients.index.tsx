@@ -192,29 +192,37 @@ function ClientsPage() {
                 <div className="text-xs text-muted-foreground">{c.industry}</div>
                 {isSettingUp && (() => {
                   const details = setupIssueDetails(c.name, c.config, supervisorsForClient(c.id).length);
+                  if (remaining > 0) {
+                    details.unshift(
+                      "Sub-Clients / Portfolios: add at least one sub-client (optional but recommended)",
+                    );
+                  }
                   return (
-                    <div className="mt-1.5 max-w-[300px] whitespace-normal" title={details.join("\n")}>
-                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                        {remaining > 0 && (
-                          <span className="inline-flex items-center rounded-full border border-warning/40 bg-warning/10 px-2 py-px text-[11px] font-medium text-warning">
-                            ⚠ {remaining} {remaining === 1 ? "step" : "steps"} left
-                          </span>
-                        )}
-                        {isAdmin && (
-                          <Link
-                            to="/clients/$clientId"
-                            params={{ clientId: c.id }}
-                            search={{ tab: "Configuration" }}
-                            className="text-[12px] font-semibold text-primary hover:underline"
-                          >
-                            {remaining > 0 ? "Complete setup →" : "Edit draft →"}
-                          </Link>
-                        )}
-                      </div>
-                      {missing.length > 0 && (
-                        <p className="mt-1 line-clamp-2 text-[11.5px] leading-snug text-muted-foreground">
-                          Missing: {missing.map((m) => setupStepLabel(m)).join(" · ")}
-                        </p>
+                    <div className="mt-1.5 max-w-[360px] whitespace-normal">
+                      {remaining > 0 && (
+                        <span className="inline-flex items-center rounded-full border border-warning/40 bg-warning/10 px-2 py-0.5 text-[11px] font-medium text-warning">
+                          ⚠ {remaining} {remaining === 1 ? "step" : "steps"} left
+                        </span>
+                      )}
+                      {details.length > 0 && (
+                        <ul className="mt-1.5 space-y-1 text-[11.5px] leading-snug text-muted-foreground">
+                          {details.map((d) => (
+                            <li key={d} className="flex gap-1.5">
+                              <span aria-hidden className="text-warning/80">•</span>
+                              <span>{d}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                      {isAdmin && (
+                        <Link
+                          to="/clients/$clientId"
+                          params={{ clientId: c.id }}
+                          search={{ tab: "Configuration" }}
+                          className="mt-1.5 inline-block text-[12px] font-semibold text-primary hover:underline"
+                        >
+                          {remaining > 0 ? "Complete setup →" : "Edit draft →"}
+                        </Link>
                       )}
                     </div>
                   );
