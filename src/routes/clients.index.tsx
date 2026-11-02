@@ -167,7 +167,7 @@ function ClientsPage() {
                 </div>
                 {remaining > 0 && (
                   <div
-                    className="mt-1.5 flex flex-wrap gap-1.5"
+                    className="mt-1.5 flex max-w-[190px] flex-wrap gap-1.5"
                     title={missing.map((m) => setupStepLabel(m)).join(", ")}
                   >
                     {missing.map((m) => (
