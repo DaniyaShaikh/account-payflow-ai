@@ -198,7 +198,7 @@ function ClientsPage() {
                     );
                   }
                   return (
-                    <div className="mt-1.5 w-[300px] whitespace-normal">
+                    <div className="mt-1.5 w-[250px] whitespace-normal">
                       {remaining > 0 && (
                         <span className="inline-flex items-center rounded-full border border-warning/40 bg-warning/10 px-2 py-0.5 text-[11px] font-medium text-warning">
                           ⚠ {remaining} {remaining === 1 ? "step" : "steps"} left
