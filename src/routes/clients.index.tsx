@@ -181,7 +181,7 @@ function ClientsPage() {
           const remaining = missing.length;
           return (
             <Tr key={c.id}>
-              <Td className="min-w-[400px] align-top">
+              <Td className="align-top">
                 <Link
                   to="/clients/$clientId"
                   params={{ clientId: c.id }}
