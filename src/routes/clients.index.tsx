@@ -159,13 +159,16 @@ function ClientsPage() {
                 <div className="text-xs text-muted-foreground">{c.industry}</div>
                 {remaining > 0 && (
                   <div
-                    className="mt-1.5 flex max-w-[220px] flex-wrap gap-1.5"
+                    className="mt-1.5 flex max-w-[170px] flex-wrap gap-1"
                     title={missing.map((m) => setupStepLabel(m)).join(", ")}
                   >
                     {missing.map((m) => (
-                      <StatusPill key={m} tone="warning">
+                      <span
+                        key={m}
+                        className="inline-flex items-center rounded-full border border-warning/40 bg-warning/10 px-2 py-px text-[10.5px] font-medium text-warning"
+                      >
                         {setupStepLabel(m)}
-                      </StatusPill>
+                      </span>
                     ))}
                   </div>
                 )}
@@ -186,7 +189,10 @@ function ClientsPage() {
                     params={{ clientId: c.id }}
                     search={{ tab: "Configuration" }}
                   >
-                    <Btn variant={remaining > 0 ? "primary" : "ghost"}>
+                    <Btn
+                      variant={remaining > 0 ? "primary" : "ghost"}
+                      className="h-7 px-2.5 text-[12px]"
+                    >
                       {remaining > 0 ? "Complete Setup" : "Edit Draft"}
                     </Btn>
                   </Link>
