@@ -157,9 +157,9 @@ function ClientsPage() {
                   {c.name}
                 </Link>
                 <div className="text-xs text-muted-foreground">{c.industry}</div>
-                {remaining > 0 && (
+                {(remaining > 0 || (isSettingUp && isAdmin)) && (
                   <div
-                    className="mt-1.5 flex max-w-[170px] flex-wrap gap-1"
+                    className="mt-1.5 flex max-w-[250px] flex-wrap items-center gap-1"
                     title={missing.map((m) => setupStepLabel(m)).join(", ")}
                   >
                     {missing.map((m) => (
@@ -170,6 +170,20 @@ function ClientsPage() {
                         {setupStepLabel(m)}
                       </span>
                     ))}
+                    {isSettingUp && isAdmin && (
+                      <Link
+                        to="/clients/$clientId"
+                        params={{ clientId: c.id }}
+                        search={{ tab: "Configuration" }}
+                      >
+                        <Btn
+                          variant={remaining > 0 ? "primary" : "ghost"}
+                          className="h-6 px-2 text-[11.5px]"
+                        >
+                          {remaining > 0 ? "Complete Setup" : "Edit Draft"}
+                        </Btn>
+                      </Link>
+                    )}
                   </div>
                 )}
               </Td>
@@ -183,28 +197,13 @@ function ClientsPage() {
               </Td>
               <Td className="text-muted-foreground">{intake.receivedAt}</Td>
               <Td className="text-right">
-                {isSettingUp && isAdmin ? (
-                  <Link
-                    to="/clients/$clientId"
-                    params={{ clientId: c.id }}
-                    search={{ tab: "Configuration" }}
-                  >
-                    <Btn
-                      variant={remaining > 0 ? "primary" : "ghost"}
-                      className="h-7 px-2.5 text-[12px]"
-                    >
-                      {remaining > 0 ? "Complete Setup" : "Edit Draft"}
-                    </Btn>
-                  </Link>
-                ) : (
-                  <Link
-                    to="/clients/$clientId"
-                    params={{ clientId: c.id }}
-                    className="text-[12.5px] font-semibold text-primary hover:underline"
-                  >
-                    View →
-                  </Link>
-                )}
+                <Link
+                  to="/clients/$clientId"
+                  params={{ clientId: c.id }}
+                  className="text-[12.5px] font-semibold text-primary hover:underline"
+                >
+                  View →
+                </Link>
               </Td>
             </Tr>
           );
