@@ -15,7 +15,7 @@ import {
 import { useRole } from "@/lib/role-context";
 import { formatCurrency, formatNumber, supervisorDirectory } from "@/lib/payflow-data";
 import { intakeForClient } from "@/lib/intake-data";
-import { incompleteSetupSections } from "@/lib/client-setup";
+import { incompleteSetupSections, setupIssueDetails } from "@/lib/client-setup";
 import { useUsers } from "@/lib/users-context";
 
 export const Route = createFileRoute("/clients/")({
@@ -190,35 +190,35 @@ function ClientsPage() {
                   {c.name}
                 </Link>
                 <div className="text-xs text-muted-foreground">{c.industry}</div>
-                {(remaining > 0 || (isSettingUp && isAdmin)) && (
-                  <div
-                    className="mt-1.5 flex max-w-[250px] flex-wrap items-center gap-1"
-                    title={missing.map((m) => setupStepLabel(m)).join(", ")}
-                  >
-                    {missing.map((m) => (
-                      <span
-                        key={m}
-                        className="inline-flex items-center rounded-full border border-warning/40 bg-warning/10 px-2 py-px text-[10.5px] font-medium text-warning"
-                      >
-                        {setupStepLabel(m)}
-                      </span>
-                    ))}
-                    {isSettingUp && isAdmin && (
-                      <Link
-                        to="/clients/$clientId"
-                        params={{ clientId: c.id }}
-                        search={{ tab: "Configuration" }}
-                      >
-                        <Btn
-                          variant={remaining > 0 ? "primary" : "ghost"}
-                          className="h-6 px-2 text-[11.5px]"
+                {isSettingUp && (() => {
+                  const details = setupIssueDetails(c.name, c.config, supervisorsForClient(c.id).length);
+                  return (
+                    <div className="mt-1.5 max-w-[340px] whitespace-normal">
+                      {remaining > 0 && (
+                        <span className="inline-flex items-center rounded-full border border-warning/40 bg-warning/10 px-2 py-0.5 text-[11.5px] font-medium text-warning">
+                          ⚠ {remaining} {remaining === 1 ? "step" : "steps"} left
+                        </span>
+                      )}
+                      {details.length > 0 && (
+                        <ul className="mt-1.5 list-disc space-y-0.5 pl-4 text-[12px] leading-snug text-muted-foreground">
+                          {details.map((d) => (
+                            <li key={d}>{d}</li>
+                          ))}
+                        </ul>
+                      )}
+                      {isAdmin && (
+                        <Link
+                          to="/clients/$clientId"
+                          params={{ clientId: c.id }}
+                          search={{ tab: "Configuration" }}
+                          className="mt-1.5 inline-block text-[12.5px] font-semibold text-primary hover:underline"
                         >
-                          {remaining > 0 ? "Complete Setup" : "Edit Draft"}
-                        </Btn>
-                      </Link>
-                    )}
-                  </div>
-                )}
+                          {remaining > 0 ? "Complete setup →" : "Edit draft →"}
+                        </Link>
+                      )}
+                    </div>
+                  );
+                })()}
               </Td>
               <Td className="text-muted-foreground">{c.config.code || "—"}</Td>
               <Td className="text-muted-foreground">{c.config.clientType}</Td>
