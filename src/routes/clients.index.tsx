@@ -52,6 +52,12 @@ function clientStatusTone(status: string): Tone {
   }
 }
 
+function setupStepLabel(m: string): string {
+  if (m === "General") return "Client Profile";
+  if (m === "Assigned Users") return "Supervisor Assignment";
+  return m;
+}
+
 function ClientsPage() {
   const { visibleClients, isAdmin } = useRole();
   const { supervisorsForClient } = useUsers();
