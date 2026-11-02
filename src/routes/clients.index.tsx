@@ -52,6 +52,12 @@ function clientStatusTone(status: string): Tone {
   }
 }
 
+function setupStepLabel(m: string): string {
+  if (m === "General") return "Client Profile";
+  if (m === "Assigned Users") return "Supervisor Assignment";
+  return m;
+}
+
 function ClientsPage() {
   const { visibleClients, isAdmin } = useRole();
   const { supervisorsForClient } = useUsers();
@@ -151,6 +157,35 @@ function ClientsPage() {
                   {c.name}
                 </Link>
                 <div className="text-xs text-muted-foreground">{c.industry}</div>
+                {(remaining > 0 || (isSettingUp && isAdmin)) && (
+                  <div
+                    className="mt-1.5 flex max-w-[250px] flex-wrap items-center gap-1"
+                    title={missing.map((m) => setupStepLabel(m)).join(", ")}
+                  >
+                    {missing.map((m) => (
+                      <span
+                        key={m}
+                        className="inline-flex items-center rounded-full border border-warning/40 bg-warning/10 px-2 py-px text-[10.5px] font-medium text-warning"
+                      >
+                        {setupStepLabel(m)}
+                      </span>
+                    ))}
+                    {isSettingUp && isAdmin && (
+                      <Link
+                        to="/clients/$clientId"
+                        params={{ clientId: c.id }}
+                        search={{ tab: "Configuration" }}
+                      >
+                        <Btn
+                          variant={remaining > 0 ? "primary" : "ghost"}
+                          className="h-6 px-2 text-[11.5px]"
+                        >
+                          {remaining > 0 ? "Complete Setup" : "Edit Draft"}
+                        </Btn>
+                      </Link>
+                    )}
+                  </div>
+                )}
               </Td>
               <Td className="text-muted-foreground">{c.config.code || "—"}</Td>
               <Td className="text-muted-foreground">{c.config.clientType}</Td>
@@ -158,13 +193,6 @@ function ClientsPage() {
               <Td>
                 <div className="flex flex-wrap items-center gap-1.5">
                   <StatusPill tone={clientStatusTone(c.status)}>{c.status}</StatusPill>
-                  {remaining > 0 && (
-                    <span title={missing.map((m) => String(m)).join(", ")}>
-                      <StatusPill tone="warning">
-                        ⚠ {remaining} step{remaining > 1 ? "s" : ""} left
-                      </StatusPill>
-                    </span>
-                  )}
                 </div>
               </Td>
               <Td className="text-muted-foreground">{intake.receivedAt}</Td>
@@ -172,10 +200,9 @@ function ClientsPage() {
                 <Link
                   to="/clients/$clientId"
                   params={{ clientId: c.id }}
-                  search={isSettingUp && isAdmin ? { tab: "Configuration" } : {}}
                   className="text-[12.5px] font-semibold text-primary hover:underline"
                 >
-                  {isSettingUp && isAdmin ? (remaining > 0 ? "Complete setup →" : "Edit draft") : "View →"}
+                  View →
                 </Link>
               </Td>
             </Tr>
