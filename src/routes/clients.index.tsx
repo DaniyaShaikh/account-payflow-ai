@@ -205,7 +205,7 @@ function ClientsPage() {
                         </span>
                       )}
                       {details.length > 0 && (
-                        <ul className="mt-1.5 space-y-1 text-[11.5px] leading-snug text-muted-foreground">
+                        <ul className="mt-1.5 space-y-1 text-[10.5px] leading-snug text-muted-foreground">
                           {details.map((d) => (
                             <li key={d} className="flex gap-1.5">
                               <span aria-hidden className="text-warning/80">•</span>
