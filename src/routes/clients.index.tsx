@@ -157,17 +157,9 @@ function ClientsPage() {
                   {c.name}
                 </Link>
                 <div className="text-xs text-muted-foreground">{c.industry}</div>
-              </Td>
-              <Td className="text-muted-foreground">{c.config.code || "—"}</Td>
-              <Td className="text-muted-foreground">{c.config.clientType}</Td>
-              <Td className="text-muted-foreground">{c.config.useCase || "—"}</Td>
-              <Td>
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <StatusPill tone={clientStatusTone(c.status)}>{c.status}</StatusPill>
-                </div>
                 {remaining > 0 && (
                   <div
-                    className="mt-1.5 flex max-w-[190px] flex-wrap gap-1.5"
+                    className="mt-1.5 flex max-w-[220px] flex-wrap gap-1.5"
                     title={missing.map((m) => setupStepLabel(m)).join(", ")}
                   >
                     {missing.map((m) => (
@@ -177,6 +169,14 @@ function ClientsPage() {
                     ))}
                   </div>
                 )}
+              </Td>
+              <Td className="text-muted-foreground">{c.config.code || "—"}</Td>
+              <Td className="text-muted-foreground">{c.config.clientType}</Td>
+              <Td className="text-muted-foreground">{c.config.useCase || "—"}</Td>
+              <Td>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <StatusPill tone={clientStatusTone(c.status)}>{c.status}</StatusPill>
+                </div>
               </Td>
               <Td className="text-muted-foreground">{intake.receivedAt}</Td>
               <Td className="text-right">
