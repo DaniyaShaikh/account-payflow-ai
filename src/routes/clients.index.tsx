@@ -172,7 +172,7 @@ function ClientsPage() {
                 <Link
                   to="/clients/$clientId"
                   params={{ clientId: c.id }}
-                  search={isSettingUp && isAdmin ? { tab: "Configuration" } : undefined}
+                  search={isSettingUp && isAdmin ? { tab: "Configuration" } : {}}
                   className="text-[12.5px] font-semibold text-primary hover:underline"
                 >
                   {isSettingUp && isAdmin ? (remaining > 0 ? "Complete setup →" : "Edit draft") : "View →"}
