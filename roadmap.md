@@ -6,3 +6,9 @@
 - [x] Add expanded and slim navigation states with session memory and tooltips.
 - [x] Add a stakeholder navigation showcase using the real menu hierarchy.
 - [x] Verify key desktop and mobile screens.
+
+## Compliance enhancement
+- [ ] Add compliance catalogue, structured editor, testing, holiday views and audit log.
+- [ ] Connect jurisdiction-based client inheritance and mandatory-rule protection.
+- [ ] Connect communication previews to unified compliance and operational evaluation.
+- [ ] Test enforcement and verify connected prototype screens.
