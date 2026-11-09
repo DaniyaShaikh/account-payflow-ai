@@ -27,8 +27,11 @@ import {
 import { useUsers } from "@/lib/users-context";
 import { permissionGroups } from "@/lib/users-data";
 import { cn } from "@/lib/utils";
+import { ClientCompliance } from "./client-compliance";
+import { ClientOperationalRules } from "./client-operational-rules";
 
 export interface ClientDraft {
+  clientId?: string;
   name: string;
   industry: string;
   aiMode: AiMode;
@@ -407,7 +410,9 @@ export function AiGovernanceSection({ draft, patch, patchConfig }: SectionProps)
         />
       </div>
 
-      {draft.aiMode === "Supervised AI" && (
+      <ClientCompliance config={draft.config} patch={patchConfig} clientId={draft.clientId} />
+      <ClientOperationalRules config={draft.config} patch={patchConfig} clientId={draft.clientId} />
+      {false && draft.aiMode === "Supervised AI" && (
         <div className="rounded-lg border border-border bg-surface p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-[13px] font-semibold text-foreground">Governance Rules</p>

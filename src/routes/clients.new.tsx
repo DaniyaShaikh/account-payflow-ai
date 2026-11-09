@@ -64,8 +64,10 @@ function AddClientPage() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [created, setCreated] = useState<Client | null>(null);
+  const [clientId] = useState(() => `client-${crypto.randomUUID()}`);
 
   const [draft, setDraft] = useState<ClientDraft>({
+    clientId,
     name: "",
     industry: "",
     aiMode: "Supervised AI",
@@ -92,7 +94,7 @@ function AddClientPage() {
   if (draft.supervisors.length === 0) issues.push("Assign at least one supervisor");
 
   const buildClient = (status: Client["status"]): Client => ({
-    id: slugify(draft.name),
+    id: clientId,
     name: draft.name.trim() || "Untitled Client",
     industry: draft.industry.trim() || "Collections",
     accounts: 0,
@@ -230,7 +232,7 @@ function AddClientPage() {
         title={`Step ${step + 1} of ${steps.length} · ${steps[step]}`}
         description={stepDescriptions[step] ?? ""}
       >
-        {step === 0 && <div className="space-y-6"><ProfileSection {...sectionProps} /><ClientCompliance config={draft.config} patch={patchConfig} /></div>}
+        {step === 0 && <ProfileSection {...sectionProps} />}
         {step === 1 && <DataSourceSection {...sectionProps} />}
         {step === 2 && <MappingSection {...sectionProps} />}
         {step === 3 && <BrandingSection {...sectionProps} />}

@@ -4,6 +4,7 @@ import { ReviewQueue } from "@/components/review-queue";
 import { JourneyLibrary } from "@/components/journey-library";
 import { PortfolioSection } from "@/components/portfolio-section";
 import { ClientCompliance } from "@/components/client-compliance";
+import { ClientOperationalRules } from "@/components/client-operational-rules";
 import { CommunicationTable } from "@/components/communication-table";
 import { journeysForClient } from "@/lib/journey-data";
 import { communicationsForClient } from "@/lib/communication-data";
@@ -282,7 +283,7 @@ function ClientDetail() {
         </Panel>
       )}
 
-      {tab === "Rules" && <ClientRules clientId={client.id} clientName={client.name} />}
+      {tab === "Rules" && <Panel title="Client Rules"><div className="space-y-8"><ClientCompliance config={client.config} patch={patchConfig} clientId={client.id} readOnly={!isAdmin} /><ClientOperationalRules config={client.config} patch={patchConfig} clientId={client.id} readOnly={!isAdmin} /></div></Panel>}
       {tab === "Human Reviews" && (
         <ReviewQueue
           clientId={client.id}
@@ -603,7 +604,7 @@ function ClientConfiguration({
   const { permissionsForClient } = useRole();
   const myPermissions = permissionsForClient(clientId);
   const summary = mappingSummary(draft.config);
-  const props = { draft, patch, patchConfig };
+  const props = { draft: { ...draft, clientId }, patch, patchConfig };
   const jump = readOnly ? undefined : (s: (typeof configSections)[number]) => setSection(s);
   const overviewPanel = (
     <ConfigurationOverview
