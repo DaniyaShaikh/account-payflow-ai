@@ -278,7 +278,14 @@ function CommunicationFunnel() {
                     ? "of addresses"
                     : isInvalid
                       ? "of valid pool"
-                      : `−${formatNumber(Math.round((rows[i - 1]?.volume ?? 0) - row.volume))}`}
+                      : `−${formatNumber(
+                          Math.round(
+                            (rows
+                              .slice(0, i)
+                              .filter((r) => r.stage !== "Invalid Addresses")
+                              .at(-1)?.volume ?? 0) - row.volume,
+                          ),
+                        )}`}
                 </span>
               </div>
             </Link>
