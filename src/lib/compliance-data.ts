@@ -26,6 +26,7 @@ export interface EvaluationInput {
   consent: boolean; optedOut: boolean; attempts: number; attemptsDaily: number; attemptsMonthly: number;
   flags: string[]; senderIdentified: boolean; unsubscribeInstructions: boolean; templateApproved: boolean;
   replyEnabled: boolean; language: string; balance: number; daysPastDue: number;
+  consentDate?: string; consentSource?: string; messageText?: string;
   lastContactAt?: string; contactHistory?: { at: string; channel: string }[]; operational?: Record<string, string | number>;
 }
 export interface EvaluationResult { result: "Allowed" | "Blocked" | "Reschedule" | "Review Required"; matches: { id: string; name: string; reason: string; action: string; layer: string }[]; evaluated: string[]; nextWindow?: string }
@@ -102,7 +103,9 @@ function triggered(r: ComplianceRule, i: EvaluationInput, holidays: Holiday[]) {
   const configured = conditions.length > 0 && (r.logic === "AND" ? conditions.every(Boolean) : conditions.some(Boolean));
   const limits = (r.settings.daily > 0 && i.attemptsDaily >= r.settings.daily) || (r.settings.weekly > 0 && i.attempts >= r.settings.weekly) || (r.settings.monthly > 0 && i.attemptsMonthly >= r.settings.monthly);
   const interval = r.settings.intervalHours > 0 && i.lastContactAt && new Date(i.at).getTime() - new Date(i.lastContactAt).getTime() < r.settings.intervalHours * 3600000;
-  return configured || (r.category === "Frequency" && !!(limits || interval));
+  const expiredConsent = r.category === "Consent & Opt-Out" && r.settings.consentExpiryDays > 0 && (!i.consentDate || new Date(i.at).getTime() - new Date(i.consentDate).getTime() >= r.settings.consentExpiryDays * 86400000);
+  const missingContent = r.category === "Content" && r.settings.requiredText.trim() && !(i.messageText ?? "").toLowerCase().includes(r.settings.requiredText.trim().toLowerCase());
+  return configured || !!expiredConsent || !!missingContent || (r.category === "Frequency" && !!(limits || interval));
 }
 export function evaluateRules(rules: ComplianceRule[], operational: Rule[], holidays: Holiday[], input: EvaluationInput, disabled: string[] = []): EvaluationResult {
   if (!input.jurisdiction.country || !input.jurisdiction.timezone || !Number.isFinite(new Date(input.at).getTime())) return { result: "Review Required", matches: [{ id: "CTX", name: "Customer jurisdiction and local time", reason: "Complete the recipient jurisdiction and proposed date/time before execution.", action: "Require Approval", layer: "Compliance" }], evaluated: [] };
@@ -121,7 +124,8 @@ export function evaluateRules(rules: ComplianceRule[], operational: Rule[], holi
       return compare(actual, op === "Is" ? "Equals" : op === "Contains" ? "Includes" : op === "Does Not Contain" ? "Excludes" : op, c.value);
     });
     const matched = checks.length > 0 && (r.logic === "ALL" ? checks.every(v => v === true) : checks.some(v => v === true));
-    if (matched || checks.includes(undefined)) matches.push({ id: r.id, name: r.name, reason: matched ? r.conditions.map(c => `${c.field} ${c.operator} ${c.value}`).join(` ${r.logic} `) : "Missing operational context; review required before execution.", action: matched && r.action === "Prevent Communication" ? "Block" : matched && r.action === "Hold Action" ? "Reschedule" : "Require Approval", layer: r.type });
+    const incomplete = r.logic === "ALL" ? !checks.includes(false) && checks.includes(undefined) : !matched && checks.includes(undefined);
+    if (matched || incomplete) matches.push({ id: r.id, name: r.name, reason: matched ? r.conditions.map(c => `${c.field} ${c.operator} ${c.value}`).join(` ${r.logic} `) : "Missing operational context; review required before execution.", action: matched && r.action === "Prevent Communication" ? "Block" : "Require Approval", layer: r.type });
   }
   const result = matches.some(m => m.action === "Block" || m.action === "Suppress") ? "Blocked" : matches.some(m => m.action === "Require Approval" || m.action === "Flag for Review") ? "Review Required" : matches.some(m => m.action === "Reschedule") ? "Reschedule" : "Allowed";
   const output: EvaluationResult = { result, matches, evaluated: [...applicable.map(r => r.id), ...ops.map(r => r.id)] };

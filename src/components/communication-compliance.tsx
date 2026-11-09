@@ -12,7 +12,7 @@ export function CommunicationCompliance({ clientId, channel, balance = 100, temp
   const [date, setDate] = useState("2026-11-09T15:00"); const [optedOut, setOptedOut] = useState(false); const [consent, setConsent] = useState(true);
   const [result, setResult] = useState<EvaluationResult | null>(null); const [outcome, setOutcome] = useState("");
   const check = () => {
-    const input = { ...defaultEvaluation(clientId, client?.config.jurisdiction ?? emptyJurisdiction), channel, balance, at: date ? `${date}:00Z` : "", consent, optedOut, senderIdentified: !!client?.config.senderName, unsubscribeInstructions: /unsubscribe|STOP/i.test(templateText), templateApproved: true };
+    const input = { ...defaultEvaluation(clientId, client?.config.jurisdiction ?? emptyJurisdiction), channel, balance, at: date ? `${date}:00Z` : "", consent, optedOut, senderIdentified: !!client?.config.senderName, unsubscribeInstructions: /unsubscribe|STOP/i.test(templateText), templateApproved: true, messageText: templateText };
     return evaluate(input, true);
   };
   return <div className="space-y-3">

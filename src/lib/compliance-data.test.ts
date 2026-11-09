@@ -54,4 +54,18 @@ describe("mandatory compliance enforcement", () => {
     expect(jurisdictionMatches({ ...input().jurisdiction, state: "Quebec" }, input().jurisdiction)).toBe(false);
   });
   it("requires review when recipient jurisdiction is missing", () => { expect(evaluateRules([], [], [], { ...input(), jurisdiction: { ...input().jurisdiction, country: "" } }).result).toBe("Review Required"); });
+  it("enforces configured consent expiry", () => {
+    const base = rule(); const r = { ...base, settings: { ...base.settings, consentExpiryDays: 30 } };
+    expect(evaluateRules([r], [], [], { ...input(), consentDate: "2026-09-01T00:00:00Z" }).result).toBe("Blocked");
+    expect(evaluateRules([r], [], [], { ...input(), consentDate: "2026-11-01T00:00:00Z" }).result).toBe("Allowed");
+  });
+  it("enforces required disclosure content", () => {
+    const base = rule({ category: "Content", conditions: [{ id: "a", field: "Sender Identified", operator: "Equals", value: "No", period: 7 }] }); const r = { ...base, settings: { ...base.settings, requiredText: "Reply STOP" } };
+    expect(evaluateRules([r], [], [], { ...input(), messageText: "Payment reminder" }).result).toBe("Blocked");
+    expect(evaluateRules([r], [], [], { ...input(), messageText: "Payment reminder. Reply STOP" }).result).toBe("Allowed");
+  });
+  it("requires human review for an operational hold rather than inventing an eligible window", () => {
+    const op: Rule = { id: "op", name: "Hold", description: "", type: "Client Rule", clientId: "client", category: "Amount", logic: "ALL", conditions: [{ id: "c", field: "Outstanding Balance", operator: "Greater Than", value: "50" }], action: "Hold Action", status: "Active", createdBy: "Admin", lastUpdated: "", triggers7d: 0, appliedTo: [], history: [] };
+    expect(evaluateRules([], [op], [], input()).result).toBe("Review Required");
+  });
 });
