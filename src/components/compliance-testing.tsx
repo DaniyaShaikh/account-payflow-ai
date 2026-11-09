@@ -5,7 +5,7 @@ import { defaultEvaluation, complianceChannels, type EvaluationInput, type Evalu
 import { useCompliance } from "@/lib/compliance-context";
 import { useRole } from "@/lib/role-context";
 
-export function ComplianceTesting({ clientId }: { clientId?: string }) {
+export function ComplianceTesting({ clientId }: { clientId?: string | undefined }) {
   const { visibleClients } = useRole(); const { evaluate } = useCompliance();
   const first = visibleClients.find(c => c.id === clientId) ?? visibleClients[0];
   const [input, setInput] = useState<EvaluationInput>(() => defaultEvaluation(first?.id ?? "", first?.config.jurisdiction));

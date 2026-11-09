@@ -9,7 +9,7 @@ import { useRole } from "@/lib/role-context";
 import { applicableRules, complianceCategories, complianceChannels, countries, statesFor, emptyJurisdiction } from "@/lib/compliance-data";
 
 export const Route = createFileRoute("/compliance/")({
-  validateSearch: (s: Record<string, unknown>): { clientId?: string } => typeof s.clientId === "string" ? { clientId: s.clientId } : {},
+  validateSearch: (s: Record<string, unknown>): { clientId?: string } => typeof s["clientId"] === "string" ? { clientId: s["clientId"] } : {},
   head: () => ({ meta: [{ title: "Compliance Rules — PayFlow Governance" }, { name: "description", content: "Jurisdiction-based compliance rules, effective restrictions, testing and holiday calendars for PayFlow." }, { property: "og:title", content: "Compliance Rules — PayFlow Governance" }, { property: "og:description", content: "Manage and test inherited compliance protections across jurisdictions." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: CompliancePage,
 });
