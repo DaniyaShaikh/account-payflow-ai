@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Btn, StatusPill, ToggleRow } from "./payflow-ui";
+import { Btn, StatusPill } from "./payflow-ui";
 import { JurisdictionFields, ComplianceNotice } from "./compliance-common";
 import { useCompliance } from "@/lib/compliance-context";
 import { applicableRules, complianceCategories, emptyJurisdiction, newComplianceRule } from "@/lib/compliance-data";
@@ -22,7 +22,7 @@ export function ClientCompliance({ config, patch, clientId = "", readOnly = fals
     {!jurisdiction.country ? <p className="text-sm text-muted-foreground">Select a country to identify inherited rules.</p> : !applicable.length ? <p className="text-sm text-muted-foreground">No sample rules match this jurisdiction. Legal validation is still required.</p> : complianceCategories.map(category => {
       const items = applicable.filter(r => r.category === category); if (!items.length) return null;
       return <div key={category} className="border-t border-border pt-3"><h4 className="mb-2 text-xs font-semibold text-muted-foreground">{category}</h4>{items.map(r => <div key={r.id} className="border-b border-border/50 py-2 last:border-0 [&>div>div>div]:flex-wrap [&>div>div]:min-w-0">
-        <ToggleRow label={r.name} description={[r.jurisdiction.country, r.jurisdiction.state, r.jurisdiction.region, r.jurisdiction.postal, r.channel].filter(Boolean).join(" · ")} badge={r.enforcement === "Mandatory" ? "Mandatory · locked" : r.enforcement} checked={r.enforcement === "Mandatory" || !disabled.includes(r.id)} disabled={readOnly || r.enforcement === "Mandatory"} onChange={enabled => patch({ disabledComplianceRules: enabled ? disabled.filter(id => id !== r.id) : [...disabled, r.id] })} />
+        <label className="flex items-start gap-3 py-2"><input type="checkbox" aria-label={`Select ${r.name}`} checked={r.enforcement === "Mandatory" || !disabled.includes(r.id)} disabled={readOnly || r.enforcement === "Mandatory"} onChange={e => patch({ disabledComplianceRules: e.target.checked ? disabled.filter(id => id !== r.id) : [...disabled, r.id] })} className="mt-1 size-4 shrink-0 accent-primary" /><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><span className="text-sm font-medium">{r.name}</span><StatusPill>{r.enforcement === "Mandatory" ? "Mandatory · locked" : r.enforcement}</StatusPill></div><p className="mt-1 text-xs text-muted-foreground">{[r.jurisdiction.country, r.jurisdiction.state, r.jurisdiction.region, r.jurisdiction.postal, r.channel].filter(Boolean).join(" · ")}</p></div></label>
         <div className="flex flex-wrap gap-2"><StatusPill>{r.clientId ? "Client Configuration" : "Inherited from Governance"}</StatusPill><StatusPill tone={r.status === "Active" ? "success" : "warning"}>{r.status}</StatusPill><Link to="/compliance/$ruleId" params={{ ruleId: r.id }} className="text-xs font-medium text-primary">View rule</Link></div>
       </div>)}</div>;
     })}
