@@ -33,6 +33,7 @@ import {
   MappingSection,
   BrandingSection,
   AiGovernanceSection,
+  PaymentOptionsSection,
   mappingSummary,
   connectionTone,
   type ClientDraft,
@@ -94,6 +95,7 @@ const configSections = [
   "Data Source",
   "Data Mapping",
   "Branding & Channels",
+  "Payment Options",
   "AI & Governance",
   "Assigned Users",
 ] as const;
@@ -677,6 +679,7 @@ function ClientConfiguration({
           )}
           {section === "Data Mapping" && <MappingSection {...props} />}
           {section === "Branding & Channels" && <BrandingSection {...props} />}
+          {section === "Payment Options" && <PaymentOptionsSection {...props} />}
           {section === "AI & Governance" && <AiGovernanceSection {...props} />}
           {section === "Assigned Users" && (
             <ClientSupervisorAccess clientId={clientId} clientName={draft.name} editable />
