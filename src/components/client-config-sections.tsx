@@ -13,12 +13,16 @@ import {
 import {
   payflowFields,
   governanceRuleLibrary,
+  defaultPaymentOptions,
+  defaultPlanLimits,
+  formatCurrency,
   type AiMode,
   type ClientConfig,
   type ClientType,
   type ConnectionState,
   type DataSource,
   type MappingStatus,
+  type PlanLimitRule,
 } from "@/lib/payflow-data";
 import { useUsers } from "@/lib/users-context";
 import { permissionGroups } from "@/lib/users-data";
@@ -437,6 +441,167 @@ export function AiGovernanceSection({ draft, patch, patchConfig }: SectionProps)
               ))}
             </div>
           )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ---------------- Payment options ---------------- */
+
+const limitToOptions = ["500", "1000", "2000", "No limit"];
+const limitTermOptions = ["3 months", "5 months", "6 months", "9 months", "12 months"];
+
+export function PaymentOptionsSection({ draft, patchConfig }: SectionProps) {
+  const opts = draft.config.paymentOptions ?? defaultPaymentOptions();
+  const patchOpts = (p: Partial<typeof opts>) =>
+    patchConfig({ paymentOptions: { ...opts, ...p } });
+
+  const patchRule = (id: string, p: Partial<PlanLimitRule>) =>
+    patchOpts({ planLimits: opts.planLimits.map((r) => (r.id === id ? { ...r, ...p } : r)) });
+
+  const addRule = () => {
+    const last = opts.planLimits[opts.planLimits.length - 1];
+    patchOpts({
+      planLimits: [
+        ...opts.planLimits.map((r) =>
+          r.maxBalance === null ? { ...r, maxBalance: (last?.minBalance ?? 0) + 1000 } : r,
+        ),
+        {
+          id: `pl-${Date.now()}`,
+          minBalance: (last?.maxBalance ?? last?.minBalance ?? 0) || 0,
+          maxBalance: null,
+          maxTermMonths: 12,
+        },
+      ],
+    });
+  };
+
+  return (
+    <div className="space-y-1">
+      <p className="text-[13px] font-semibold text-foreground">Customer payment options</p>
+      <p className="text-[11px] text-muted-foreground">
+        Controls what the customer payment experience offers for this client. Future instalments are
+        never auto-charged.
+      </p>
+
+      <div className="mt-2 divide-y divide-border">
+        <ToggleRow
+          label="Allow partial payments"
+          description="Customer can enter an amount within the configured limits"
+          checked={opts.allowPartial}
+          onChange={(v) => patchOpts({ allowPartial: v })}
+        />
+        <ToggleRow
+          label="Allow payment plans"
+          description="Show instalment schedule options on the payment page"
+          checked={opts.allowPlans}
+          onChange={(v) =>
+            patchOpts({
+              allowPlans: v,
+              // Auto-create the best-practice limits the first time plans are switched on.
+              planLimits:
+                v && opts.planLimits.length === 0
+                  ? defaultPlanLimits.map((r) => ({ ...r }))
+                  : opts.planLimits,
+            })
+          }
+        />
+      </div>
+
+      <div className="grid gap-4 pt-3 sm:grid-cols-2">
+        <Field label="Minimum partial amount">
+          <TextInput
+            value={String(opts.minPartialAmount)}
+            onChange={(v) => patchOpts({ minPartialAmount: Number(v.replace(/[^0-9.]/g, "")) || 0 })}
+            placeholder="25"
+          />
+        </Field>
+        <Field label="Minimum plan total">
+          <TextInput
+            value={String(opts.minPlanTotal)}
+            onChange={(v) => patchOpts({ minPlanTotal: Number(v.replace(/[^0-9.]/g, "")) || 0 })}
+            placeholder="100"
+          />
+        </Field>
+      </div>
+
+      {opts.allowPlans && (
+        <div className="pt-4">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[13px] font-semibold text-foreground">Payment plan limits</p>
+              <p className="text-[11px] text-muted-foreground">
+                How long a plan may run, based on the customer's balance. Applied automatically on
+                the payment page.
+              </p>
+            </div>
+            <Btn onClick={addRule}>+ Add limit</Btn>
+          </div>
+          <div className="mt-3 overflow-hidden rounded-lg border border-border">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="border-b border-border bg-surface">
+                  <th className="px-3 py-2 text-[11px] font-semibold text-muted-foreground">
+                    If balance is
+                  </th>
+                  <th className="px-3 py-2 text-[11px] font-semibold text-muted-foreground">To</th>
+                  <th className="px-3 py-2 text-[11px] font-semibold text-muted-foreground">
+                    Allow plans up to
+                  </th>
+                  <th className="w-10 px-3 py-2" />
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {opts.planLimits.map((rule) => (
+                  <tr key={rule.id}>
+                    <td className="px-3 py-2">
+                      <span className="tabular text-[13px] font-medium text-foreground">
+                        {rule.minBalance === 0
+                          ? "Up to"
+                          : `Greater than ${formatCurrency(rule.minBalance, true)}`}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2">
+                      <SelectInput
+                        value={rule.maxBalance === null ? "No limit" : String(rule.maxBalance)}
+                        options={limitToOptions}
+                        onChange={(v) =>
+                          patchRule(rule.id, { maxBalance: v === "No limit" ? null : Number(v) })
+                        }
+                      />
+                    </td>
+                    <td className="px-3 py-2">
+                      <SelectInput
+                        value={`${rule.maxTermMonths} months`}
+                        options={limitTermOptions}
+                        onChange={(v) =>
+                          patchRule(rule.id, { maxTermMonths: Number(v.split(" ")[0]) })
+                        }
+                      />
+                    </td>
+                    <td className="px-3 py-2 text-right">
+                      <button
+                        onClick={() =>
+                          patchOpts({
+                            planLimits: opts.planLimits.filter((r) => r.id !== rule.id),
+                          })
+                        }
+                        className="text-[12px] font-medium text-muted-foreground transition-colors hover:text-danger"
+                        aria-label="Remove limit"
+                      >
+                        Remove
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
+            Example: a balance greater than {formatCurrency(1000, true)} can be paid over up to 6
+            months. The payment page suggests the best-practice plan within these limits.
+          </p>
         </div>
       )}
     </div>

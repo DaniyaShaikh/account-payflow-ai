@@ -19,6 +19,7 @@ import {
   portfolioByName,
   subClientNamesForClient,
 } from "@/lib/portfolio-data";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -41,6 +42,8 @@ export const Route = createFileRoute("/")({
 });
 
 const funnelStages = [
+  "Valid Addresses",
+  "Invalid Addresses",
   "Sent",
   "Delivered",
   "Opened / Read",
@@ -49,7 +52,7 @@ const funnelStages = [
   "Paid",
 ] as const;
 
-const stageRates = [1, 0.956, 0.738, 0.416, 0.737, 0.802];
+const stageRates = [1, 0.062, 0.984, 0.956, 0.738, 0.416, 0.737, 0.802];
 
 // Funnel stages map onto the communication statuses that produced them, so a
 // click leads to the underlying communications.
@@ -88,11 +91,26 @@ function funnelVolumes(
   return funnelStages.map((stage, i) => {
     if (i === 0) return { stage, volume: base, rate: null as number | null };
     const jitter = 0.94 + ((seed >> (i * 3)) % 13) / 100;
-    const volume = Math.round(previous * (stageRates[i] ?? 1) * jitter);
-    const rate = volume / previous;
-    previous = volume;
+    // Invalid addresses branch off the valid pool; every other stage follows the previous one.
+    const volume = Math.round(
+      (stage === "Invalid Addresses" ? base : previous) * (stageRates[i] ?? 1) * jitter,
+    );
+    const rate = volume / (stage === "Invalid Addresses" ? base : previous);
+    if (stage !== "Invalid Addresses") previous = volume;
     return { stage, volume, rate };
   });
+}
+
+/** Seeded inbox-placement split for the delivered volume (email only). */
+function placementSplit(delivered: number, seed: number) {
+  const inbox = Math.round(delivered * (0.82 + ((seed >> 5) % 8) / 100));
+  const spam = Math.round((delivered - inbox) * 0.72);
+  const promotions = delivered - inbox - spam;
+  return [
+    { label: "Inbox", volume: inbox },
+    { label: "Spam", volume: spam },
+    { label: "Promotions", volume: promotions },
+  ];
 }
 
 function CommunicationFunnel() {
@@ -111,6 +129,12 @@ function CommunicationFunnel() {
     journey === "All Workflows";
 
   const rows = funnelVolumes(client, subClients.join(","), date, channel, journey);
+  const deliveredVolume = rows.find((r) => r.stage === "Delivered")?.volume ?? 0;
+  const placement = placementSplit(
+    deliveredVolume,
+    hashSeed(`${client}|${subClients.join(",")}|${date}|${channel}|${journey}`),
+  );
+  const showPlacement = channel === "All Channels" || channel === "Email";
   const activeParts = [
     client !== "All Clients" ? client : null,
     subClients.length > 0 ? subClients.join(", ") : null,
@@ -122,7 +146,7 @@ function CommunicationFunnel() {
   return (
     <Panel
       title="Communication to Payment Performance"
-      description="Conversion from outreach to completed payment"
+      description="Conversion from outreach to completed payment, with address validity and inbox placement"
       className="mb-5"
       action={
         !isDefault ? (
@@ -191,16 +215,19 @@ function CommunicationFunnel() {
       </div>
 
       {/* Connected progression: navy → PayFlow blue → teal at the paid stage. */}
-      <div className="grid gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-3 xl:grid-cols-6">
+      <div className="grid gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
         {rows.map((row, i) => {
           const top = rows[0]?.volume || 1;
           const width = Math.max(5, (row.volume / top) * 100);
           const isPaid = i === rows.length - 1;
+          const isInvalid = row.stage === "Invalid Addresses";
           const barColor = isPaid
             ? "bg-teal"
-            : i === 0
-              ? "bg-navy"
-              : "bg-primary";
+            : isInvalid
+              ? "bg-warning"
+              : i === 0
+                ? "bg-navy"
+                : "bg-primary";
           return (
             <Link
               key={row.stage}
@@ -238,19 +265,67 @@ function CommunicationFunnel() {
                 />
               </div>
               <div className="mt-2 flex items-baseline justify-between gap-2">
-                <span className="tabular text-[11.5px] font-semibold text-primary">
+                <span
+                  className={cn(
+                    "tabular text-[11.5px] font-semibold",
+                    isInvalid ? "text-warning" : "text-primary",
+                  )}
+                >
                   {row.rate === null ? "Start" : `${(row.rate * 100).toFixed(1)}%`}
                 </span>
                 <span className="tabular text-[10.5px] text-muted-foreground">
                   {row.rate === null
-                    ? "of funnel"
-                    : `−${formatNumber(Math.round((rows[i - 1]?.volume ?? 0) - row.volume))}`}
+                    ? "of addresses"
+                    : isInvalid
+                      ? "of valid pool"
+                      : `−${formatNumber(
+                          Math.round(
+                            (rows
+                              .slice(0, i)
+                              .filter((r) => r.stage !== "Invalid Addresses")
+                              .at(-1)?.volume ?? 0) - row.volume,
+                          ),
+                        )}`}
                 </span>
               </div>
             </Link>
           );
         })}
       </div>
+
+      {showPlacement && (
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-border bg-surface px-4 py-2.5">
+          <span className="text-[11.5px] font-semibold text-foreground">
+            Delivered where (email)
+          </span>
+          {placement.map((p) => (
+            <Link
+              key={p.label}
+              to="/communications"
+              search={{
+                ...(client !== "All Clients" ? { client } : {}),
+                channel: "Email",
+                status: "Delivered",
+              }}
+              className="group flex items-baseline gap-1.5"
+              title={`View emails delivered to ${p.label}`}
+            >
+              <span className="text-[11.5px] text-muted-foreground group-hover:text-foreground">
+                {p.label}
+              </span>
+              <span className="tabular text-[12.5px] font-semibold text-foreground">
+                {formatNumber(p.volume)}
+              </span>
+              <span className="tabular text-[10.5px] text-muted-foreground">
+                ({deliveredVolume ? Math.round((p.volume / deliveredVolume) * 100) : 0}%)
+              </span>
+            </Link>
+          ))}
+          <span className="text-[10.5px] text-muted-foreground">
+            Placement is reported by the receiving mail provider.
+          </span>
+        </div>
+      )}
     </Panel>
   );
 }

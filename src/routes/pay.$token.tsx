@@ -3,7 +3,7 @@ import { useState } from "react";
 import { ShieldCheck, CheckCircle2, AlertCircle, CalendarClock, Lock } from "lucide-react";
 import { accountForPaymentToken, maskedReference, planIllustrativeNote } from "@/lib/payment-data";
 import { brandingFor } from "@/lib/communication-data";
-import { clientName, formatCurrency } from "@/lib/payflow-data";
+import { clientName, defaultPlanLimits, formatCurrency } from "@/lib/payflow-data";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/pay/$token")({
@@ -36,9 +36,7 @@ type Step =
   | "options"
   | "full"
   | "partial"
-  | "plan-frequency"
-  | "plan-schedule"
-  | "plan-amount"
+  | "plan"
   | "review"
   | "success"
   | "plan-success"
@@ -46,7 +44,14 @@ type Step =
 
 type Mode = "full" | "partial" | "plan";
 type Method = "Card" | "Bank Account";
-type Frequency = "Daily" | "Weekly" | "Monthly";
+type Frequency = "Weekly" | "Bi-Weekly" | "Monthly";
+
+interface PlanChoice {
+  frequency: Frequency;
+  payments: number;
+  installment: number;
+  suggested: boolean;
+}
 
 function referenceCode(seed: string) {
   let hash = 0;
@@ -71,17 +76,19 @@ function formatDate(date: Date) {
 
 function addIntervals(date: Date, frequency: Frequency, count: number) {
   const next = new Date(date.getTime());
-  if (frequency === "Daily") next.setUTCDate(next.getUTCDate() + count);
-  else if (frequency === "Weekly") next.setUTCDate(next.getUTCDate() + count * 7);
+  if (frequency === "Weekly") next.setUTCDate(next.getUTCDate() + count * 7);
+  else if (frequency === "Bi-Weekly") next.setUTCDate(next.getUTCDate() + count * 14);
   else next.setUTCMonth(next.getUTCMonth() + count);
   return next;
 }
 
-const frequencyMeta: Record<Frequency, { label: string; every: string; divisor: number; note: string }> = {
-  Daily: { label: "Daily", every: "every day", divisor: 60, note: "Small amounts, paid each day" },
-  Weekly: { label: "Weekly", every: "every week", divisor: 12, note: "Sync with a weekly pay cycle" },
-  Monthly: { label: "Monthly", every: "every month", divisor: 6, note: "One payment each month" },
+const frequencyMeta: Record<Frequency, { label: string; every: string; note: string }> = {
+  Weekly: { label: "Weekly", every: "every week", note: "Sync with a weekly pay cycle" },
+  "Bi-Weekly": { label: "Bi-Weekly", every: "every two weeks", note: "Matches a fortnightly pay cycle" },
+  Monthly: { label: "Monthly", every: "every month", note: "One payment each month" },
 };
+
+const frequencies: Frequency[] = ["Weekly", "Bi-Weekly", "Monthly"];
 
 function CustomerPaymentExperience() {
   const { token } = Route.useParams();
@@ -92,10 +99,8 @@ function CustomerPaymentExperience() {
   const [mode, setMode] = useState<Mode>("full");
   const [method, setMethod] = useState<Method>("Card");
   const [partialInput, setPartialInput] = useState("");
-  const [frequency, setFrequency] = useState<Frequency>("Weekly");
-  const [startMode, setStartMode] = useState<"today" | "custom">("today");
-  const [customStart, setCustomStart] = useState(demoToday);
-  const [installmentInput, setInstallmentInput] = useState("");
+  const [planTotalInput, setPlanTotalInput] = useState("");
+  const [selectedPlan, setSelectedPlan] = useState<PlanChoice | null>(null);
   const [simulateDecline, setSimulateDecline] = useState(false);
   const [paidAmount, setPaidAmount] = useState(0);
 
@@ -103,18 +108,47 @@ function CustomerPaymentExperience() {
   const partialAmount = Math.min(Math.max(Number(partialInput) || 0, 0), outstanding);
   const remainingAfterPartial = Math.max(outstanding - partialAmount, 0);
 
-  const suggestedInstallment = Math.max(
-    5,
-    Math.round(outstanding / frequencyMeta[frequency].divisor / 5) * 5,
-  );
-  const installment = Math.min(
-    Math.max(Number(installmentInput) || suggestedInstallment, 1),
+  // One-page plan builder: amount first, then calculated plans per frequency.
+  const planTotal = Math.min(
+    Math.max(Number(planTotalInput) || outstanding, 0),
     outstanding,
   );
-  const planPayments = Math.max(1, Math.ceil(outstanding / installment));
-  const startDate = startMode === "today" ? parseISO(demoToday) : parseISO(customStart);
+  const planTier =
+    defaultPlanLimits.find(
+      (r) => planTotal > r.minBalance && (r.maxBalance === null || planTotal <= r.maxBalance),
+    ) ?? defaultPlanLimits[defaultPlanLimits.length - 1]!;
+  const maxPaymentsFor: Record<Frequency, number> = {
+    Weekly: planTier.maxTermMonths * 4,
+    "Bi-Weekly": planTier.maxTermMonths * 2,
+    Monthly: planTier.maxTermMonths,
+  };
+  const preferredPayments: Record<Frequency, number> = { Weekly: 24, "Bi-Weekly": 12, Monthly: 6 };
+
+  function planFor(frequency: Frequency, suggested: boolean): PlanChoice {
+    const cap = maxPaymentsFor[frequency];
+    let payments = suggested ? cap : Math.min(preferredPayments[frequency], cap);
+    let installment = Math.ceil(planTotal / payments);
+    if (installment < 5) {
+      payments = Math.max(1, Math.floor(planTotal / 5));
+      installment = Math.ceil(planTotal / payments);
+    }
+    return { frequency, payments, installment, suggested };
+  }
+
+  // Best practice: spread the balance over the longest term the client's limits allow.
+  const suggestedPlan = planFor("Monthly", true);
+  const planCards: PlanChoice[] = [
+    suggestedPlan,
+    planFor("Bi-Weekly", false),
+    planFor("Weekly", false),
+  ];
+  const activePlan = selectedPlan ?? suggestedPlan;
+
+  const startDate = parseISO(demoToday);
   const firstPaymentDate = formatDate(startDate);
-  const finalPaymentDate = formatDate(addIntervals(startDate, frequency, planPayments - 1));
+  const finalPaymentDate = formatDate(
+    addIntervals(startDate, activePlan.frequency, activePlan.payments - 1),
+  );
   const amountToPay = mode === "partial" ? partialAmount : outstanding;
   const firstName = account.customer.split(" ")[0];
 
@@ -195,7 +229,7 @@ function CustomerPaymentExperience() {
               <button className={outlineBtn} onClick={() => setStep("partial")}>
                 Make a Partial Payment
               </button>
-              <button className={outlineBtn} onClick={() => setStep("plan-frequency")}>
+              <button className={outlineBtn} onClick={() => setStep("plan")}>
                 Set Up a Payment Plan
               </button>
             </div>
@@ -248,109 +282,92 @@ function CustomerPaymentExperience() {
           </StepCard>
         )}
 
-        {step === "plan-frequency" && (
-          <StepCard title="Select how often you would like to pay" onBack={() => setStep("options")}>
-            <p className="text-[13px] leading-relaxed text-muted-foreground">
-              Tip: sync your payment plan to your pay cycle to stay on top of your balance.
-            </p>
-            <div className="space-y-2.5">
-              {(["Daily", "Weekly", "Monthly"] as Frequency[]).map((option) => (
-                <button
-                  key={option}
-                  onClick={() => {
-                    setFrequency(option);
-                    setInstallmentInput("");
-                    setStep("plan-schedule");
-                  }}
-                  aria-pressed={frequency === option}
-                  className={cn(
-                    "w-full rounded-lg border px-4 py-3 text-left transition-colors",
-                    frequency === option
-                      ? "border-foreground bg-card"
-                      : "border-border bg-card hover:bg-surface",
-                  )}
-                >
-                  <p className="text-[14px] font-semibold text-foreground">
-                    {frequencyMeta[option].label}
-                  </p>
-                  <p className="mt-0.5 text-[13px] text-muted-foreground">
-                    {frequencyMeta[option].note}
-                  </p>
-                </button>
-              ))}
-            </div>
-            <p className="text-[12px] leading-relaxed text-muted-foreground">{planIllustrativeNote}</p>
-          </StepCard>
-        )}
-
-        {step === "plan-schedule" && (
-          <StepCard title="Schedule your payment plan" onBack={() => setStep("plan-frequency")}>
-            <p className="text-[13px] leading-relaxed text-muted-foreground">
-              Select when you would like your {frequencyMeta[frequency].label.toLowerCase()} payments
-              to start.
-            </p>
-            <button
-              className={accentBtn}
-              onClick={() => {
-                setStartMode("today");
-                setCustomStart(demoToday);
-                setStep("plan-amount");
-              }}
-            >
-              Start today
-            </button>
-            <div className="space-y-2">
-              <label htmlFor="plan-start" className="block text-[13px] font-medium text-foreground">
-                Or pick a custom start date
-              </label>
-              <input
-                id="plan-start"
-                type="date"
-                value={customStart}
-                min={demoToday}
-                onChange={(e) => {
-                  setCustomStart(e.target.value || demoToday);
-                  setStartMode("custom");
-                }}
-                className="w-full rounded-lg border border-border-strong bg-card px-3 py-2.5 text-[15px] text-foreground outline-none"
-              />
-              <button className={outlineBtn} onClick={() => setStep("plan-amount")}>
-                Continue with {formatDate(parseISO(customStart))}
-              </button>
-            </div>
-          </StepCard>
-        )}
-
-        {step === "plan-amount" && (
-          <StepCard title="Set the instalment amount" onBack={() => setStep("plan-schedule")}>
+        {step === "plan" && (
+          <StepCard title="Set up a payment plan" onBack={() => setStep("options")}>
             <Row label="Outstanding Balance" value={formatCurrency(outstanding)} />
             <div>
               <label
-                htmlFor="installment-amount"
+                htmlFor="plan-total"
                 className="mb-1.5 block text-[13px] font-medium text-foreground"
               >
-                Enter the regular amount you would like to pay {frequencyMeta[frequency].every}
+                Amount you would like to pay off
               </label>
               <div className="flex items-center gap-2 rounded-lg border border-border-strong bg-card px-3 py-2.5">
                 <span className="text-[15px] text-muted-foreground">$</span>
                 <input
-                  id="installment-amount"
+                  id="plan-total"
                   inputMode="decimal"
-                  value={installmentInput}
-                  onChange={(e) => setInstallmentInput(e.target.value.replace(/[^0-9.]/g, ""))}
-                  placeholder={String(suggestedInstallment)}
+                  value={planTotalInput}
+                  onChange={(e) => {
+                    setPlanTotalInput(e.target.value.replace(/[^0-9.]/g, ""));
+                    setSelectedPlan(null);
+                  }}
+                  placeholder={String(outstanding)}
                   className="tabular w-full bg-transparent text-[15px] text-foreground outline-none"
                 />
               </div>
               <p className="mt-1.5 text-[12px] text-muted-foreground">
-                Suggested: {formatCurrency(suggestedInstallment)} {frequencyMeta[frequency].every}
+                Plans are available for balances of {formatCurrency(100)} or more.
               </p>
             </div>
-            <Row label="Number of Payments" value={String(planPayments)} />
-            <Row label="First Payment" value={firstPaymentDate} />
-            <Row label="Final Payment" value={finalPaymentDate} />
+
+            <div>
+              <p className="mb-1.5 text-[13px] font-medium text-foreground">
+                Choose a plan below — everything is calculated for you
+              </p>
+              <div className="space-y-2.5">
+                {planCards.map((card) => {
+                  const selected =
+                    activePlan.frequency === card.frequency &&
+                    activePlan.payments === card.payments;
+                  const first = formatDate(startDate);
+                  const final = formatDate(
+                    addIntervals(startDate, card.frequency, card.payments - 1),
+                  );
+                  return (
+                    <button
+                      key={card.frequency}
+                      onClick={() => setSelectedPlan(card)}
+                      aria-pressed={selected}
+                      className={cn(
+                        "w-full rounded-lg border px-4 py-3 text-left transition-colors",
+                        selected
+                          ? "border-foreground bg-card ring-1 ring-foreground/15"
+                          : "border-border bg-card hover:bg-surface",
+                      )}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-[14px] font-semibold text-foreground">
+                          {frequencyMeta[card.frequency].label}
+                        </p>
+                        {card.suggested && (
+                          <span className="rounded-full bg-teal/15 px-2 py-0.5 text-[10.5px] font-semibold text-success">
+                            Suggested plan
+                          </span>
+                        )}
+                      </div>
+                      <p className="tabular mt-1 text-[15px] font-semibold text-foreground">
+                        {formatCurrency(card.installment)}{" "}
+                        <span className="text-[13px] font-normal text-muted-foreground">
+                          {frequencyMeta[card.frequency].every} · {card.payments} payments
+                        </span>
+                      </p>
+                      <p className="mt-1 text-[12px] text-muted-foreground">
+                        First payment {first} · final payment {final} · completes in{" "}
+                        {card.payments} {card.frequency === "Monthly" ? "months" : card.frequency === "Bi-Weekly" ? "fortnights" : "weeks"}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="mt-2 text-[12px] leading-relaxed text-muted-foreground">
+                Our suggested plan follows best practice: smaller monthly payments over the longest
+                term available for this balance. You can pick any other plan instead.
+              </p>
+            </div>
+
             <button className={accentBtn} onClick={() => startReview("plan")}>
-              Continue
+              Continue with the {frequencyMeta[activePlan.frequency].label} plan
             </button>
             <p className="text-[12px] leading-relaxed text-muted-foreground">{planIllustrativeNote}</p>
           </StepCard>
@@ -377,11 +394,11 @@ function CustomerPaymentExperience() {
         )}
 
         {step === "review" && mode === "plan" && (
-          <StepCard title="Payment Plan Review" onBack={() => setStep("plan-amount")}>
-            <Row label="Outstanding Balance" value={formatCurrency(outstanding)} />
-            <Row label="Frequency" value={frequencyMeta[frequency].label} />
-            <Row label="Instalment Amount" value={formatCurrency(installment)} emphasis />
-            <Row label="Number of Payments" value={String(planPayments)} />
+          <StepCard title="Payment Plan Review" onBack={() => setStep("plan")}>
+            <Row label="Plan Total" value={formatCurrency(planTotal)} />
+            <Row label="Frequency" value={frequencyMeta[activePlan.frequency].label} />
+            <Row label="Instalment Amount" value={formatCurrency(activePlan.installment)} emphasis />
+            <Row label="Number of Payments" value={String(activePlan.payments)} />
             <Row label="First Payment" value={firstPaymentDate} />
             <Row label="Final Payment" value={finalPaymentDate} />
             <MethodPicker method={method} setMethod={setMethod} />
@@ -450,10 +467,10 @@ function CustomerPaymentExperience() {
               </p>
             </div>
             <dl className="overflow-hidden rounded-xl border border-border bg-card text-left">
-              <RowPlain label="Plan Amount" value={formatCurrency(outstanding)} />
-              <RowPlain label="Frequency" value={frequencyMeta[frequency].label} />
-              <RowPlain label="Instalment Amount" value={formatCurrency(installment)} />
-              <RowPlain label="Number of Payments" value={String(planPayments)} />
+              <RowPlain label="Plan Total" value={formatCurrency(planTotal)} />
+              <RowPlain label="Frequency" value={frequencyMeta[activePlan.frequency].label} />
+              <RowPlain label="Instalment Amount" value={formatCurrency(activePlan.installment)} />
+              <RowPlain label="Number of Payments" value={String(activePlan.payments)} />
               <RowPlain label="First Payment" value={firstPaymentDate} />
               <RowPlain label="Final Payment" value={finalPaymentDate} />
               <RowPlain label="Payment Method" value={method} last />
@@ -492,9 +509,7 @@ function CustomerPaymentExperience() {
                 onClick={() => {
                   setSimulateDecline(false);
                   setMethod(method === "Card" ? "Bank Account" : "Card");
-                  setStep(
-                    mode === "plan" ? "plan-amount" : mode === "partial" ? "partial" : "full",
-                  );
+                  setStep(mode === "plan" ? "plan" : mode === "partial" ? "partial" : "full");
                 }}
               >
                 Choose Another Payment Method
