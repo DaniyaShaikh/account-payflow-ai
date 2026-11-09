@@ -12,3 +12,4 @@
 - Keep prototype compliance rules, holiday records and immutable audit versions in ComplianceProvider alongside existing session-scoped providers; no production compliance service is implied.
 - Evaluate all inherited mandatory compliance restrictions together with System and Client operational rules before simulated communication execution; client settings may add restrictions but never override mandatory protections.
 - Calculate contact windows from recipient IANA time zones using Intl and real UTC instants so daylight saving transitions preserve local-time restrictions.
+- Reuse client rule selectors in onboarding, configuration, Rules and simulated import; keep operational selections in ClientConfig and never clone another client's configuration for a new import.
