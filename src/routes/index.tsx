@@ -19,6 +19,7 @@ import {
   portfolioByName,
   subClientNamesForClient,
 } from "@/lib/portfolio-data";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
   head: () => ({
