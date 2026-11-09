@@ -135,6 +135,7 @@ function CommunicationFunnel() {
     hashSeed(`${client}|${subClients.join(",")}|${date}|${channel}|${journey}`),
   );
   const showPlacement = channel === "All Channels" || channel === "Email";
+  const [expanded, setExpanded] = useState<string | null>(null);
   const activeParts = [
     client !== "All Clients" ? client : null,
     subClients.length > 0 ? subClients.join(", ") : null,
@@ -214,118 +215,119 @@ function CommunicationFunnel() {
         )}
       </div>
 
-      {/* Connected progression: navy → PayFlow blue → teal at the paid stage. */}
-      <div className="grid gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
-        {rows.map((row, i) => {
-          const top = rows[0]?.volume || 1;
-          const width = Math.max(5, (row.volume / top) * 100);
-          const isPaid = i === rows.length - 1;
-          const isInvalid = row.stage === "Invalid Addresses";
-          const barColor = isPaid
-            ? "bg-teal"
-            : isInvalid
-              ? "bg-warning"
-              : i === 0
-                ? "bg-navy"
-                : "bg-primary";
-          return (
-            <Link
-              key={row.stage}
-              to="/communications"
-              search={{
-                ...(client !== "All Clients" ? { client } : {}),
-                ...(channel !== "All Channels" ? { channel } : {}),
-                ...(journey !== "All Workflows" ? { journey } : {}),
-                ...(stageStatus(row.stage) ? { status: stageStatus(row.stage) } : {}),
-              }}
-              className="group relative block bg-card px-4 py-3.5 transition-colors hover:bg-surface"
-              title={`View communications at "${row.stage}"`}
-            >
-              <div className="flex items-center gap-1.5">
-                <span className="tabular text-[10px] font-semibold text-muted-foreground">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <span
-                  className={
-                    isPaid
-                      ? "text-[11.5px] font-semibold text-success"
-                      : "text-[11.5px] font-semibold text-foreground"
-                  }
-                >
-                  {row.stage}
-                </span>
+      {/* Grouped progression: Total Records and Delivered expand into their breakdowns. */}
+      {(() => {
+        const vol = (st: string) => rows.find((r) => r.stage === st)?.volume ?? 0;
+        const valid = vol("Valid Addresses");
+        const invalid = vol("Invalid Addresses");
+        const total = valid + invalid;
+        const main = [
+          { key: "records", label: "Total Records", volume: total, sub: "records received" },
+          ...rows
+            .filter((r) => !["Valid Addresses", "Invalid Addresses", "Sent"].includes(r.stage))
+            .map((r) => ({ key: r.stage, label: r.stage, volume: r.volume, sub: "" })),
+        ];
+        const pct = (n: number, d: number) => (d ? `${((n / d) * 100).toFixed(1)}%` : "0%");
+        const breakdown =
+          expanded === "records"
+            ? [
+                { label: "Valid Addresses", volume: valid, of: total, tone: "bg-primary" },
+                { label: "Invalid Addresses", volume: invalid, of: total, tone: "bg-warning" },
+                { label: "Sent", volume: vol("Sent"), of: valid, tone: "bg-navy" },
+              ]
+            : expanded === "Delivered"
+              ? placement.map((p) => ({
+                  label: p.label,
+                  volume: p.volume,
+                  of: deliveredVolume,
+                  tone: p.label === "Inbox" ? "bg-teal" : p.label === "Spam" ? "bg-warning" : "bg-primary",
+                }))
+              : null;
+        return (
+          <>
+            <div className="grid gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-3 lg:grid-cols-6">
+              {main.map((m, i) => {
+                const expandable = m.key === "records" || (m.key === "Delivered" && showPlacement);
+                const isOpen = expanded === m.key;
+                const isPaid = i === main.length - 1;
+                const prev = i > 0 ? main[i - 1]!.volume : 0;
+                const body = (
+                  <>
+                    <div className="flex items-center justify-between gap-1.5">
+                      <span className={cn("text-[11.5px] font-semibold", isPaid ? "text-success" : "text-foreground")}>
+                        {m.label}
+                      </span>
+                      {expandable && (
+                        <span className="text-[10.5px] text-muted-foreground">{isOpen ? "▴" : "▾"}</span>
+                      )}
+                    </div>
+                    <p className="tabular mt-2 text-[19px] leading-none font-bold tracking-tight text-foreground">
+                      {formatNumber(m.volume)}
+                    </p>
+                    <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-secondary">
+                      <div
+                        className={cn("h-full rounded-full", isPaid ? "bg-teal" : i === 0 ? "bg-navy" : "bg-primary")}
+                        style={{ width: `${Math.max(5, (m.volume / (total || 1)) * 100)}%` }}
+                      />
+                    </div>
+                    <p className="tabular mt-2 text-[10.5px] text-muted-foreground">
+                      {i === 0 ? m.sub : `${pct(m.volume, prev)} of previous`}
+                    </p>
+                  </>
+                );
+                const cls = cn(
+                  "block bg-card px-4 py-3.5 text-left transition-colors hover:bg-surface",
+                  isOpen && "bg-surface ring-1 ring-inset ring-primary/40",
+                );
+                return expandable ? (
+                  <button key={m.key} type="button" className={cls} onClick={() => setExpanded(isOpen ? null : m.key)}>
+                    {body}
+                  </button>
+                ) : (
+                  <Link
+                    key={m.key}
+                    to="/communications"
+                    search={{
+                      ...(client !== "All Clients" ? { client } : {}),
+                      ...(channel !== "All Channels" ? { channel } : {}),
+                      ...(stageStatus(m.label) ? { status: stageStatus(m.label) } : {}),
+                    }}
+                    className={cls}
+                  >
+                    {body}
+                  </Link>
+                );
+              })}
+            </div>
+            {breakdown && (
+              <div className="mt-3 rounded-lg border border-border bg-surface px-4 py-3">
+                <p className="mb-2.5 text-[11.5px] font-semibold text-foreground">
+                  {expanded === "records" ? "Total Records breakdown" : "Delivered where (email)"}
+                </p>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  {breakdown.map((b) => (
+                    <div key={b.label} className="rounded-md border border-border bg-card px-3 py-2.5">
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span className="text-[11.5px] text-muted-foreground">{b.label}</span>
+                        <span className="tabular text-[10.5px] text-muted-foreground">{pct(b.volume, b.of)}</span>
+                      </div>
+                      <p className="tabular mt-1 text-[16px] font-bold text-foreground">{formatNumber(b.volume)}</p>
+                      <div className="mt-2 h-1 overflow-hidden rounded-full bg-secondary">
+                        <div className={cn("h-full rounded-full", b.tone)} style={{ width: `${b.of ? (b.volume / b.of) * 100 : 0}%` }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {expanded === "Delivered" && (
+                  <p className="mt-2 text-[10.5px] text-muted-foreground">
+                    Placement is reported by the receiving mail provider.
+                  </p>
+                )}
               </div>
-              <p className="tabular mt-2 text-[19px] leading-none font-bold tracking-tight text-foreground">
-                {formatNumber(row.volume)}
-              </p>
-              <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-secondary">
-                <div
-                  className={`h-full rounded-full ${barColor} transition-all group-hover:opacity-80`}
-                  style={{ width: `${width}%` }}
-                />
-              </div>
-              <div className="mt-2 flex items-baseline justify-between gap-2">
-                <span
-                  className={cn(
-                    "tabular text-[11.5px] font-semibold",
-                    isInvalid ? "text-warning" : "text-primary",
-                  )}
-                >
-                  {row.rate === null ? "Start" : `${(row.rate * 100).toFixed(1)}%`}
-                </span>
-                <span className="tabular text-[10.5px] text-muted-foreground">
-                  {row.rate === null
-                    ? "of addresses"
-                    : isInvalid
-                      ? "of valid pool"
-                      : `−${formatNumber(
-                          Math.round(
-                            (rows
-                              .slice(0, i)
-                              .filter((r) => r.stage !== "Invalid Addresses")
-                              .at(-1)?.volume ?? 0) - row.volume,
-                          ),
-                        )}`}
-                </span>
-              </div>
-            </Link>
-          );
-        })}
-      </div>
-
-      {showPlacement && (
-        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-border bg-surface px-4 py-2.5">
-          <span className="text-[11.5px] font-semibold text-foreground">
-            Delivered where (email)
-          </span>
-          {placement.map((p) => (
-            <Link
-              key={p.label}
-              to="/communications"
-              search={{
-                ...(client !== "All Clients" ? { client } : {}),
-                channel: "Email",
-                status: "Delivered",
-              }}
-              className="group flex items-baseline gap-1.5"
-              title={`View emails delivered to ${p.label}`}
-            >
-              <span className="text-[11.5px] text-muted-foreground group-hover:text-foreground">
-                {p.label}
-              </span>
-              <span className="tabular text-[12.5px] font-semibold text-foreground">
-                {formatNumber(p.volume)}
-              </span>
-              <span className="tabular text-[10.5px] text-muted-foreground">
-                ({deliveredVolume ? Math.round((p.volume / deliveredVolume) * 100) : 0}%)
-              </span>
-            </Link>
-          ))}
-          <span className="text-[10.5px] text-muted-foreground">
-            Placement is reported by the receiving mail provider.
-          </span>
-        </div>
-      )}
+            )}
+          </>
+        );
+      })()}
     </Panel>
   );
 }

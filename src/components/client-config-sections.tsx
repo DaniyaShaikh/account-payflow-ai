@@ -488,10 +488,23 @@ export function PaymentOptionsSection({ draft, patchConfig }: SectionProps) {
       <div className="mt-2 divide-y divide-border">
         <ToggleRow
           label="Allow partial payments"
-          description="Customer can enter an amount within the configured limits"
+          description="Customer can pay part of the balance now"
           checked={opts.allowPartial}
           onChange={(v) => patchOpts({ allowPartial: v })}
         />
+        {opts.allowPartial && (
+          <div className="py-3 sm:max-w-xs">
+            <Field label="Minimum partial amount allowed">
+              <TextInput
+                value={String(opts.minPartialAmount)}
+                onChange={(v) =>
+                  patchOpts({ minPartialAmount: Number(v.replace(/[^0-9.]/g, "")) || 0 })
+                }
+                placeholder="25"
+              />
+            </Field>
+          </div>
+        )}
         <ToggleRow
           label="Allow payment plans"
           description="Show instalment schedule options on the payment page"
@@ -507,23 +520,6 @@ export function PaymentOptionsSection({ draft, patchConfig }: SectionProps) {
             })
           }
         />
-      </div>
-
-      <div className="grid gap-4 pt-3 sm:grid-cols-2">
-        <Field label="Minimum partial amount">
-          <TextInput
-            value={String(opts.minPartialAmount)}
-            onChange={(v) => patchOpts({ minPartialAmount: Number(v.replace(/[^0-9.]/g, "")) || 0 })}
-            placeholder="25"
-          />
-        </Field>
-        <Field label="Minimum plan total">
-          <TextInput
-            value={String(opts.minPlanTotal)}
-            onChange={(v) => patchOpts({ minPlanTotal: Number(v.replace(/[^0-9.]/g, "")) || 0 })}
-            placeholder="100"
-          />
-        </Field>
       </div>
 
       {opts.allowPlans && (

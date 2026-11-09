@@ -204,8 +204,6 @@ function CommunicationDetail() {
                   <div>
                     <a
                       href={payLink ?? "#"}
-                      target="_blank"
-                      rel="noreferrer"
                       className={cn(
                         "inline-flex items-center rounded-md px-3.5 py-2 text-[13px] font-semibold",
                         brand.accentClass,
