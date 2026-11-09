@@ -33,6 +33,41 @@ export interface ClientConfig {
   channels: { email: boolean; sms: boolean; whatsapp: boolean };
   governanceRules: string[];
   permissions: string[];
+  paymentOptions: PaymentOptions;
+}
+
+/** Balance tier that limits how long a payment plan may run. */
+export interface PlanLimitRule {
+  id: string;
+  minBalance: number;
+  maxBalance: number | null;
+  maxTermMonths: number;
+}
+
+export interface PaymentOptions {
+  allowPartial: boolean;
+  allowPlans: boolean;
+  minPartialAmount: number;
+  minPlanTotal: number;
+  planLimits: PlanLimitRule[];
+}
+
+/** Best-practice limits auto-created when payment plans are switched on. */
+export const defaultPlanLimits: PlanLimitRule[] = [
+  { id: "pl-1", minBalance: 0, maxBalance: 500, maxTermMonths: 3 },
+  { id: "pl-2", minBalance: 500, maxBalance: 1000, maxTermMonths: 5 },
+  { id: "pl-3", minBalance: 1000, maxBalance: 2000, maxTermMonths: 6 },
+  { id: "pl-4", minBalance: 2000, maxBalance: null, maxTermMonths: 12 },
+];
+
+export function defaultPaymentOptions(): PaymentOptions {
+  return {
+    allowPartial: true,
+    allowPlans: true,
+    minPartialAmount: 25,
+    minPlanTotal: 100,
+    planLimits: defaultPlanLimits.map((r) => ({ ...r })),
+  };
 }
 
 export interface Client {
@@ -162,6 +197,7 @@ export function makeConfig(overrides: Partial<ClientConfig> = {}): ClientConfig 
     channels: { email: true, sms: true, whatsapp: false },
     governanceRules: [],
     permissions: [...defaultPermissions],
+    paymentOptions: defaultPaymentOptions(),
     ...overrides,
   };
 }
