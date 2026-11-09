@@ -7,6 +7,8 @@ import {
   Route as RouteIcon,
   MessageSquare,
   Scale,
+  ShieldCheck,
+  History,
   Users,
   Plug,
   ChevronsUpDown,
@@ -71,7 +73,11 @@ const navGroups = [
   },
   {
     label: "Governance",
-    items: [{ to: "/rules", label: "Rules", icon: Scale }],
+    items: [
+      { to: "/rules", label: "Rules (System+Client)", icon: Scale },
+      { to: "/compliance", label: "Compliance Rules", icon: ShieldCheck },
+      { to: "/compliance-audit", label: "Compliance Audit Log", icon: History, adminOnly: true },
+    ],
   },
   {
     label: "Administration",

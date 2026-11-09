@@ -20,6 +20,8 @@ export interface FieldMapping {
 }
 
 export interface ClientConfig {
+  jurisdiction?: import("./compliance-data").Jurisdiction;
+  disabledComplianceRules?: string[];
   code: string;
   clientType: ClientType;
   useCase: string;
@@ -198,6 +200,8 @@ export function makeConfig(overrides: Partial<ClientConfig> = {}): ClientConfig 
     governanceRules: [],
     permissions: [...defaultPermissions],
     paymentOptions: defaultPaymentOptions(),
+    jurisdiction: { country: "Canada", state: "Ontario", region: "", postal: "", timezone: "America/Toronto" },
+    disabledComplianceRules: [],
     ...overrides,
   };
 }
@@ -218,6 +222,7 @@ export const clients: Client[] = [
     attention: "12 escalated cases awaiting supervisor decision",
     config: makeConfig({
       code: "PP-CLT-001",
+      jurisdiction: { country: "United States", state: "New York", region: "", postal: "", timezone: "America/New_York" },
       clientType: "Third Party",
       dataSource: "CRM",
       connection: "Connected",
