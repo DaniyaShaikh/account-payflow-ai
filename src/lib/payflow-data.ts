@@ -22,6 +22,7 @@ export interface FieldMapping {
 export interface ClientConfig {
   jurisdiction?: import("./compliance-data").Jurisdiction;
   disabledComplianceRules?: string[];
+  selectedOperationalRules?: string[];
   code: string;
   clientType: ClientType;
   useCase: string;

@@ -7,7 +7,7 @@ import { useCompliance } from "@/lib/compliance-context";
 import { useRole } from "@/lib/role-context";
 import { Plus, Trash2 } from "lucide-react";
 
-export function ComplianceEditor({ initial }: { initial: ComplianceRule }) {
+export function ComplianceEditor({ initial, onSaved }: { initial: ComplianceRule; onSaved?: (id: string) => void }) {
   const [draft, setDraft] = useState(initial);
   const [reason, setReason] = useState("");
   const [error, setError] = useState("");
@@ -21,7 +21,7 @@ export function ComplianceEditor({ initial }: { initial: ComplianceRule }) {
     if (draft.settings.start >= draft.settings.end || draft.settings.weekendStart >= draft.settings.weekendEnd) { setError("The end of each contact window must follow its start."); return; }
     if (draft.conditions.some(c => c.field === "Contact Attempts" && (!Number.isFinite(Number(c.value)) || Number(c.value) < 0 || c.period <= 0))) { setError("Contact limits must be non-negative numbers with a positive rolling period."); return; }
     if (draft.clientId && draft.action === "Allow") { setError("Client-specific rules may only add restrictions, not bypass inherited requirements."); return; }
-    const id = saveRule(draft, reason); if (id) navigate({ to: "/compliance/$ruleId", params: { ruleId: id } });
+    const id = saveRule(draft, reason); if (id) { if (onSaved) onSaved(id); else navigate({ to: "/compliance/$ruleId", params: { ruleId: id } }); }
   };
   return <fieldset disabled={!isAdmin} className="space-y-7">
     <div><SectionHeading title="Rule identification" /><div className="grid gap-3 sm:grid-cols-2">

@@ -1,5 +1,10 @@
 # Roadmap
 
+## Client rule selection
+- [ ] Share compliance and operational rule selection across onboarding and Client Rules.
+- [ ] Preserve existing client selections during file import; configure new clients independently.
+- [ ] Verify matching defaults, editable selections, mandatory protection and connected screens.
+
 - [x] Develop a distinctive modernization that preserves the current PayFlow design character.
 - [x] Add a user profile page with photo, theme, password, and relevant account details.
 - [x] Refine shared visual hierarchy, typography, surfaces, and navigation without changing behavior.
