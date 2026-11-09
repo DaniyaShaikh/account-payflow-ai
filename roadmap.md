@@ -8,7 +8,7 @@
 - [x] Verify key desktop and mobile screens.
 
 ## Compliance enhancement
-- [ ] Add compliance catalogue, structured editor, testing, holiday views and audit log.
-- [ ] Connect jurisdiction-based client inheritance and mandatory-rule protection.
-- [ ] Connect communication previews to unified compliance and operational evaluation.
-- [ ] Test enforcement and verify connected prototype screens.
+- [x] Add compliance catalogue, structured editor, testing, holiday views and audit log.
+- [x] Connect jurisdiction-based client inheritance and mandatory-rule protection.
+- [x] Connect communication previews to unified compliance and operational evaluation.
+- [x] Test enforcement and verify connected prototype screens (17 tests; creation, inheritance, locked mandatory rules, blocking and audit verified).
