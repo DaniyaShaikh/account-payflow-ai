@@ -2,6 +2,7 @@ import { useContext, useMemo, useState, type ReactNode } from "react";
 import { createStableContext } from "./stable-context";
 import { useRole } from "./role-context";
 import { useRules } from "./rules-context";
+import { operationalRuleSelected } from "./client-rule-selection";
 import { complianceSeed, holidaySeed, evaluateRules, type ComplianceRule, type ComplianceAudit, type Holiday, type EvaluationInput, type EvaluationResult } from "./compliance-data";
 
 interface ComplianceValue {
@@ -44,7 +45,8 @@ export function ComplianceProvider({ children }: { children: ReactNode }) {
       evaluate: (input, shouldRecord = false) => {
         if (!visibleClientIds.includes(input.clientId)) return { result: "Review Required", matches: [{ id: "ACCESS", name: "Client access", reason: "Client not assigned", action: "Require Approval", layer: "Access" }], evaluated: [] };
         const client = allClients.find(c => c.id === input.clientId);
-        const result = evaluateRules(rules, allRules, holidays, input, client?.config.disabledComplianceRules ?? []);
+        const selectedRules = client ? allRules.filter(r => (r.type === "System Rule" || r.clientId === input.clientId) && operationalRuleSelected(r, input.clientId, client.config)).map(r => r.type === "System Rule" ? { ...r, appliedTo: [...r.appliedTo, input.clientId] } : r) : allRules;
+        const result = evaluateRules(rules, selectedRules, holidays, input, client?.config.disabledComplianceRules ?? []);
         if (shouldRecord) record({ ruleId: "EVALUATION", ruleName: `Communication · ${client?.name ?? input.clientId}`, event: `Execution check: ${result.result}`, reason: result.matches.map(m => `${m.id}: ${m.reason}`).join("; ") || "All applicable checks passed", before: null, after: { clientId: input.clientId, channel: input.channel, at: input.at, jurisdiction: input.jurisdiction, ...result }, approval: result.result });
         return result;
       },

@@ -13,6 +13,11 @@ import {
 } from "@/components/payflow-ui";
 import { cn } from "@/lib/utils";
 import { formatCurrency, formatNumber } from "@/lib/payflow-data";
+import type { ClientConfig } from "@/lib/payflow-data";
+import { importClientConfig } from "@/lib/client-rule-selection";
+import { ClientCompliance } from "./client-compliance";
+import { ClientOperationalRules } from "./client-operational-rules";
+import { SelectInput } from "./payflow-ui";
 import { seedPortfolios } from "@/lib/portfolio-data";
 import { useRole } from "@/lib/role-context";
 import {
@@ -348,7 +353,10 @@ function nowStamp() {
 
 export function ImportFlow({ kind }: { kind: ImportKind }) {
   const navigate = useNavigate();
-  const { allClients, addClient, userName } = useRole();
+  const { allClients, addClient, updateClient, userName } = useRole();
+  const [ruleClient, setRuleClient] = useState(clientImportRecords[0]?.clientName ?? "");
+  const [importConfigs, setImportConfigs] = useState<Record<string, ClientConfig>>(() => Object.fromEntries(clientImportRecords.filter(r => r.clientId).map(r => [r.clientName, importClientConfig(allClients.find(c => c.name === r.clientName)?.config, r.clientId)])));
+  const importId = (name: string) => allClients.find(c => c.name === name)?.id ?? `imp-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
   const [stage, setStage] = useState<Stage>("upload");
   const [file, setFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
@@ -431,6 +439,10 @@ export function ImportFlow({ kind }: { kind: ImportKind }) {
   function applyClientImport() {
     const template = allClients[0];
     if (!template) return;
+    Object.entries(importConfigs).forEach(([name, config]) => {
+      const existingClient = allClients.find(c => c.name === name);
+      if (existingClient) updateClient(existingClient.id, { config });
+    });
     const created = clientImportRecords.filter((r) => r.action === "Create");
     const existing = new Set(allClients.map((c) => c.name));
     const byClient = new Map<string, ImportRecord[]>();
@@ -453,14 +465,16 @@ export function ImportFlow({ kind }: { kind: ImportKind }) {
           reviewsPending: 0,
           supervisors: [],
           status: "Onboarding",
-          config: { ...template.config, code: rows[0]!.clientId },
+          config: importConfigs[name] ?? importClientConfig(undefined, rows[0]?.clientId ?? ""),
         });
       }
+      if (!clientId) return;
+      const resolvedClientId = clientId;
       rows.forEach((r, i) => {
         if (seedPortfolios.some((p) => p.name === r.subClientName)) return;
         seedPortfolios.push({
           id: `imp-${r.subClientId.toLowerCase()}`,
-          clientId: clientId!,
+          clientId: resolvedClientId,
           name: r.subClientName,
           code: r.subClientId,
           status: "Onboarding",
@@ -562,6 +576,7 @@ export function ImportFlow({ kind }: { kind: ImportKind }) {
           ) : (
             <AccountPreviewTable records={accountImportRecords} />
           )}
+          {isClient && importConfigs[ruleClient] && <Panel title="Client rule selections"><div className="mb-5 max-w-sm"><SelectInput value={ruleClient} options={Object.keys(importConfigs)} onChange={setRuleClient} /></div><div className="space-y-8"><ClientCompliance config={importConfigs[ruleClient]} clientId={importId(ruleClient)} patch={p => setImportConfigs(prev => ({ ...prev, [ruleClient]: { ...prev[ruleClient], ...p } as ClientConfig }))} /><ClientOperationalRules config={importConfigs[ruleClient]} clientId={importId(ruleClient)} patch={p => setImportConfigs(prev => ({ ...prev, [ruleClient]: { ...prev[ruleClient], ...p } as ClientConfig }))} /></div></Panel>}
           <div className="flex flex-wrap gap-2">
             <Btn variant="primary" onClick={() => setStage("processing")}>
               {isClient ? "Process Import" : "Process Daily File"}

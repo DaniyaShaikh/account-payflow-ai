@@ -12,7 +12,6 @@ import {
 } from "@/components/payflow-ui";
 import {
   payflowFields,
-  governanceRuleLibrary,
   defaultPaymentOptions,
   defaultPlanLimits,
   formatCurrency,
@@ -27,8 +26,11 @@ import {
 import { useUsers } from "@/lib/users-context";
 import { permissionGroups } from "@/lib/users-data";
 import { cn } from "@/lib/utils";
+import { ClientCompliance } from "./client-compliance";
+import { ClientOperationalRules } from "./client-operational-rules";
 
 export interface ClientDraft {
+  clientId?: string;
   name: string;
   industry: string;
   aiMode: AiMode;
@@ -375,14 +377,6 @@ export function BrandingSection({ draft, patchConfig }: SectionProps) {
 /* ---------------- AI & governance ---------------- */
 
 export function AiGovernanceSection({ draft, patch, patchConfig }: SectionProps) {
-  const rules = draft.config.governanceRules;
-
-  const toggleRule = (rule: string) =>
-    patchConfig({
-      governanceRules: rules.includes(rule)
-        ? rules.filter((r) => r !== rule)
-        : [...rules, rule],
-    });
 
   return (
     <div className="space-y-4">
@@ -407,42 +401,9 @@ export function AiGovernanceSection({ draft, patch, patchConfig }: SectionProps)
         />
       </div>
 
-      {draft.aiMode === "Supervised AI" && (
-        <div className="rounded-lg border border-border bg-surface p-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-[13px] font-semibold text-foreground">Governance Rules</p>
-            <Btn variant="ghost">+ Create Rule</Btn>
-          </div>
-          <p className="mt-0.5 text-[11px] text-muted-foreground">
-            Select existing rules. Full rule authoring arrives with the Rule Builder.
-          </p>
-          <div className="mt-3 space-y-1">
-            {governanceRuleLibrary.map((rule) => (
-              <label
-                key={rule}
-                className="flex cursor-pointer items-center gap-2.5 rounded-md px-2 py-1.5 hover:bg-card"
-              >
-                <input
-                  type="checkbox"
-                  checked={rules.includes(rule)}
-                  onChange={() => toggleRule(rule)}
-                  className="size-3.5 accent-[var(--primary)]"
-                />
-                <span className="text-[13px] text-foreground">{rule}</span>
-              </label>
-            ))}
-          </div>
-          {rules.length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-1.5 border-t border-border pt-3">
-              {rules.map((r) => (
-                <StatusPill key={r} tone="info">
-                  {r}
-                </StatusPill>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+      <ClientCompliance config={draft.config} patch={patchConfig} clientId={draft.clientId ?? ""} />
+      <ClientOperationalRules config={draft.config} patch={patchConfig} clientId={draft.clientId ?? ""} />
+
     </div>
   );
 }
