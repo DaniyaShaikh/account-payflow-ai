@@ -99,10 +99,8 @@ function CustomerPaymentExperience() {
   const [mode, setMode] = useState<Mode>("full");
   const [method, setMethod] = useState<Method>("Card");
   const [partialInput, setPartialInput] = useState("");
-  const [frequency, setFrequency] = useState<Frequency>("Weekly");
-  const [startMode, setStartMode] = useState<"today" | "custom">("today");
-  const [customStart, setCustomStart] = useState(demoToday);
-  const [installmentInput, setInstallmentInput] = useState("");
+  const [planTotalInput, setPlanTotalInput] = useState("");
+  const [selectedPlan, setSelectedPlan] = useState<PlanChoice | null>(null);
   const [simulateDecline, setSimulateDecline] = useState(false);
   const [paidAmount, setPaidAmount] = useState(0);
 
@@ -110,18 +108,47 @@ function CustomerPaymentExperience() {
   const partialAmount = Math.min(Math.max(Number(partialInput) || 0, 0), outstanding);
   const remainingAfterPartial = Math.max(outstanding - partialAmount, 0);
 
-  const suggestedInstallment = Math.max(
-    5,
-    Math.round(outstanding / frequencyMeta[frequency].divisor / 5) * 5,
-  );
-  const installment = Math.min(
-    Math.max(Number(installmentInput) || suggestedInstallment, 1),
+  // One-page plan builder: amount first, then calculated plans per frequency.
+  const planTotal = Math.min(
+    Math.max(Number(planTotalInput) || outstanding, 0),
     outstanding,
   );
-  const planPayments = Math.max(1, Math.ceil(outstanding / installment));
-  const startDate = startMode === "today" ? parseISO(demoToday) : parseISO(customStart);
+  const planTier =
+    defaultPlanLimits.find(
+      (r) => planTotal > r.minBalance && (r.maxBalance === null || planTotal <= r.maxBalance),
+    ) ?? defaultPlanLimits[defaultPlanLimits.length - 1]!;
+  const maxPaymentsFor: Record<Frequency, number> = {
+    Weekly: planTier.maxTermMonths * 4,
+    "Bi-Weekly": planTier.maxTermMonths * 2,
+    Monthly: planTier.maxTermMonths,
+  };
+  const preferredPayments: Record<Frequency, number> = { Weekly: 12, "Bi-Weekly": 12, Monthly: 6 };
+
+  function planFor(frequency: Frequency, suggested: boolean): PlanChoice {
+    const cap = maxPaymentsFor[frequency];
+    let payments = suggested ? cap : Math.min(preferredPayments[frequency], cap);
+    let installment = Math.ceil(planTotal / payments);
+    if (installment < 5) {
+      payments = Math.max(1, Math.floor(planTotal / 5));
+      installment = Math.ceil(planTotal / payments);
+    }
+    return { frequency, payments, installment, suggested };
+  }
+
+  // Best practice: spread the balance over the longest term the client's limits allow.
+  const suggestedPlan = planFor("Monthly", true);
+  const planCards: PlanChoice[] = [
+    suggestedPlan,
+    planFor("Bi-Weekly", false),
+    planFor("Weekly", false),
+  ];
+  const activePlan = selectedPlan ?? suggestedPlan;
+
+  const startDate = parseISO(demoToday);
   const firstPaymentDate = formatDate(startDate);
-  const finalPaymentDate = formatDate(addIntervals(startDate, frequency, planPayments - 1));
+  const finalPaymentDate = formatDate(
+    addIntervals(startDate, activePlan.frequency, activePlan.payments - 1),
+  );
   const amountToPay = mode === "partial" ? partialAmount : outstanding;
   const firstName = account.customer.split(" ")[0];
 
