@@ -122,7 +122,7 @@ function CustomerPaymentExperience() {
     "Bi-Weekly": planTier.maxTermMonths * 2,
     Monthly: planTier.maxTermMonths,
   };
-  const preferredPayments: Record<Frequency, number> = { Weekly: 12, "Bi-Weekly": 12, Monthly: 6 };
+  const preferredPayments: Record<Frequency, number> = { Weekly: 24, "Bi-Weekly": 12, Monthly: 6 };
 
   function planFor(frequency: Frequency, suggested: boolean): PlanChoice {
     const cap = maxPaymentsFor[frequency];
