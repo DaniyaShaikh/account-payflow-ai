@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ActivateRouteImport } from './routes/activate'
+import { Route as ComplianceAuditRouteImport } from './routes/compliance-audit'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ProductsRouteImport } from './routes/products'
 import { Route as ProfileRouteImport } from './routes/profile'
@@ -24,6 +25,9 @@ import { Route as ClientsImportRouteImport } from './routes/clients.import'
 import { Route as ClientsNewRouteImport } from './routes/clients.new'
 import { Route as CommunicationsIndexRouteImport } from './routes/communications.index'
 import { Route as CommunicationsCommunicationIdRouteImport } from './routes/communications.$communicationId'
+import { Route as ComplianceIndexRouteImport } from './routes/compliance.index'
+import { Route as ComplianceRuleIdRouteImport } from './routes/compliance.$ruleId'
+import { Route as ComplianceNewRouteImport } from './routes/compliance.new'
 import { Route as HumanReviewIndexRouteImport } from './routes/human-review.index'
 import { Route as HumanReviewReviewIdRouteImport } from './routes/human-review.$reviewId'
 import { Route as ImportsIndexRouteImport } from './routes/imports.index'
@@ -56,6 +60,11 @@ const IndexRoute = IndexRouteImport.update({
 const ActivateRoute = ActivateRouteImport.update({
   id: '/activate',
   path: '/activate',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComplianceAuditRoute = ComplianceAuditRouteImport.update({
+  id: '/compliance-audit',
+  path: '/compliance-audit',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -124,6 +133,21 @@ const CommunicationsCommunicationIdRoute =
     path: '/communications/$communicationId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ComplianceIndexRoute = ComplianceIndexRouteImport.update({
+  id: '/compliance/',
+  path: '/compliance/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComplianceRuleIdRoute = ComplianceRuleIdRouteImport.update({
+  id: '/compliance/$ruleId',
+  path: '/compliance/$ruleId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComplianceNewRoute = ComplianceNewRouteImport.update({
+  id: '/compliance/new',
+  path: '/compliance/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HumanReviewIndexRoute = HumanReviewIndexRouteImport.update({
   id: '/human-review/',
   path: '/human-review/',
@@ -245,6 +269,7 @@ const PlatformProductsProductIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/activate': typeof ActivateRoute
+  '/compliance-audit': typeof ComplianceAuditRoute
   '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
   '/profile': typeof ProfileRoute
@@ -255,6 +280,8 @@ export interface FileRoutesByFullPath {
   '/clients/import': typeof ClientsImportRoute
   '/clients/new': typeof ClientsNewRoute
   '/communications/$communicationId': typeof CommunicationsCommunicationIdRoute
+  '/compliance/$ruleId': typeof ComplianceRuleIdRoute
+  '/compliance/new': typeof ComplianceNewRoute
   '/human-review/$reviewId': typeof HumanReviewReviewIdRoute
   '/imports/$importId': typeof ImportsImportIdRoute
   '/integrations/$integrationId': typeof IntegrationsIntegrationIdRoute
@@ -271,6 +298,7 @@ export interface FileRoutesByFullPath {
   '/accounts/': typeof AccountsIndexRoute
   '/clients/': typeof ClientsIndexRoute
   '/communications/': typeof CommunicationsIndexRoute
+  '/compliance/': typeof ComplianceIndexRoute
   '/human-review/': typeof HumanReviewIndexRoute
   '/imports/': typeof ImportsIndexRoute
   '/integrations/': typeof IntegrationsIndexRoute
@@ -285,6 +313,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/activate': typeof ActivateRoute
+  '/compliance-audit': typeof ComplianceAuditRoute
   '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
   '/profile': typeof ProfileRoute
@@ -295,6 +324,8 @@ export interface FileRoutesByTo {
   '/clients/import': typeof ClientsImportRoute
   '/clients/new': typeof ClientsNewRoute
   '/communications/$communicationId': typeof CommunicationsCommunicationIdRoute
+  '/compliance/$ruleId': typeof ComplianceRuleIdRoute
+  '/compliance/new': typeof ComplianceNewRoute
   '/human-review/$reviewId': typeof HumanReviewReviewIdRoute
   '/imports/$importId': typeof ImportsImportIdRoute
   '/integrations/$integrationId': typeof IntegrationsIntegrationIdRoute
@@ -311,6 +342,7 @@ export interface FileRoutesByTo {
   '/accounts': typeof AccountsIndexRoute
   '/clients': typeof ClientsIndexRoute
   '/communications': typeof CommunicationsIndexRoute
+  '/compliance': typeof ComplianceIndexRoute
   '/human-review': typeof HumanReviewIndexRoute
   '/imports': typeof ImportsIndexRoute
   '/integrations': typeof IntegrationsIndexRoute
@@ -326,6 +358,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/activate': typeof ActivateRoute
+  '/compliance-audit': typeof ComplianceAuditRoute
   '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
   '/profile': typeof ProfileRoute
@@ -336,6 +369,8 @@ export interface FileRoutesById {
   '/clients/import': typeof ClientsImportRoute
   '/clients/new': typeof ClientsNewRoute
   '/communications/$communicationId': typeof CommunicationsCommunicationIdRoute
+  '/compliance/$ruleId': typeof ComplianceRuleIdRoute
+  '/compliance/new': typeof ComplianceNewRoute
   '/human-review/$reviewId': typeof HumanReviewReviewIdRoute
   '/imports/$importId': typeof ImportsImportIdRoute
   '/integrations/$integrationId': typeof IntegrationsIntegrationIdRoute
@@ -352,6 +387,7 @@ export interface FileRoutesById {
   '/accounts/': typeof AccountsIndexRoute
   '/clients/': typeof ClientsIndexRoute
   '/communications/': typeof CommunicationsIndexRoute
+  '/compliance/': typeof ComplianceIndexRoute
   '/human-review/': typeof HumanReviewIndexRoute
   '/imports/': typeof ImportsIndexRoute
   '/integrations/': typeof IntegrationsIndexRoute
@@ -368,6 +404,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/activate'
+    | '/compliance-audit'
     | '/login'
     | '/products'
     | '/profile'
@@ -378,6 +415,8 @@ export interface FileRouteTypes {
     | '/clients/import'
     | '/clients/new'
     | '/communications/$communicationId'
+    | '/compliance/$ruleId'
+    | '/compliance/new'
     | '/human-review/$reviewId'
     | '/imports/$importId'
     | '/integrations/$integrationId'
@@ -394,6 +433,7 @@ export interface FileRouteTypes {
     | '/accounts/'
     | '/clients/'
     | '/communications/'
+    | '/compliance/'
     | '/human-review/'
     | '/imports/'
     | '/integrations/'
@@ -408,6 +448,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/activate'
+    | '/compliance-audit'
     | '/login'
     | '/products'
     | '/profile'
@@ -418,6 +459,8 @@ export interface FileRouteTypes {
     | '/clients/import'
     | '/clients/new'
     | '/communications/$communicationId'
+    | '/compliance/$ruleId'
+    | '/compliance/new'
     | '/human-review/$reviewId'
     | '/imports/$importId'
     | '/integrations/$integrationId'
@@ -434,6 +477,7 @@ export interface FileRouteTypes {
     | '/accounts'
     | '/clients'
     | '/communications'
+    | '/compliance'
     | '/human-review'
     | '/imports'
     | '/integrations'
@@ -448,6 +492,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/activate'
+    | '/compliance-audit'
     | '/login'
     | '/products'
     | '/profile'
@@ -458,6 +503,8 @@ export interface FileRouteTypes {
     | '/clients/import'
     | '/clients/new'
     | '/communications/$communicationId'
+    | '/compliance/$ruleId'
+    | '/compliance/new'
     | '/human-review/$reviewId'
     | '/imports/$importId'
     | '/integrations/$integrationId'
@@ -474,6 +521,7 @@ export interface FileRouteTypes {
     | '/accounts/'
     | '/clients/'
     | '/communications/'
+    | '/compliance/'
     | '/human-review/'
     | '/imports/'
     | '/integrations/'
@@ -489,6 +537,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ActivateRoute: typeof ActivateRoute
+  ComplianceAuditRoute: typeof ComplianceAuditRoute
   LoginRoute: typeof LoginRoute
   ProductsRoute: typeof ProductsRoute
   ProfileRoute: typeof ProfileRoute
@@ -499,6 +548,8 @@ export interface RootRouteChildren {
   ClientsImportRoute: typeof ClientsImportRoute
   ClientsNewRoute: typeof ClientsNewRoute
   CommunicationsCommunicationIdRoute: typeof CommunicationsCommunicationIdRoute
+  ComplianceRuleIdRoute: typeof ComplianceRuleIdRoute
+  ComplianceNewRoute: typeof ComplianceNewRoute
   HumanReviewReviewIdRoute: typeof HumanReviewReviewIdRoute
   ImportsImportIdRoute: typeof ImportsImportIdRoute
   IntegrationsIntegrationIdRoute: typeof IntegrationsIntegrationIdRoute
@@ -515,6 +566,7 @@ export interface RootRouteChildren {
   AccountsIndexRoute: typeof AccountsIndexRoute
   ClientsIndexRoute: typeof ClientsIndexRoute
   CommunicationsIndexRoute: typeof CommunicationsIndexRoute
+  ComplianceIndexRoute: typeof ComplianceIndexRoute
   HumanReviewIndexRoute: typeof HumanReviewIndexRoute
   ImportsIndexRoute: typeof ImportsIndexRoute
   IntegrationsIndexRoute: typeof IntegrationsIndexRoute
@@ -541,6 +593,13 @@ declare module '@tanstack/react-router' {
       path: '/activate'
       fullPath: '/activate'
       preLoaderRoute: typeof ActivateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/compliance-audit': {
+      id: '/compliance-audit'
+      path: '/compliance-audit'
+      fullPath: '/compliance-audit'
+      preLoaderRoute: typeof ComplianceAuditRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -632,6 +691,27 @@ declare module '@tanstack/react-router' {
       path: '/communications/$communicationId'
       fullPath: '/communications/$communicationId'
       preLoaderRoute: typeof CommunicationsCommunicationIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/compliance/': {
+      id: '/compliance/'
+      path: '/compliance'
+      fullPath: '/compliance/'
+      preLoaderRoute: typeof ComplianceIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/compliance/$ruleId': {
+      id: '/compliance/$ruleId'
+      path: '/compliance/$ruleId'
+      fullPath: '/compliance/$ruleId'
+      preLoaderRoute: typeof ComplianceRuleIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/compliance/new': {
+      id: '/compliance/new'
+      path: '/compliance/new'
+      fullPath: '/compliance/new'
+      preLoaderRoute: typeof ComplianceNewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/human-review/': {
@@ -801,6 +881,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ActivateRoute: ActivateRoute,
+  ComplianceAuditRoute: ComplianceAuditRoute,
   LoginRoute: LoginRoute,
   ProductsRoute: ProductsRoute,
   ProfileRoute: ProfileRoute,
@@ -811,6 +892,8 @@ const rootRouteChildren: RootRouteChildren = {
   ClientsImportRoute: ClientsImportRoute,
   ClientsNewRoute: ClientsNewRoute,
   CommunicationsCommunicationIdRoute: CommunicationsCommunicationIdRoute,
+  ComplianceRuleIdRoute: ComplianceRuleIdRoute,
+  ComplianceNewRoute: ComplianceNewRoute,
   HumanReviewReviewIdRoute: HumanReviewReviewIdRoute,
   ImportsImportIdRoute: ImportsImportIdRoute,
   IntegrationsIntegrationIdRoute: IntegrationsIntegrationIdRoute,
@@ -827,6 +910,7 @@ const rootRouteChildren: RootRouteChildren = {
   AccountsIndexRoute: AccountsIndexRoute,
   ClientsIndexRoute: ClientsIndexRoute,
   CommunicationsIndexRoute: CommunicationsIndexRoute,
+  ComplianceIndexRoute: ComplianceIndexRoute,
   HumanReviewIndexRoute: HumanReviewIndexRoute,
   ImportsIndexRoute: ImportsIndexRoute,
   IntegrationsIndexRoute: IntegrationsIndexRoute,
