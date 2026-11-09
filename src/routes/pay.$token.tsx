@@ -100,6 +100,8 @@ function CustomerPaymentExperience() {
   const [method, setMethod] = useState<Method>("Card");
   const [partialInput, setPartialInput] = useState("");
   const [planTotalInput, setPlanTotalInput] = useState("");
+  const [planFreq, setPlanFreq] = useState<Frequency>("Monthly");
+  const [cycleInput, setCycleInput] = useState("");
   const [selectedPlan, setSelectedPlan] = useState<PlanChoice | null>(null);
   const [simulateDecline, setSimulateDecline] = useState(false);
   const [paidAmount, setPaidAmount] = useState(0);
@@ -142,7 +144,16 @@ function CustomerPaymentExperience() {
     planFor("Bi-Weekly", false),
     planFor("Weekly", false),
   ];
-  const activePlan = selectedPlan ?? suggestedPlan;
+  void selectedPlan;
+  // Customer picks a frequency, then how much they want to pay each cycle.
+  const minCycle = Math.ceil(planTotal / maxPaymentsFor[planFreq]);
+  const cycleAmount = Math.min(Math.max(Number(cycleInput) || 0, 0), planTotal);
+  const cycleValid = cycleAmount >= minCycle;
+  const cyclePayments = cycleAmount > 0 ? Math.ceil(planTotal / cycleAmount) : 0;
+  const lastPayment = cyclePayments > 0 ? planTotal - cycleAmount * (cyclePayments - 1) : 0;
+  const activePlan: PlanChoice = cycleValid
+    ? { frequency: planFreq, payments: cyclePayments, installment: cycleAmount, suggested: false }
+    : suggestedPlan;
 
   const startDate = parseISO(demoToday);
   const firstPaymentDate = formatDate(startDate);
@@ -286,88 +297,62 @@ function CustomerPaymentExperience() {
           <StepCard title="Set up a payment plan" onBack={() => setStep("options")}>
             <Row label="Outstanding Balance" value={formatCurrency(outstanding)} />
             <div>
-              <label
-                htmlFor="plan-total"
-                className="mb-1.5 block text-[13px] font-medium text-foreground"
-              >
-                Amount you would like to pay off
+              <p className="mb-1.5 text-[13px] font-medium text-foreground">How often would you like to pay?</p>
+              <div className="grid grid-cols-3 gap-2">
+                {frequencies.map((f) => (
+                  <button
+                    key={f}
+                    onClick={() => setPlanFreq(f)}
+                    aria-pressed={planFreq === f}
+                    className={cn(
+                      "rounded-lg border px-3 py-2.5 text-[14px] font-semibold transition-colors",
+                      planFreq === f
+                        ? "border-foreground bg-card text-foreground ring-1 ring-foreground/15"
+                        : "border-border bg-card text-muted-foreground hover:bg-surface",
+                    )}
+                  >
+                    {frequencyMeta[f].label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label htmlFor="plan-cycle" className="mb-1.5 block text-[13px] font-medium text-foreground">
+                Amount you would like to pay {frequencyMeta[planFreq].every}
               </label>
               <div className="flex items-center gap-2 rounded-lg border border-border-strong bg-card px-3 py-2.5">
                 <span className="text-[15px] text-muted-foreground">$</span>
                 <input
-                  id="plan-total"
+                  id="plan-cycle"
                   inputMode="decimal"
-                  value={planTotalInput}
-                  onChange={(e) => {
-                    setPlanTotalInput(e.target.value.replace(/[^0-9.]/g, ""));
-                    setSelectedPlan(null);
-                  }}
-                  placeholder={String(outstanding)}
+                  value={cycleInput}
+                  onChange={(e) => setCycleInput(e.target.value.replace(/[^0-9.]/g, ""))}
+                  placeholder={String(minCycle)}
                   className="tabular w-full bg-transparent text-[15px] text-foreground outline-none"
                 />
               </div>
-              <p className="mt-1.5 text-[12px] text-muted-foreground">
-                Plans are available for balances of {formatCurrency(100)} or more.
+              <p className={cn("mt-1.5 text-[12px]", cycleInput && !cycleValid ? "text-warning" : "text-muted-foreground")}>
+                Minimum {formatCurrency(minCycle)} {frequencyMeta[planFreq].every} for this balance.
               </p>
             </div>
-
-            <div>
-              <p className="mb-1.5 text-[13px] font-medium text-foreground">
-                Choose a plan below — everything is calculated for you
-              </p>
-              <div className="space-y-2.5">
-                {planCards.map((card) => {
-                  const selected =
-                    activePlan.frequency === card.frequency &&
-                    activePlan.payments === card.payments;
-                  const first = formatDate(startDate);
-                  const final = formatDate(
-                    addIntervals(startDate, card.frequency, card.payments - 1),
-                  );
-                  return (
-                    <button
-                      key={card.frequency}
-                      onClick={() => setSelectedPlan(card)}
-                      aria-pressed={selected}
-                      className={cn(
-                        "w-full rounded-lg border px-4 py-3 text-left transition-colors",
-                        selected
-                          ? "border-foreground bg-card ring-1 ring-foreground/15"
-                          : "border-border bg-card hover:bg-surface",
-                      )}
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="text-[14px] font-semibold text-foreground">
-                          {frequencyMeta[card.frequency].label}
-                        </p>
-                        {card.suggested && (
-                          <span className="rounded-full bg-teal/15 px-2 py-0.5 text-[10.5px] font-semibold text-success">
-                            Suggested plan
-                          </span>
-                        )}
-                      </div>
-                      <p className="tabular mt-1 text-[15px] font-semibold text-foreground">
-                        {formatCurrency(card.installment)}{" "}
-                        <span className="text-[13px] font-normal text-muted-foreground">
-                          {frequencyMeta[card.frequency].every} · {card.payments} payments
-                        </span>
-                      </p>
-                      <p className="mt-1 text-[12px] text-muted-foreground">
-                        First payment {first} · final payment {final} · completes in{" "}
-                        {card.payments} {card.frequency === "Monthly" ? "months" : card.frequency === "Bi-Weekly" ? "fortnights" : "weeks"}
-                      </p>
-                    </button>
-                  );
-                })}
+            {cycleValid && (
+              <div className="rounded-lg border border-border bg-card px-4 py-3">
+                <p className="text-[13px] font-semibold text-foreground">Your plan</p>
+                <div className="mt-2 space-y-1.5 text-[13px]">
+                  <div className="flex justify-between"><span className="text-muted-foreground">Payment</span><span className="tabular font-semibold text-foreground">{formatCurrency(cycleAmount)} {frequencyMeta[planFreq].every}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">Number of payments</span><span className="tabular font-semibold text-foreground">{cyclePayments}</span></div>
+                  {lastPayment !== cycleAmount && (
+                    <div className="flex justify-between"><span className="text-muted-foreground">Final payment amount</span><span className="tabular font-semibold text-foreground">{formatCurrency(lastPayment)}</span></div>
+                  )}
+                  <div className="flex justify-between"><span className="text-muted-foreground">First payment</span><span className="tabular text-foreground">{formatDate(startDate)}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">Final payment</span><span className="tabular text-foreground">{formatDate(addIntervals(startDate, planFreq, cyclePayments - 1))}</span></div>
+                  <div className="flex justify-between border-t border-border pt-1.5"><span className="text-muted-foreground">Plan total</span><span className="tabular font-semibold text-foreground">{formatCurrency(planTotal)}</span></div>
+                </div>
               </div>
-              <p className="mt-2 text-[12px] leading-relaxed text-muted-foreground">
-                Our suggested plan follows best practice: smaller monthly payments over the longest
-                term available for this balance. You can pick any other plan instead.
-              </p>
-            </div>
+            )}
 
-            <button className={accentBtn} onClick={() => startReview("plan")}>
-              Continue with the {frequencyMeta[activePlan.frequency].label} plan
+            <button className={cn(accentBtn, !cycleValid && "pointer-events-none opacity-50")} disabled={!cycleValid} onClick={() => startReview("plan")}>
+              Continue with this plan
             </button>
             <p className="text-[12px] leading-relaxed text-muted-foreground">{planIllustrativeNote}</p>
           </StepCard>
