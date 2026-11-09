@@ -264,19 +264,60 @@ function CommunicationFunnel() {
                 />
               </div>
               <div className="mt-2 flex items-baseline justify-between gap-2">
-                <span className="tabular text-[11.5px] font-semibold text-primary">
+                <span
+                  className={cn(
+                    "tabular text-[11.5px] font-semibold",
+                    isInvalid ? "text-warning" : "text-primary",
+                  )}
+                >
                   {row.rate === null ? "Start" : `${(row.rate * 100).toFixed(1)}%`}
                 </span>
                 <span className="tabular text-[10.5px] text-muted-foreground">
                   {row.rate === null
-                    ? "of funnel"
-                    : `−${formatNumber(Math.round((rows[i - 1]?.volume ?? 0) - row.volume))}`}
+                    ? "of addresses"
+                    : isInvalid
+                      ? "of valid pool"
+                      : `−${formatNumber(Math.round((rows[i - 1]?.volume ?? 0) - row.volume))}`}
                 </span>
               </div>
             </Link>
           );
         })}
       </div>
+
+      {showPlacement && (
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-border bg-surface px-4 py-2.5">
+          <span className="text-[11.5px] font-semibold text-foreground">
+            Delivered where (email)
+          </span>
+          {placement.map((p) => (
+            <Link
+              key={p.label}
+              to="/communications"
+              search={{
+                ...(client !== "All Clients" ? { client } : {}),
+                channel: "Email",
+                status: "Delivered",
+              }}
+              className="group flex items-baseline gap-1.5"
+              title={`View emails delivered to ${p.label}`}
+            >
+              <span className="text-[11.5px] text-muted-foreground group-hover:text-foreground">
+                {p.label}
+              </span>
+              <span className="tabular text-[12.5px] font-semibold text-foreground">
+                {formatNumber(p.volume)}
+              </span>
+              <span className="tabular text-[10.5px] text-muted-foreground">
+                ({deliveredVolume ? Math.round((p.volume / deliveredVolume) * 100) : 0}%)
+              </span>
+            </Link>
+          ))}
+          <span className="text-[10.5px] text-muted-foreground">
+            Placement is reported by the receiving mail provider.
+          </span>
+        </div>
+      )}
     </Panel>
   );
 }
