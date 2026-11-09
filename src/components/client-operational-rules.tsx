@@ -25,7 +25,7 @@ export function ClientOperationalRules({ config, patch, clientId = "", readOnly 
     <div className="flex flex-wrap items-center justify-between gap-2"><h3 className="text-sm font-semibold">System & Client Rules <span className="text-muted-foreground">· {selected.length} selected</span></h3>{!readOnly && <Btn onClick={() => setDraft(draft ? null : emptyRuleDraft({ type: "Client Rule", clientId: clientId || null }))}>{draft ? "Cancel new rule" : "+ Add Client Rule"}</Btn>}</div>
     {draft && <div className="space-y-4 border-y border-border py-4">
       <Field label="Rule name"><TextInput value={draft.name} onChange={name => setDraft({ ...draft, name })} /></Field>
-      <div className="grid gap-3 sm:grid-cols-2"><Field label="Category"><SelectInput value={draft.category} options={ruleCategories} onChange={category => setDraft({ ...draft, category })} /></Field><Field label="Action"><SelectInput value={draft.action} options={ruleActions} onChange={action => setDraft({ ...draft, action })} /></Field></div>
+      <div className="grid gap-3 sm:grid-cols-2"><Field label="Category"><SelectInput value={draft.category} options={[...ruleCategories]} onChange={category => setDraft({ ...draft, category })} /></Field><Field label="Action"><SelectInput value={draft.action} options={[...ruleActions]} onChange={action => setDraft({ ...draft, action })} /></Field></div>
       <ConditionBuilder draft={draft} patch={p => setDraft({ ...draft, ...p })} />
       <Btn variant="primary" disabled={!draft.name.trim() || draft.conditions.some(c => !c.value.trim())} onClick={save}>Save Client Rule as Draft</Btn>
     </div>}

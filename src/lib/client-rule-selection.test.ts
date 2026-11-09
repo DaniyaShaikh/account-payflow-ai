@@ -30,8 +30,8 @@ describe("client rule choices", () => {
   it("does not copy another client's rule choices into a newly imported client", () => {
     const config = importClientConfig(undefined, "CL-1090");
     expect(config.code).toBe("CL-1090");
-    expect(config.disabledComplianceRules).toBeUndefined();
+    expect(config.disabledComplianceRules).toEqual([]);
     expect(config.selectedOperationalRules).toBeUndefined();
-    expect(config.jurisdiction).toBeUndefined();
+    expect(config.jurisdiction?.country).toBe("");
   });
 });

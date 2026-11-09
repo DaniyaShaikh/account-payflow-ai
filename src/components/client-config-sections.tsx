@@ -401,8 +401,8 @@ export function AiGovernanceSection({ draft, patch, patchConfig }: SectionProps)
         />
       </div>
 
-      <ClientCompliance config={draft.config} patch={patchConfig} clientId={draft.clientId} />
-      <ClientOperationalRules config={draft.config} patch={patchConfig} clientId={draft.clientId} />
+      <ClientCompliance config={draft.config} patch={patchConfig} clientId={draft.clientId ?? ""} />
+      <ClientOperationalRules config={draft.config} patch={patchConfig} clientId={draft.clientId ?? ""} />
 
     </div>
   );
