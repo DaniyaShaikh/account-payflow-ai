@@ -1,0 +1,23 @@
+import { useState } from "react";
+import { Btn, Field, TextInput, SelectInput, ToggleRow, DataTable, Td, Tr, TabBar } from "./payflow-ui";
+import { useCompliance } from "@/lib/compliance-context";
+import { useRole } from "@/lib/role-context";
+import { countries, statesFor, type Holiday } from "@/lib/compliance-data";
+import { ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
+
+export function ComplianceHolidays() {
+  const { holidays, saveHoliday } = useCompliance(); const { isAdmin } = useRole();
+  const [view, setView] = useState("List"); const [month, setMonth] = useState("2026-12");
+  const [draft, setDraft] = useState<Holiday>({ id: "", name: "", date: "2026-12-25", country: "Canada", state: "", recurring: false, source: "" });
+  const patch = (p: Partial<Holiday>) => setDraft(d => ({ ...d, ...p }));
+  const [year = 2026, m = 12] = month.split("-").map(Number);
+  const count = new Date(Date.UTC(year, m, 0)).getUTCDate(); const offset = new Date(Date.UTC(year, m - 1, 1)).getUTCDay();
+  const shift = (delta: number) => setMonth(new Date(Date.UTC(year, m - 1 + delta, 1)).toISOString().slice(0, 7));
+  return <div className="space-y-5"><TabBar tabs={["List", "Calendar"]} active={view} onChange={setView} />
+    {view === "List" ? <DataTable minWidth={650} head={["Restricted date", "Name", "Jurisdiction", "Source", "Actions"]}>{holidays.map(h => <Tr key={h.id}><Td>{h.date}{h.recurring && <p className="text-xs text-muted-foreground">Recurring annually</p>}</Td><Td className="max-w-[220px] whitespace-normal">{h.name}</Td><Td>{h.country}<p className="text-xs text-muted-foreground">{h.state || "All states / provinces"}</p></Td><Td className="max-w-[220px] whitespace-normal text-xs">{h.source}</Td><Td>{isAdmin && <div className="flex gap-1"><Btn variant="ghost" onClick={() => setDraft(h)}>Edit</Btn><Btn variant="ghost" onClick={() => saveHoliday(h, true)}><Trash2 className="size-4" /><span className="sr-only">Remove {h.name}</span></Btn></div>}</Td></Tr>)}</DataTable> : <div>
+      <div className="mb-3 flex items-center justify-between"><Btn onClick={() => shift(-1)}><ChevronLeft className="size-4" /><span className="sr-only">Previous month</span></Btn><span className="text-sm font-semibold">{month}</span><Btn onClick={() => shift(1)}><ChevronRight className="size-4" /><span className="sr-only">Next month</span></Btn></div>
+      <div className="grid grid-cols-7">{["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(d => <span key={d} className="p-2 text-center text-xs text-muted-foreground">{d}</span>)}{Array.from({ length: offset + count }, (_, n) => { const day = n - offset + 1; const date = `${month}-${String(day).padStart(2, "0")}`; const hits = day > 0 ? holidays.filter(h => h.recurring ? h.date.slice(5) === date.slice(5) : h.date === date) : []; return <div key={n} className="min-h-20 min-w-0 border border-border p-1.5 text-xs">{day > 0 && day}{hits.map(h => <p key={h.id} className="mt-1 break-words bg-warning/10 p-1 text-[10px] text-warning-foreground">{h.name}</p>)}</div>; })}</div>
+    </div>}
+    {isAdmin && <fieldset className="space-y-3 border-t border-border pt-5"><h3 className="text-sm font-semibold">{draft.id ? "Edit restricted date" : "Add restricted date"}</h3><div className="grid gap-3 sm:grid-cols-2"><Field label="Holiday / Blackout Name"><TextInput value={draft.name} onChange={name => patch({ name })} /></Field><Field label="Date"><input type="date" className="h-9 w-full rounded-md border border-border bg-card px-3 text-sm" value={draft.date} onChange={e => patch({ date: e.target.value })} /></Field><Field label="Country"><SelectInput value={draft.country} options={countries} onChange={country => patch({ country, state: "" })} /></Field><Field label="State / Province"><SelectInput value={draft.state} options={["", ...statesFor(draft.country)]} onChange={state => patch({ state })} /></Field><Field label="Source / Reason"><TextInput value={draft.source} onChange={source => patch({ source })} /></Field></div><ToggleRow label="Recurring annually" checked={draft.recurring} onChange={recurring => patch({ recurring })} /><div className="flex gap-2"><Btn variant="primary" disabled={!draft.name.trim() || !draft.date || !draft.source.trim()} onClick={() => { saveHoliday({ ...draft, id: draft.id || crypto.randomUUID() }); setDraft({ ...draft, id: "", name: "", source: "" }); }}>Save Restricted Date</Btn>{draft.id && <Btn onClick={() => setDraft({ ...draft, id: "", name: "" })}>Cancel edit</Btn>}</div></fieldset>}
+  </div>;
+}
