@@ -128,6 +128,12 @@ function CommunicationFunnel() {
     journey === "All Workflows";
 
   const rows = funnelVolumes(client, subClients.join(","), date, channel, journey);
+  const deliveredVolume = rows.find((r) => r.stage === "Delivered")?.volume ?? 0;
+  const placement = placementSplit(
+    deliveredVolume,
+    hashSeed(`${client}|${subClients.join(",")}|${date}|${channel}|${journey}`),
+  );
+  const showPlacement = channel === "All Channels" || channel === "Email";
   const activeParts = [
     client !== "All Clients" ? client : null,
     subClients.length > 0 ? subClients.join(", ") : null,
@@ -139,7 +145,7 @@ function CommunicationFunnel() {
   return (
     <Panel
       title="Communication to Payment Performance"
-      description="Conversion from outreach to completed payment"
+      description="Conversion from outreach to completed payment, with address validity and inbox placement"
       className="mb-5"
       action={
         !isDefault ? (
@@ -208,16 +214,19 @@ function CommunicationFunnel() {
       </div>
 
       {/* Connected progression: navy → PayFlow blue → teal at the paid stage. */}
-      <div className="grid gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-3 xl:grid-cols-6">
+      <div className="grid gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
         {rows.map((row, i) => {
           const top = rows[0]?.volume || 1;
           const width = Math.max(5, (row.volume / top) * 100);
           const isPaid = i === rows.length - 1;
+          const isInvalid = row.stage === "Invalid Addresses";
           const barColor = isPaid
             ? "bg-teal"
-            : i === 0
-              ? "bg-navy"
-              : "bg-primary";
+            : isInvalid
+              ? "bg-warning"
+              : i === 0
+                ? "bg-navy"
+                : "bg-primary";
           return (
             <Link
               key={row.stage}
