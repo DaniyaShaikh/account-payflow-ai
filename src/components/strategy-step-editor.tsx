@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { CommunicationCompliance } from "./communication-compliance";
 import { Mail, MessageSquare } from "lucide-react";
 import {
   Dialog,
@@ -118,6 +119,7 @@ export function StepConfigForm({
             />
           </Field>
           <TemplatePreview node={node} />
+          <details className="border-t border-border pt-3"><summary className="cursor-pointer text-xs font-semibold text-primary">Compliance execution preview</summary><div className="mt-3"><CommunicationCompliance clientId={strategy.clientId} channel={node.config.channel ?? "Email"} templateText={activeTemplate?.body ?? ""} /></div></details>
         </>
       )}
 
