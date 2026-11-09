@@ -2,9 +2,9 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 export const explainRule = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => z.object({ rule: z.string().max(8000) }).parse(d))
+  .validator((d: unknown) => z.object({ rule: z.string().max(8000) }).parse(d))
   .handler(async ({ data }) => {
-    const key = process.env.LOVABLE_API_KEY;
+    const key = process.env["LOVABLE_API_KEY"];
     if (!key) return { error: "AI explanation is not configured." };
     const { createOpenAI } = await import("@ai-sdk/openai");
     const { streamText } = await import("ai");
