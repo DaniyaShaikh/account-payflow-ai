@@ -3,7 +3,7 @@ import { useState } from "react";
 import { ShieldCheck, CheckCircle2, AlertCircle, CalendarClock, Lock } from "lucide-react";
 import { accountForPaymentToken, maskedReference, planIllustrativeNote } from "@/lib/payment-data";
 import { brandingFor } from "@/lib/communication-data";
-import { clientName, formatCurrency } from "@/lib/payflow-data";
+import { clientName, defaultPlanLimits, formatCurrency } from "@/lib/payflow-data";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/pay/$token")({
@@ -229,7 +229,7 @@ function CustomerPaymentExperience() {
               <button className={outlineBtn} onClick={() => setStep("partial")}>
                 Make a Partial Payment
               </button>
-              <button className={outlineBtn} onClick={() => setStep("plan-frequency")}>
+              <button className={outlineBtn} onClick={() => setStep("plan")}>
                 Set Up a Payment Plan
               </button>
             </div>
