@@ -353,7 +353,7 @@ function nowStamp() {
 
 export function ImportFlow({ kind }: { kind: ImportKind }) {
   const navigate = useNavigate();
-  const { allClients, addClient, userName } = useRole();
+  const { allClients, addClient, updateClient, userName } = useRole();
   const [ruleClient, setRuleClient] = useState(clientImportRecords[0]?.clientName ?? "");
   const [importConfigs, setImportConfigs] = useState<Record<string, ClientConfig>>(() => Object.fromEntries(clientImportRecords.filter(r => r.clientId).map(r => [r.clientName, importClientConfig(allClients.find(c => c.name === r.clientName)?.config, r.clientId)])));
   const importId = (name: string) => allClients.find(c => c.name === name)?.id ?? `imp-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
@@ -439,6 +439,10 @@ export function ImportFlow({ kind }: { kind: ImportKind }) {
   function applyClientImport() {
     const template = allClients[0];
     if (!template) return;
+    Object.entries(importConfigs).forEach(([name, config]) => {
+      const existingClient = allClients.find(c => c.name === name);
+      if (existingClient) updateClient(existingClient.id, { config });
+    });
     const created = clientImportRecords.filter((r) => r.action === "Create");
     const existing = new Set(allClients.map((c) => c.name));
     const byClient = new Map<string, ImportRecord[]>();
