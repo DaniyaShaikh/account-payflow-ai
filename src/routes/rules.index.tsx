@@ -26,6 +26,8 @@ import {
 export const Route = createFileRoute("/rules/")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Rules & Governance — PayFlow Collections" },
       {
         name: "description",

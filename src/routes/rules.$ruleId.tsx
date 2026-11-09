@@ -17,6 +17,8 @@ import { conditionSummary, statusToneForRule } from "@/lib/rules-data";
 export const Route = createFileRoute("/rules/$ruleId")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Rule detail — PayFlow Governance" },
       {
         name: "description",

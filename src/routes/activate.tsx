@@ -16,6 +16,8 @@ export const Route = createFileRoute("/activate")({
   }),
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Set Up Your Account — PayFlow" },
       {
         name: "description",
