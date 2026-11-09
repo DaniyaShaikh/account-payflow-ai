@@ -41,6 +41,8 @@ export const Route = createFileRoute("/")({
 });
 
 const funnelStages = [
+  "Valid Addresses",
+  "Invalid Addresses",
   "Sent",
   "Delivered",
   "Opened / Read",
@@ -49,7 +51,7 @@ const funnelStages = [
   "Paid",
 ] as const;
 
-const stageRates = [1, 0.956, 0.738, 0.416, 0.737, 0.802];
+const stageRates = [1, 0.062, 0.984, 0.956, 0.738, 0.416, 0.737, 0.802];
 
 // Funnel stages map onto the communication statuses that produced them, so a
 // click leads to the underlying communications.
@@ -88,11 +90,26 @@ function funnelVolumes(
   return funnelStages.map((stage, i) => {
     if (i === 0) return { stage, volume: base, rate: null as number | null };
     const jitter = 0.94 + ((seed >> (i * 3)) % 13) / 100;
-    const volume = Math.round(previous * (stageRates[i] ?? 1) * jitter);
-    const rate = volume / previous;
-    previous = volume;
+    // Invalid addresses branch off the valid pool; every other stage follows the previous one.
+    const volume = Math.round(
+      (stage === "Invalid Addresses" ? base : previous) * (stageRates[i] ?? 1) * jitter,
+    );
+    const rate = volume / (stage === "Invalid Addresses" ? base : previous);
+    if (stage !== "Invalid Addresses") previous = volume;
     return { stage, volume, rate };
   });
+}
+
+/** Seeded inbox-placement split for the delivered volume (email only). */
+function placementSplit(delivered: number, seed: number) {
+  const inbox = Math.round(delivered * (0.82 + ((seed >> 5) % 8) / 100));
+  const spam = Math.round((delivered - inbox) * 0.72);
+  const promotions = delivered - inbox - spam;
+  return [
+    { label: "Inbox", volume: inbox },
+    { label: "Spam", volume: spam },
+    { label: "Promotions", volume: promotions },
+  ];
 }
 
 function CommunicationFunnel() {
