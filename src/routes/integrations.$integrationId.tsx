@@ -17,6 +17,8 @@ import { mappingSummary, mappingTone } from "@/components/client-config-sections
 export const Route = createFileRoute("/integrations/$integrationId")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Integration detail — PayFlow Collections" },
       {
         name: "description",

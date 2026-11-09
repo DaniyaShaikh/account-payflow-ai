@@ -18,6 +18,8 @@ import { productStatusTone, type ProductStatus } from "@/lib/platform-data";
 export const Route = createFileRoute("/platform/products/$productId")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Product Detail — Platform Administration" },
       {
         name: "description",

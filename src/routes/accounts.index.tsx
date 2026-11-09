@@ -29,6 +29,8 @@ import {
 export const Route = createFileRoute("/accounts/")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Accounts / Cases — PayFlow Collections" },
       {
         name: "description",

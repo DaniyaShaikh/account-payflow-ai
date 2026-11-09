@@ -15,6 +15,8 @@ import type { RuleStatus } from "@/lib/rules-data";
 export const Route = createFileRoute("/rules/new")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Create Rule — PayFlow Governance" },
       {
         name: "description",

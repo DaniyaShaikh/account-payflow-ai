@@ -12,6 +12,7 @@ import {
 } from "@/lib/communication-data";
 import { paymentTokenForAccount } from "@/lib/payment-data";
 import { cn } from "@/lib/utils";
+import { CommunicationCompliance } from "@/components/communication-compliance";
 
 export const Route = createFileRoute("/communications/$communicationId")({
   head: () => ({
@@ -57,7 +58,8 @@ function Expandable({ title, children }: { title: string; children: React.ReactN
 function CommunicationDetail() {
   const { communicationId } = Route.useParams();
   const { canSeeClient } = useRole();
-  const comm = communicationById(communicationId)!;
+  const comm = communicationById(communicationId);
+  if (!comm) return <Panel title="Communication unavailable">This communication could not be found.</Panel>;
 
   if (!canSeeClient(comm.clientId)) {
     return (
@@ -145,6 +147,8 @@ function CommunicationDetail() {
             <Expandable title={`Why ${comm.channel}?`}>{comm.whyChannel}</Expandable>
             <Expandable title="Why now?">{comm.whyTiming}</Expandable>
           </Panel>
+
+          <Panel title="Compliance before execution"><CommunicationCompliance clientId={comm.clientId} channel={comm.channel} balance={comm.balance} templateText={comm.bodyLines.join(" ")} /></Panel>
 
           <Panel title="Linked records" bodyClassName="p-0">
             <ul className="divide-y divide-border text-[13px]">

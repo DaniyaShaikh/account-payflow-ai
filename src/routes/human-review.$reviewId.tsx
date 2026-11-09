@@ -28,6 +28,8 @@ import {
 export const Route = createFileRoute("/human-review/$reviewId")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Review decision — PayFlow Human Review" },
       {
         name: "description",

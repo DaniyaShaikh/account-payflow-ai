@@ -16,6 +16,7 @@ import appCss from "../styles.css?url";
 import { RoleProvider } from "../lib/role-context";
 import { UsersProvider } from "../lib/users-context";
 import { RulesProvider } from "../lib/rules-context";
+import { ComplianceProvider } from "../lib/compliance-context";
 import { ReviewsProvider } from "../lib/reviews-context";
 import { StrategyProvider } from "../lib/strategy-context";
 import { PlatformProvider } from "../lib/platform-context";
@@ -166,9 +167,11 @@ function RootShell({ children }: { children: ReactNode }) {
           <UsersProvider>
             <RoleProvider>
               <RulesProvider>
+                <ComplianceProvider>
                 <ReviewsProvider>
                   <StrategyProvider>{children}</StrategyProvider>
                 </ReviewsProvider>
+                </ComplianceProvider>
               </RulesProvider>
             </RoleProvider>
           </UsersProvider>

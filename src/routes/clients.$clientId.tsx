@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { ReviewQueue } from "@/components/review-queue";
 import { JourneyLibrary } from "@/components/journey-library";
 import { PortfolioSection } from "@/components/portfolio-section";
+import { ClientCompliance } from "@/components/client-compliance";
 import { CommunicationTable } from "@/components/communication-table";
 import { journeysForClient } from "@/lib/journey-data";
 import { communicationsForClient } from "@/lib/communication-data";
@@ -74,6 +75,8 @@ export const Route = createFileRoute("/clients/$clientId")({
         property: "og:description",
         content: "Customer accounts, performance and configuration for a single PayFlow client.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: ClientDetail,
@@ -96,6 +99,7 @@ const configSections = [
   "Data Mapping",
   "Branding & Channels",
   "Payment Options",
+  "Compliance",
   "AI & Governance",
   "Assigned Users",
 ] as const;
@@ -637,6 +641,7 @@ function ClientConfiguration({
             )}
           </div>
         </Panel>
+        <Panel title="Applicable Compliance Rules"><ClientCompliance config={draft.config} patch={() => {}} clientId={clientId} readOnly /></Panel>
       </div>
     );
   }
@@ -680,6 +685,7 @@ function ClientConfiguration({
           {section === "Data Mapping" && <MappingSection {...props} />}
           {section === "Branding & Channels" && <BrandingSection {...props} />}
           {section === "Payment Options" && <PaymentOptionsSection {...props} />}
+          {section === "Compliance" && <ClientCompliance config={draft.config} patch={patchConfig} clientId={clientId} />}
           {section === "AI & Governance" && <AiGovernanceSection {...props} />}
           {section === "Assigned Users" && (
             <ClientSupervisorAccess clientId={clientId} clientName={draft.name} editable />

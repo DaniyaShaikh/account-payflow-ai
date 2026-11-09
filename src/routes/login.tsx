@@ -8,6 +8,8 @@ import { markSignedIn } from "@/lib/session";
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Sign In — PayFlow Collections Operations" },
       {
         name: "description",

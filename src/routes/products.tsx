@@ -10,6 +10,8 @@ import { markSignedOut } from "@/lib/session";
 export const Route = createFileRoute("/products")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Select a Product — Platform Access" },
       {
         name: "description",

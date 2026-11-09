@@ -16,6 +16,7 @@ import { useRole } from "@/lib/role-context";
 import { useUsers } from "@/lib/users-context";
 import { makeConfig, type Client, type ClientConfig } from "@/lib/payflow-data";
 import { cn } from "@/lib/utils";
+import { ClientCompliance } from "@/components/client-compliance";
 
 export const Route = createFileRoute("/clients/new")({
   head: () => ({
@@ -31,6 +32,8 @@ export const Route = createFileRoute("/clients/new")({
         property: "og:description",
         content: "Onboard a new organization into PayFlow collection operations.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: AddClientPage,
@@ -227,7 +230,7 @@ function AddClientPage() {
         title={`Step ${step + 1} of ${steps.length} · ${steps[step]}`}
         description={stepDescriptions[step] ?? ""}
       >
-        {step === 0 && <ProfileSection {...sectionProps} />}
+        {step === 0 && <div className="space-y-6"><ProfileSection {...sectionProps} /><ClientCompliance config={draft.config} patch={patchConfig} /></div>}
         {step === 1 && <DataSourceSection {...sectionProps} />}
         {step === 2 && <MappingSection {...sectionProps} />}
         {step === 3 && <BrandingSection {...sectionProps} />}

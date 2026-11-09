@@ -22,6 +22,8 @@ import { usePlatform } from "@/lib/platform-context";
 export const Route = createFileRoute("/platform/people")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "People & Product Assignment — Platform Administration" },
       {
         name: "description",

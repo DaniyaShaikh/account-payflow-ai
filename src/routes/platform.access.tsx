@@ -20,6 +20,8 @@ import { entitlementTone } from "@/lib/platform-data";
 export const Route = createFileRoute("/platform/access")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Product Access — Platform Administration" },
       {
         name: "description",

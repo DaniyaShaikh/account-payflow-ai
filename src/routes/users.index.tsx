@@ -26,6 +26,8 @@ import { userProfile, type UserRole, type UserStatus } from "@/lib/users-data";
 export const Route = createFileRoute("/users/")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Users & Permissions — PayFlow Operations" },
       {
         name: "description",
