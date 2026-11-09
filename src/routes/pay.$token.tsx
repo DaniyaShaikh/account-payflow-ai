@@ -36,9 +36,7 @@ type Step =
   | "options"
   | "full"
   | "partial"
-  | "plan-frequency"
-  | "plan-schedule"
-  | "plan-amount"
+  | "plan"
   | "review"
   | "success"
   | "plan-success"
@@ -46,7 +44,14 @@ type Step =
 
 type Mode = "full" | "partial" | "plan";
 type Method = "Card" | "Bank Account";
-type Frequency = "Daily" | "Weekly" | "Monthly";
+type Frequency = "Weekly" | "Bi-Weekly" | "Monthly";
+
+interface PlanChoice {
+  frequency: Frequency;
+  payments: number;
+  installment: number;
+  suggested: boolean;
+}
 
 function referenceCode(seed: string) {
   let hash = 0;
@@ -71,17 +76,19 @@ function formatDate(date: Date) {
 
 function addIntervals(date: Date, frequency: Frequency, count: number) {
   const next = new Date(date.getTime());
-  if (frequency === "Daily") next.setUTCDate(next.getUTCDate() + count);
-  else if (frequency === "Weekly") next.setUTCDate(next.getUTCDate() + count * 7);
+  if (frequency === "Weekly") next.setUTCDate(next.getUTCDate() + count * 7);
+  else if (frequency === "Bi-Weekly") next.setUTCDate(next.getUTCDate() + count * 14);
   else next.setUTCMonth(next.getUTCMonth() + count);
   return next;
 }
 
-const frequencyMeta: Record<Frequency, { label: string; every: string; divisor: number; note: string }> = {
-  Daily: { label: "Daily", every: "every day", divisor: 60, note: "Small amounts, paid each day" },
-  Weekly: { label: "Weekly", every: "every week", divisor: 12, note: "Sync with a weekly pay cycle" },
-  Monthly: { label: "Monthly", every: "every month", divisor: 6, note: "One payment each month" },
+const frequencyMeta: Record<Frequency, { label: string; every: string; note: string }> = {
+  Weekly: { label: "Weekly", every: "every week", note: "Sync with a weekly pay cycle" },
+  "Bi-Weekly": { label: "Bi-Weekly", every: "every two weeks", note: "Matches a fortnightly pay cycle" },
+  Monthly: { label: "Monthly", every: "every month", note: "One payment each month" },
 };
+
+const frequencies: Frequency[] = ["Weekly", "Bi-Weekly", "Monthly"];
 
 function CustomerPaymentExperience() {
   const { token } = Route.useParams();
