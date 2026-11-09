@@ -394,11 +394,11 @@ function CustomerPaymentExperience() {
         )}
 
         {step === "review" && mode === "plan" && (
-          <StepCard title="Payment Plan Review" onBack={() => setStep("plan-amount")}>
-            <Row label="Outstanding Balance" value={formatCurrency(outstanding)} />
-            <Row label="Frequency" value={frequencyMeta[frequency].label} />
-            <Row label="Instalment Amount" value={formatCurrency(installment)} emphasis />
-            <Row label="Number of Payments" value={String(planPayments)} />
+          <StepCard title="Payment Plan Review" onBack={() => setStep("plan")}>
+            <Row label="Plan Total" value={formatCurrency(planTotal)} />
+            <Row label="Frequency" value={frequencyMeta[activePlan.frequency].label} />
+            <Row label="Instalment Amount" value={formatCurrency(activePlan.installment)} emphasis />
+            <Row label="Number of Payments" value={String(activePlan.payments)} />
             <Row label="First Payment" value={firstPaymentDate} />
             <Row label="Final Payment" value={finalPaymentDate} />
             <MethodPicker method={method} setMethod={setMethod} />
@@ -467,10 +467,10 @@ function CustomerPaymentExperience() {
               </p>
             </div>
             <dl className="overflow-hidden rounded-xl border border-border bg-card text-left">
-              <RowPlain label="Plan Amount" value={formatCurrency(outstanding)} />
-              <RowPlain label="Frequency" value={frequencyMeta[frequency].label} />
-              <RowPlain label="Instalment Amount" value={formatCurrency(installment)} />
-              <RowPlain label="Number of Payments" value={String(planPayments)} />
+              <RowPlain label="Plan Total" value={formatCurrency(planTotal)} />
+              <RowPlain label="Frequency" value={frequencyMeta[activePlan.frequency].label} />
+              <RowPlain label="Instalment Amount" value={formatCurrency(activePlan.installment)} />
+              <RowPlain label="Number of Payments" value={String(activePlan.payments)} />
               <RowPlain label="First Payment" value={firstPaymentDate} />
               <RowPlain label="Final Payment" value={finalPaymentDate} />
               <RowPlain label="Payment Method" value={method} last />
@@ -509,9 +509,7 @@ function CustomerPaymentExperience() {
                 onClick={() => {
                   setSimulateDecline(false);
                   setMethod(method === "Card" ? "Bank Account" : "Card");
-                  setStep(
-                    mode === "plan" ? "plan-amount" : mode === "partial" ? "partial" : "full",
-                  );
+                  setStep(mode === "plan" ? "plan" : mode === "partial" ? "partial" : "full");
                 }}
               >
                 Choose Another Payment Method
