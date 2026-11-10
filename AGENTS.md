@@ -13,3 +13,4 @@
 - Evaluate all inherited mandatory compliance restrictions together with System and Client operational rules before simulated communication execution; client settings may add restrictions but never override mandatory protections.
 - Calculate contact windows from recipient IANA time zones using Intl and real UTC instants so daylight saving transitions preserve local-time restrictions.
 - Reuse client rule selectors in onboarding, configuration, Rules and simulated import; keep operational selections in ClientConfig and never clone another client's configuration for a new import.
+- Introduce reusable operational catalogue additions as unassigned drafts in rules-data; explicit activation and client selection prevent silently changing existing client execution.

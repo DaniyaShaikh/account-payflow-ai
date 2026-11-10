@@ -68,6 +68,11 @@ export const ruleActions = [
   "Request Reassessment",
   "Escalate Case",
   "Apply / Change Workflow",
+  "Include Unsubscribe Option",
+  "Offer Alternate Payment Method",
+  "Send via Alternate Channel",
+  "Send Payment Reminder",
+  "Send Payment Confirmation",
 ] as const;
 
 export const ruleFields: RuleField[] = [
@@ -121,6 +126,13 @@ export const ruleFields: RuleField[] = [
   },
   { label: "Messages Sent (7 days)", category: "Communication", type: "number" },
   { label: "Customer Reply Content", category: "Communication", type: "text" },
+  { label: "Customer Opted Out", category: "Communication", type: "enum", options: ["Yes", "No"] },
+  { label: "Delivery Status", category: "Communication", type: "enum", options: ["Not Sent", "Delivered", "Failed", "Bounced"] },
+  { label: "Alternate Channel Eligible", category: "Communication", type: "enum", options: ["Yes", "No"] },
+  { label: "Duplicate Communication", category: "Communication", type: "enum", options: ["Yes", "No"] },
+  { label: "Alternate Payment Method Available", category: "Payment Activity", type: "enum", options: ["Yes", "No"] },
+  { label: "Payment Processing Status", category: "Payment Activity", type: "enum", options: ["None", "Pending", "Succeeded", "Failed"] },
+  { label: "Payment Confirmation Sent", category: "Payment Activity", type: "enum", options: ["Yes", "No"] },
   {
     label: "Customer Risk Level",
     category: "Customer Risk",
@@ -209,7 +221,69 @@ export function blankCondition(field = "Outstanding Balance"): RuleCondition {
   };
 }
 
+// New essentials are opt-in drafts: existing client choices and execution stay unchanged.
+export const essentialRules: Rule[] = [
+  {
+    id: "allow-unsubscribe-option", name: "Allow Unsubscribe Option", category: "Communication", logic: "ANY",
+    description: "Include a working unsubscribe option in email or STOP instructions in SMS. An unsubscribe request must still suppress future contact on that channel; this rule never overrides mandatory compliance.",
+    conditions: [{ id: "unsub-email", field: "Channel", operator: "Is", value: "Email" }, { id: "unsub-sms", field: "Channel", operator: "Is", value: "SMS" }],
+    action: "Include Unsubscribe Option",
+  },
+  {
+    id: "failed-payment-alternate-method", name: "Failed Payment · Offer Alternate Method", category: "Payment Activity", logic: "ALL",
+    description: "When a payment fails, offer another enabled payment method if one is available. Never charge automatically, retry the same payment, or offer a disabled method.",
+    conditions: [{ id: "payment-failed", field: "Payment Status", operator: "Is", value: "Failed" }, { id: "method-available", field: "Alternate Payment Method Available", operator: "Is", value: "Yes" }],
+    action: "Offer Alternate Payment Method",
+  },
+  {
+    id: "failed-delivery-alternate-channel", name: "Failed Delivery · Alternate Channel", category: "Communication", logic: "ALL",
+    description: "After email or SMS delivery fails, propose the other enabled channel only when its address is valid, consent is recorded and it is not opted out. Recheck all compliance restrictions on that channel; do not switch channels to bypass an unsubscribe request.",
+    conditions: [{ id: "delivery-failed", field: "Delivery Status", operator: "Is", value: "Failed" }, { id: "channel-eligible", field: "Alternate Channel Eligible", operator: "Is", value: "Yes" }],
+    action: "Send via Alternate Channel",
+  },
+  {
+    id: "respect-channel-unsubscribe", name: "Stop Contact After Unsubscribe", category: "Communication", logic: "ALL",
+    description: "Prevent further messages on the channel the customer unsubscribed from. Mandatory opt-out protections still apply even when this operational rule is not selected.",
+    conditions: [{ id: "opted-out", field: "Customer Opted Out", operator: "Is", value: "Yes" }], action: "Prevent Communication",
+  },
+  {
+    id: "paid-account-stop-reminders", name: "Stop Collection Reminders After Payment", category: "Payment Status", logic: "ANY",
+    description: "Stop collection reminders when the balance is fully paid or is zero. A separate payment receipt can still be reviewed; this rule is for collection messages, not receipts.",
+    conditions: [{ id: "paid", field: "Payment Status", operator: "Is", value: "Paid" }, { id: "zero-balance", field: "Outstanding Balance", operator: "Less Than or Equal To", value: "0" }], action: "Prevent Communication",
+  },
+  {
+    id: "payment-processing-hold", name: "Hold Reminders While Payment Is Processing", category: "Payment Activity", logic: "ALL",
+    description: "Hold further collection reminders while a payment is pending. Resume only after the payment outcome and remaining balance are confirmed.",
+    conditions: [{ id: "pending", field: "Payment Processing Status", operator: "Is", value: "Pending" }], action: "Hold Action",
+  },
+  {
+    id: "prevent-duplicate-messages", name: "Prevent Duplicate Communications", category: "Communication", logic: "ALL",
+    description: "Prevent a message already identified as a duplicate for the same customer, case and workflow event. Re-importing a file should not produce another copy.",
+    conditions: [{ id: "duplicate", field: "Duplicate Communication", operator: "Is", value: "Yes" }], action: "Prevent Communication",
+  },
+  {
+    id: "invalid-address-hold", name: "Hold Undeliverable Contact Channel", category: "Communication", logic: "ALL",
+    description: "Stop sending to a bounced address until its contact details are corrected. An eligible alternate channel is handled separately and must pass compliance checks.",
+    conditions: [{ id: "bounced", field: "Delivery Status", operator: "Is", value: "Bounced" }], action: "Prevent Communication",
+  },
+  {
+    id: "missed-installment-follow-up", name: "Missed Instalment Follow-Up", category: "Payment Plan", logic: "ALL",
+    description: "Propose a reminder when a plan has a missed instalment and a balance remains. Do not cancel the plan or charge the customer automatically; review contact eligibility first.",
+    conditions: [{ id: "missed", field: "Missed Installments", operator: "Greater Than", value: "0" }, { id: "remaining", field: "Outstanding Balance", operator: "Greater Than", value: "0" }], action: "Send Payment Reminder",
+  },
+  {
+    id: "successful-payment-confirmation", name: "Successful Payment Confirmation", category: "Payment Activity", logic: "ALL",
+    description: "Propose one receipt after a successful payment when no confirmation has been sent. Use the recorded payment outcome and never send a success receipt for a pending or failed payment.",
+    conditions: [{ id: "succeeded", field: "Payment Processing Status", operator: "Is", value: "Succeeded" }, { id: "not-confirmed", field: "Payment Confirmation Sent", operator: "Is", value: "No" }], action: "Send Payment Confirmation",
+  },
+].map((rule) => ({
+  ...rule, logic: rule.logic as RuleLogic, type: "System Rule", clientId: null,
+  status: "Draft", createdBy: "PayFlow", lastUpdated: "10 Nov 2026", triggers7d: 0,
+  appliedTo: [], history: [{ at: "10 Nov 2026", change: "Essential rule draft created for client review", by: "PayFlow" }],
+}));
+
 export const rulesSeed: Rule[] = [
+  ...essentialRules,
   {
     id: "high-balance-review",
     name: "High Balance Review",
