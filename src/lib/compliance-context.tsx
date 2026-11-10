@@ -3,7 +3,7 @@ import { createStableContext } from "./stable-context";
 import { useRole } from "./role-context";
 import { useRules } from "./rules-context";
 import { operationalRuleSelected } from "./client-rule-selection";
-import { complianceSeed, holidaySeed, evaluateRules, type ComplianceRule, type ComplianceAudit, type Holiday, type EvaluationInput, type EvaluationResult } from "./compliance-data";
+import { complianceSeed, jurisdictionLibraryRules, holidaySeed, evaluateRules, type ComplianceRule, type ComplianceAudit, type Holiday, type EvaluationInput, type EvaluationResult } from "./compliance-data";
 
 interface ComplianceValue {
   rules: ComplianceRule[]; audit: ComplianceAudit[]; holidays: Holiday[];
@@ -16,7 +16,7 @@ const ComplianceContext = createStableContext<ComplianceValue | null>("complianc
 export function ComplianceProvider({ children }: { children: ReactNode }) {
   const { isAdmin, userName, allClients, visibleClientIds } = useRole();
   const { allRules } = useRules();
-  const [rules, setRules] = useState(complianceSeed);
+  const [rules, setRules] = useState(() => [...complianceSeed, ...jurisdictionLibraryRules]);
   const [holidays, setHolidays] = useState(holidaySeed);
   const [audit, setAudit] = useState<ComplianceAudit[]>([{ id: "AUD-SEED", ruleId: "CMP-001", ruleName: complianceSeed[0]?.name ?? "Sample rule", event: "Sample rules created", by: "PayFlow sample catalogue", at: "2026-11-01T12:00:00Z", reason: "Illustrative configurations requiring legal validation", before: null, after: complianceSeed, approval: "Sample configuration" }]);
   const value = useMemo<ComplianceValue>(() => {
