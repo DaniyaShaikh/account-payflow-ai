@@ -84,5 +84,6 @@ const categoryHelp: Record<string, string> = {
   "Holidays & Restricted Dates": "Don't contact customers on holidays or blocked dates.",
   "Content": "Text every message must include, like opt-out wording.",
   "Contact Restrictions": "Stop contact in special situations (e.g. dispute, hardship).",
+  "Notice & Waiting Periods": "Send required notices first and wait before contacting.",
   "Additional Controls": "Record keeping and other safeguards.",
 };
