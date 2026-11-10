@@ -14,3 +14,4 @@
 - Calculate contact windows from recipient IANA time zones using Intl and real UTC instants so daylight saving transitions preserve local-time restrictions.
 - Reuse client rule selectors in onboarding, configuration, Rules and simulated import; keep operational selections in ClientConfig and never clone another client's configuration for a new import.
 - Introduce reusable operational catalogue additions as unassigned drafts in rules-data; explicit activation and client selection prevent silently changing existing client execution.
+- Record jurisdiction research and reusable rule types (JUR codes) in src/lib/jurisdiction-library.ts as pure data seeded as Draft compliance rules; new rule types are added there, not hardcoded in UI.
