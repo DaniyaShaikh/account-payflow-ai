@@ -17,7 +17,7 @@ describe("client rule choices", () => {
     expect(matches.map(r => r.id)).toContain("CMP-005");
   });
   it("preserves existing operational choices including unchecked rules", () => {
-    const r = rulesSeed[0]; if (!r) throw new Error("Missing seed");
+    const r = rulesSeed.find(rule => rule.id === "high-balance-review"); if (!r) throw new Error("Missing seed");
     expect(operationalRuleSelected(r, "paypal", makeConfig())).toBe(true);
     expect(operationalRuleSelected(r, "paypal", makeConfig({ selectedOperationalRules: [] }))).toBe(false);
     expect(operationalRuleSelected(r, "paypal", makeConfig({ selectedOperationalRules: [r.id] }))).toBe(true);
