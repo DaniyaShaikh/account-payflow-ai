@@ -1,5 +1,9 @@
 # Roadmap
 
+## Essential operational rules
+- [ ] Add editable unsubscribe, fallback, payment follow-up and communication safeguards as reusable draft System rules.
+- [ ] Verify rule editing, client selection and simulated enforcement tests.
+
 ## Client rule selection
 - [x] Share compliance and operational rule selection across onboarding and Client Rules.
 - [x] Preserve existing client selections during file import; configure new clients independently.
