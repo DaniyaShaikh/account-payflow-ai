@@ -1,15 +1,16 @@
+import { jurisdictionLibrary, ruleTemplates } from "./jurisdiction-library";
 import type { Rule } from "./rules-data";
 
-export const complianceCategories = ["Consent & Opt-Out", "Reply Handling", "Frequency", "Permitted Hours", "Holidays & Restricted Dates", "Content", "Contact Restrictions", "Additional Controls"] as const;
+export const complianceCategories = ["Consent & Opt-Out", "Reply Handling", "Frequency", "Permitted Hours", "Holidays & Restricted Dates", "Content", "Contact Restrictions", "Notice & Waiting Periods", "Additional Controls"] as const;
 export type ComplianceCategory = typeof complianceCategories[number];
 export type ComplianceStatus = "Draft" | "Pending Approval" | "Active" | "Inactive" | "Archived";
 export type ComplianceAction = "Allow" | "Block" | "Reschedule" | "Suppress" | "Require Approval" | "Flag for Review";
 export interface Jurisdiction { country: string; state: string; region: string; postal: string; timezone: string }
 export const emptyJurisdiction: Jurisdiction = { country: "", state: "", region: "", postal: "", timezone: "America/Toronto" };
 export const countries = ["United States", "Canada"];
-export const statesFor = (country: string) => country === "Canada" ? ["Ontario", "Quebec", "British Columbia", "Alberta"] : ["California", "New York", "Texas", "Florida"];
+export const statesFor = (country: string) => country === "Canada" ? ["Alberta", "British Columbia", "Manitoba", "New Brunswick", "Newfoundland and Labrador", "Nova Scotia", "Ontario", "Prince Edward Island", "Quebec", "Saskatchewan"] : ["California", "Florida", "Massachusetts", "New York", "Texas", "Washington"];
 export const complianceChannels = ["All Channels", "Email", "SMS", "Voice", "WhatsApp"];
-export const conditionFields = ["Consent", "Opt-Out", "Contact Attempts", "Outside Permitted Hours", "Restricted Date", "Do Not Contact", "Cease Communication", "Disputed Debt", "Legal Representation", "Bankruptcy", "Deceased", "Hardship", "Third-Party Contact", "Sender Identified", "Unsubscribe Instructions", "Template Approved", "Reply Handling Enabled", "Language", "Communication Type", "Outstanding Balance", "Days Past Due"];
+export const conditionFields = ["Consent", "Opt-Out", "Contact Attempts", "Outside Permitted Hours", "Restricted Date", "Do Not Contact", "Cease Communication", "Disputed Debt", "Legal Representation", "Bankruptcy", "Deceased", "Hardship", "Third-Party Contact", "Sender Identified", "Unsubscribe Instructions", "Template Approved", "Reply Handling Enabled", "Language", "Communication Type", "Outstanding Balance", "Days Past Due", "Days Since Last Contact", "Days Since Conversation", "Channel Permitted", "Workplace Contact", "Employer Email", "Written Notice Sent", "Days Since Notice", "Validation Notice Sent", "Accounting Request Overdue", "Time-Barred Debt", "Unauthorized Fee", "Collector Licensed", "Outside Customer Preference", "Chargeable Method"];
 export const conditionOperators = ["Equals", "Greater Than", "Less Than", "Between", "Includes", "Excludes"];
 export interface ComplianceCondition { id: string; field: string; operator: string; value: string; period: number }
 export interface Holiday { id: string; name: string; date: string; recurring: boolean; country: string; state: string; source: string }
@@ -51,6 +52,19 @@ export const complianceSeed: ComplianceRule[] = [
   seed("CMP-009", "Quebec · language review", "Additional Controls", "Canada", "Language", "French", "Flag for Review", { status: "Pending Approval", jurisdiction: { ...emptyJurisdiction, country: "Canada", state: "Quebec" }, enforcement: "Advisory" }),
   seed("CMP-010", "California · approved content", "Content", "United States", "Template Approved", "No", "Require Approval", { status: "Draft", jurisdiction: { ...emptyJurisdiction, country: "United States", state: "California", timezone: "America/Los_Angeles" } }),
 ];
+const tzFor = (country: string, state = "") => ({ Alberta: "America/Edmonton", "British Columbia": "America/Vancouver", Manitoba: "America/Winnipeg", Saskatchewan: "America/Regina", "Nova Scotia": "America/Halifax", "New Brunswick": "America/Moncton", "Prince Edward Island": "America/Halifax", "Newfoundland and Labrador": "America/St_Johns", Washington: "America/Los_Angeles", California: "America/Los_Angeles", Texas: "America/Chicago" } as Record<string, string>)[state] ?? (country === "Canada" ? "America/Toronto" : "America/New_York");
+/** Recorded jurisdiction library as Draft rules: visible and editable, but never executed until an admin activates them. */
+export const jurisdictionLibraryRules: ComplianceRule[] = jurisdictionLibrary.map(e => {
+  const t = ruleTemplates.find(x => x.code === e.code)!; const base = newComplianceRule();
+  const field = e.limit ? "Contact Attempts" : e.field ?? t.field;
+  const value = e.limit ? String(e.limit.count - 1) : e.value ?? (e.period ? String(e.period) : t.value);
+  const operator = e.limit ? "Greater Than" : e.operator ?? t.operator ?? "Equals";
+  const h = e.hours; const sun = h?.sunStart;
+  return { ...base, id: e.id, name: e.name, category: t.category as ComplianceCategory, description: `${t.code} ${t.name}: ${e.description}`, reference: `${e.reference} — illustrative, legal validation required`, source: e.source,
+    jurisdiction: { country: e.country, state: e.state ?? "", region: e.region ?? "", postal: "", timezone: tzFor(e.country, e.state) }, channel: e.channel ?? "All Channels", status: "Draft", action: t.action as ComplianceAction,
+    conditions: [{ id: `${e.id}-1`, field, operator, value, period: e.limit?.periodDays ?? e.period ?? 7 }],
+    settings: { ...base.settings, ...(h ? { start: h.start, end: h.end, weekendStart: sun ?? h.start, weekendEnd: e.hours?.sunEnd ?? h.end, days: h.days } : {}), ...(e.limit ? { weekly: e.limit.count } : {}) } };
+});
 export const holidaySeed: Holiday[] = [
   { id: "hol-1", name: "New Year’s Day — sample blackout", date: "2026-01-01", recurring: true, country: "Canada", state: "", source: "Illustrative calendar; legal validation required" },
   { id: "hol-2", name: "Christmas Day — sample blackout", date: "2026-12-25", recurring: true, country: "Canada", state: "", source: "Illustrative calendar; legal validation required" },
