@@ -14,10 +14,10 @@ export const Route = createFileRoute("/compliance/new")({
 });
 function NewRule() {
   const { clientId } = Route.useSearch(); const { visibleClients } = useRole(); const client = visibleClients.find(c => c.id === clientId);
-  const [code, setCode] = useState(""); const t = ruleTemplates.find(x => x.code === code); const base = newComplianceRule();
+  const [code, setCode] = useState(""); const label = (r: typeof ruleTemplates[number]) => `${r.code} · ${r.name}`; const t = ruleTemplates.find(x => label(x) === code); const base = newComplianceRule();
   const initial: ComplianceRule = { ...base, clientId: client?.id ?? null, jurisdiction: client?.config.jurisdiction ?? base.jurisdiction,
     ...(t ? { name: t.name, category: t.category as ComplianceRule["category"], action: t.action as ComplianceRule["action"], description: `${t.code} ${t.name}: ${t.example}`, conditions: [{ id: "c1", field: t.field, operator: t.operator ?? "Equals", value: t.value, period: 7 }] } : {}) };
   return <><PageHeader title="Add Compliance Rule" breadcrumb={[{ label: "Compliance Rules", to: "/compliance" }, { label: "New Rule" }]} /><ComplianceNotice />
-    <div className="mb-5 max-w-xl"><Field label="Start from a rule type (optional)"><SelectInput value={code} options={["", ...ruleTemplates.map(r => r.code)]} onChange={setCode} /></Field>{t ? <p className="mt-1 text-xs text-muted-foreground">{t.name} — {t.example}. Default action: {t.action}.</p> : <p className="mt-1 text-xs text-muted-foreground">Pick a type (JUR-01 to JUR-25) to pre-fill the form, or start blank for any new kind of rule.</p>}</div>
+    <div className="mb-5 max-w-xl"><Field label="Start from a rule type (optional)"><SelectInput value={code} options={["", ...ruleTemplates.map(label)]} onChange={setCode} /></Field>{t ? <p className="mt-1 text-xs text-muted-foreground">{t.name} — {t.example}. Default action: {t.action}.</p> : <p className="mt-1 text-xs text-muted-foreground">Pick a type (JUR-01 to JUR-25) to pre-fill the form, or start blank for any new kind of rule.</p>}</div>
     <ComplianceEditor key={code} initial={initial} /></>;
 }
