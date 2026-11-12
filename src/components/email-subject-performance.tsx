@@ -293,7 +293,7 @@ export function EmailSubjectPerformance() {
                       </Btn>
                     </th>
                   ))}
-                  <th className="border-y border-border px-3 text-left">Details</th>
+                  <th className="sticky right-0 border-y border-border bg-surface px-3 text-left">Details</th>
                 </tr>
               </thead>
               <tbody>
@@ -313,7 +313,7 @@ export function EmailSubjectPerformance() {
                           : Number(row[c.key]).toLocaleString()}
                       </Td>
                     ))}
-                    <Td>
+                    <Td className="sticky right-0 bg-card">
                       <Btn variant="ghost" onClick={() => setDetail(row)}>
                         View Details
                       </Btn>
@@ -396,22 +396,8 @@ export function EmailSubjectPerformance() {
                 <SubjectExamples
                   rows={rows.filter((r) => r.delivered >= MIN_SUBJECT_DELIVERIES).slice(0, 3)}
                   onView={setDetail}
+                  reminderFor={r => [...new Set(records.filter(e => normalizeSubject(e.subject) === r.subject).map(e => e.stage))].join(', ')}
                 />
-                {rows
-                  .filter((r) => r.delivered >= MIN_SUBJECT_DELIVERIES)
-                  .slice(0, 3)
-                  .map((r) => (
-                    <p key={r.subject} className="mt-1 text-[11px] text-muted-foreground">
-                      {r.subject} ·{" "}
-                      {[
-                        ...new Set(
-                          records
-                            .filter((e) => normalizeSubject(e.subject) === r.subject)
-                            .map((e) => e.stage),
-                        ),
-                      ].join(", ")}
-                    </p>
-                  ))}
               </div>
             </div>
             <p className="mt-4 border-t border-border pt-3 text-[11px] leading-relaxed text-muted-foreground">
@@ -425,8 +411,8 @@ export function EmailSubjectPerformance() {
       </Panel>
       <EmailSubjectDetails
         row={detail}
-        records={records}
-        comparisons={rows}
+        records={filterEmails({ ...filters, search: "" })}
+        comparisons={aggregateSubjects(filterEmails({ ...filters, search: "" }))}
         onClose={() => setDetail(undefined)}
       />
     </section>

@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { messageTemplates, templateForNode } from "./strategy-data";
 import {
   aggregateSubjects,
   emailRecords,
@@ -37,6 +38,12 @@ const payment: PaymentTransaction = {
   stage: row.stage,
 };
 describe("subject analytics rules", () => {
+  it("keeps selected subjects draft-scoped without changing shared email templates", () => {
+    const original = messageTemplates.find(t => t.id === "em-reminder")?.subject;
+    const template = templateForNode({ id: "draft", kind: "Communication", title: "Reminder", origin: "Human Modified", config: { templateId: "em-reminder", channel: "Email", subjectOverride: "Your payment options are ready when you are" } });
+    expect(template?.subject).toBe("Your payment options are ready when you are");
+    expect(messageTemplates.find(t => t.id === "em-reminder")?.subject).toBe(original);
+  });
   it("normalizes insignificant spacing without merging distinct text", () => {
     expect(normalizeSubject(row.subject)).toBe("Payment reminder");
     expect(normalizeSubject("payment reminder")).not.toBe(normalizeSubject(row.subject));

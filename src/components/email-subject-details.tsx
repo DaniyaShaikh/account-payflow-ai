@@ -25,15 +25,17 @@ import { seedStrategies } from "@/lib/strategy-data";
 export function SubjectExamples({
   rows,
   onView,
+  reminderFor,
 }: {
   rows: SubjectMetrics[];
   onView?: (row: SubjectMetrics) => void;
+  reminderFor?: (row: SubjectMetrics) => string;
 }) {
   return (
     <div className="divide-y divide-border">
       {rows.map((row) => (
         <div key={row.subject} className="py-3 text-xs">
-          <div className="flex items-start justify-between gap-3">
+          <div className="flex flex-wrap items-start justify-between gap-2">
             <p className="font-semibold text-foreground">{row.subject}</p>
             {onView && (
               <Btn variant="ghost" onClick={() => onView(row)}>
@@ -41,6 +43,7 @@ export function SubjectExamples({
               </Btn>
             )}
           </div>
+          {reminderFor && <p className="mt-1 text-[11px] text-muted-foreground">{reminderFor(row)}</p>}
           <p className="mt-1 leading-relaxed text-muted-foreground">
             {row.delivered.toLocaleString()} delivered · {percentage(row.openRate)} estimated opens
             · {percentage(row.clickRate)} clicks · {row.completed} completed payments ·{" "}
