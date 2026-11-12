@@ -203,6 +203,7 @@ function RootComponent() {
     select: (s) =>
       s.location.pathname.startsWith("/pay/") ||
       s.location.pathname.startsWith("/login") ||
+      s.location.pathname.startsWith("/unsubscribe/") ||
       s.location.pathname.startsWith("/activate"),
   });
 
