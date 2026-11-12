@@ -30,7 +30,7 @@ export function customerEmail(c: Pick<Communication, "customer">) {
 }
 export function senderAddressFor(clientId: string) { return `reminders@${clientId.replace(/[^a-z]/g, "")}.payflow-mail.com`; }
 export function maskEmail(email: string) {
-  const [u, d] = email.split("@");
+  const [u = "", d = ""] = email.split("@");
   return `${u.slice(0, 2)}${"•".repeat(Math.max(2, u.length - 2))}@${d}`;
 }
 /** Mock secure token per email communication (opaque, non-guessable looking). */
