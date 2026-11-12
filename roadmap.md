@@ -1,5 +1,11 @@
 # Roadmap
 
+## Email subject performance
+- [ ] Add consistent mock communication analytics, filters, rankings and rule tests.
+- [ ] Add dashboard subject KPIs, sortable table, details and simulated AI insights without changing existing sections.
+- [ ] Add contextual historical examples and selectable subjects to the workflow email editor.
+- [ ] Verify dashboard filters, details, draft selection and mobile layout.
+
 ## Essential operational rules
 - [x] Add unsubscribe, fallback, payment follow-up and communication safeguards as reusable draft System rules using existing activation and client selection controls.
 - [x] Verify signed-in rule details and client selection / simulated enforcement tests (34 tests pass).
