@@ -1,7 +1,7 @@
 import { jurisdictionLibrary, ruleTemplates } from "./jurisdiction-library";
 import type { Rule } from "./rules-data";
 
-export const complianceCategories = ["Consent & Opt-Out", "Reply Handling", "Frequency", "Permitted Hours", "Holidays & Restricted Dates", "Content", "Contact Restrictions", "Notice & Waiting Periods", "Additional Controls"] as const;
+export const complianceCategories = ["Unsubscribe Option", "Reply Handling", "Frequency", "Permitted Hours", "Holidays & Restricted Dates", "Content", "Contact Restrictions", "Notice & Waiting Periods", "Additional Controls"] as const;
 export type ComplianceCategory = typeof complianceCategories[number];
 export type ComplianceStatus = "Draft" | "Pending Approval" | "Active" | "Inactive" | "Archived";
 export type ComplianceAction = "Allow" | "Block" | "Reschedule" | "Suppress" | "Require Approval" | "Flag for Review";
@@ -33,7 +33,7 @@ export interface EvaluationInput {
 export interface EvaluationResult { result: "Allowed" | "Blocked" | "Reschedule" | "Review Required"; matches: { id: string; name: string; reason: string; action: string; layer: string }[]; evaluated: string[]; nextWindow?: string }
 
 export function newComplianceRule(): ComplianceRule {
-  return { id: "", name: "", category: "Consent & Opt-Out", description: "", reference: "Illustrative configuration — legal validation required", source: "", jurisdiction: { ...emptyJurisdiction, country: "Canada" }, channel: "Email", enforcement: "Mandatory", priority: 100, from: "2026-01-01", until: "", status: "Draft", action: "Block", logic: "AND", conditions: [{ id: "c1", field: "Consent", operator: "Equals", value: "No", period: 7 }], clientId: null, version: 1,
+  return { id: "", name: "", category: "Unsubscribe Option", description: "", reference: "Illustrative configuration — legal validation required", source: "", jurisdiction: { ...emptyJurisdiction, country: "Canada" }, channel: "Email", enforcement: "Mandatory", priority: 100, from: "2026-01-01", until: "", status: "Draft", action: "Block", logic: "AND", conditions: [{ id: "c1", field: "Consent", operator: "Equals", value: "No", period: 7 }], clientId: null, version: 1,
     settings: { start: "09:00", end: "18:00", weekendStart: "10:00", weekendEnd: "16:00", days: [1, 2, 3, 4, 5], intervalHours: 0, daily: 0, weekly: 0, monthly: 0, combined: true, reply: "Two-way", keywords: "STOP, HELP", consentMethod: "Recorded customer preference", consentExpiryDays: 0, resubscribe: true, promotionalOnly: false, requiredText: "", retentionDays: 365 } };
 }
 function seed(id: string, name: string, category: ComplianceCategory, country: string, field: string, value: string, action: ComplianceAction, overrides: Partial<ComplianceRule> = {}): ComplianceRule {
@@ -41,8 +41,8 @@ function seed(id: string, name: string, category: ComplianceCategory, country: s
   return { ...base, id, name, category, jurisdiction: { ...base.jurisdiction, country }, status: "Active", channel: "All Channels", action, conditions: [{ id: `${id}-1`, field, operator: "Equals", value, period: 7 }], ...overrides };
 }
 export const complianceSeed: ComplianceRule[] = [
-  seed("CMP-001", "Canada · channel opt-out suppression", "Consent & Opt-Out", "Canada", "Opt-Out", "Yes", "Suppress"),
-  seed("CMP-002", "Canada · explicit consent", "Consent & Opt-Out", "Canada", "Consent", "No", "Block", { channel: "SMS" }),
+  seed("CMP-001", "Canada · channel opt-out suppression", "Unsubscribe Option", "Canada", "Opt-Out", "Yes", "Suppress"),
+  seed("CMP-002", "Canada · explicit consent", "Unsubscribe Option", "Canada", "Consent", "No", "Block", { channel: "SMS" }),
   seed("CMP-003", "Ontario · recipient-local contact window", "Permitted Hours", "Canada", "Outside Permitted Hours", "Yes", "Reschedule", { jurisdiction: { ...emptyJurisdiction, country: "Canada", state: "Ontario" } }),
   seed("CMP-004", "United States · rolling voice attempts", "Frequency", "United States", "Contact Attempts", "7", "Block", { channel: "Voice", conditions: [{ id: "a", field: "Contact Attempts", operator: "Greater Than", value: "6", period: 7 }] }),
   seed("CMP-005", "United States · cease communication", "Contact Restrictions", "United States", "Cease Communication", "Yes", "Suppress"),
@@ -117,7 +117,7 @@ function triggered(r: ComplianceRule, i: EvaluationInput, holidays: Holiday[]) {
   const configured = conditions.length > 0 && (r.logic === "AND" ? conditions.every(Boolean) : conditions.some(Boolean));
   const limits = (r.settings.daily > 0 && i.attemptsDaily >= r.settings.daily) || (r.settings.weekly > 0 && i.attempts >= r.settings.weekly) || (r.settings.monthly > 0 && i.attemptsMonthly >= r.settings.monthly);
   const interval = r.settings.intervalHours > 0 && i.lastContactAt && new Date(i.at).getTime() - new Date(i.lastContactAt).getTime() < r.settings.intervalHours * 3600000;
-  const expiredConsent = r.category === "Consent & Opt-Out" && r.settings.consentExpiryDays > 0 && (!i.consentDate || new Date(i.at).getTime() - new Date(i.consentDate).getTime() >= r.settings.consentExpiryDays * 86400000);
+  const expiredConsent = r.category === "Unsubscribe Option" && r.settings.consentExpiryDays > 0 && (!i.consentDate || new Date(i.at).getTime() - new Date(i.consentDate).getTime() >= r.settings.consentExpiryDays * 86400000);
   const missingContent = r.category === "Content" && r.settings.requiredText.trim() && !(i.messageText ?? "").toLowerCase().includes(r.settings.requiredText.trim().toLowerCase());
   return configured || !!expiredConsent || !!missingContent || (r.category === "Frequency" && !!(limits || interval));
 }
