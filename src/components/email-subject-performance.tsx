@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowDown, ArrowUp, RotateCcw, Sparkles } from "lucide-react";
+import { ArrowDown, ArrowUp, RotateCcw, SlidersHorizontal, ChevronDown, ChevronUp } from "lucide-react";
 import {
   Panel,
   KpiCard,
@@ -26,11 +26,11 @@ import {
   normalizeSubject,
   percentage,
   reminderTypes,
-  subjectInsight,
   subjectLeaders,
   type SubjectMetrics,
 } from "@/lib/email-subject-data";
-import { EmailSubjectDetails, SubjectExamples } from "./email-subject-details";
+import { EmailSubjectDetails } from "./email-subject-details";
+import { SubjectInsightButton } from "./subject-insight-button";
 const columns: { label: string; key: keyof SubjectMetrics }[] = [
   { label: "Email Subject", key: "subject" },
   { label: "Emails Sent", key: "sent" },
@@ -58,6 +58,8 @@ export function EmailSubjectPerformance() {
   const [ascending, setAscending] = useState(false);
   const [detail, setDetail] = useState<SubjectMetrics>();
   const [loading, setLoading] = useState(true);
+  const [moreFilters, setMoreFilters] = useState(false);
+  const [allMetrics, setAllMetrics] = useState(false);
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 250);
     return () => clearTimeout(timer);
@@ -101,6 +103,9 @@ export function EmailSubjectPerformance() {
     [rows, sort, ascending],
   );
   const leaders = subjectLeaders(rows);
+  const displayedColumns = allMetrics ? columns : columns.filter(c => ["subject", "delivered", "openRate", "clickRate", "completed", "conversion"].includes(c.key));
+  const insightKey = JSON.stringify(filters);
+  const contextFor = (row: SubjectMetrics | undefined) => row ? [...new Set(records.filter(r => normalizeSubject(r.subject) === row.subject).map(r => `${visibleClients.find(c => c.id === r.clientId)?.name ?? r.clientId} · ${r.stage}`))].join(" / ") : "Selected filters";
   const unattributed = emailPayments.filter(
     (p) => p.status === "Succeeded" && !p.communicationId && matchesContext(p, filters),
   ).length;
@@ -149,6 +154,13 @@ export function EmailSubjectPerformance() {
               }}
               options={["All Clients", ...visibleClients.map((c) => c.name)]}
             />
+            <Btn variant="ghost" onClick={() => setMoreFilters(v => !v)}><SlidersHorizontal className="size-3.5" />Filters{portfolios.length || workflow !== "All Workflows" || stage !== "All Reminder Types" ? " · Applied" : ""}</Btn>
+            <Btn variant="ghost" onClick={reset}>
+              <RotateCcw className="size-3.5" />
+              Reset
+            </Btn>
+          </div>
+          {moreFilters && <div className="mt-3 flex flex-wrap gap-2">
             {clientId && (
               <FilterMultiSelect
                 label="Sub-Client / Portfolio"
@@ -170,11 +182,7 @@ export function EmailSubjectPerformance() {
               onChange={setStage}
               options={["All Reminder Types", ...reminderTypes]}
             />
-            <Btn variant="ghost" onClick={reset}>
-              <RotateCcw className="size-3.5" />
-              Reset
-            </Btn>
-          </div>
+          </div>}
           {range === "Custom Range" && (
             <div className="mt-3 flex flex-wrap gap-3">
               {[
@@ -218,9 +226,10 @@ export function EmailSubjectPerformance() {
                     ["Highest Payment Conversion", leaders.conversion, "conversion"],
                   ] as const
                 ).map(([label, row, metric]) => (
-                  <div key={label} className="min-w-0">
+                  <div key={label} className="relative min-w-0">
+                    <div className="absolute right-2 top-2 z-10"><SubjectInsightButton key={`${insightKey}-${metric}`} row={row} label={label} context={contextFor(row)} onDetails={setDetail} /></div>
                     <KpiCard
-                      label={label}
+                      label={label === "Highest Payment Conversion" ? "Best Conversion" : label === "Most Payments Generated" ? "Most Payments" : label === "Most Opened Subject" ? "Most Opened" : "Most Clicked"}
                       value={counts(row, metric)}
                       hint={
                         !row
@@ -240,12 +249,11 @@ export function EmailSubjectPerformance() {
                   </div>
                 ))}
           </div>
-          <p className="mb-3 text-[11px] leading-relaxed text-muted-foreground">
-            Open tracking is an estimate due to privacy protections and automated email-client
-            activity. All rates use Delivered as the denominator. Conversion rankings require at
-            least {MIN_SUBJECT_DELIVERIES} deliveries. Not attributed: {unattributed} successful
-            transactions{search ? " in the selected context (not subject-linked)" : ""}.
-          </p>
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-[11px] text-muted-foreground">Opens are estimates · Payments count successful transactions</p>
+            <Btn variant="ghost" onClick={() => setAllMetrics(v => !v)}>{allMetrics ? "Key metrics" : "All metrics"}{allMetrics ? <ChevronUp className="size-3.5" /> : <ChevronDown className="size-3.5" />}</Btn>
+          </div>
+          <details className="mb-3 text-[11px] text-muted-foreground"><summary className="cursor-pointer">Measurement notes · {unattributed} not attributed</summary><p className="mt-2 leading-relaxed">Open tracking is estimated due to privacy protections and automated email-client activity. All rates use Delivered as the denominator. Conversion rankings require {MIN_SUBJECT_DELIVERIES} deliveries. Attribution uses the last payment-link click within 7 days; each successful transaction is credited once. {unattributed} successful transactions have no subject attribution. Outcomes depend on client mix, reminder stage and email body, not just the subject.</p></details>
         </div>
         {loading ? (
           <div className="px-5 pb-4" role="status">
@@ -266,10 +274,10 @@ export function EmailSubjectPerformance() {
           </div>
         ) : (
           <div className="max-h-[440px] overflow-auto">
-            <table className="w-full min-w-[1550px] border-collapse text-xs">
+            <table className={`w-full ${allMetrics ? "min-w-[1550px]" : "min-w-[800px]"} border-collapse text-xs`}>
               <thead className="sticky top-0 z-10 bg-surface">
                 <tr>
-                  {columns.map((c) => (
+                  {displayedColumns.map((c) => (
                     <th
                       key={c.key}
                       aria-sort={sort === c.key ? (ascending ? "ascending" : "descending") : "none"}
@@ -306,7 +314,7 @@ export function EmailSubjectPerformance() {
                         {row.delivered < MIN_SUBJECT_DELIVERIES ? " · Low sample" : ""}
                       </p>
                     </Td>
-                    {columns.slice(1).map((c) => (
+                    {displayedColumns.slice(1).map((c) => (
                       <Td key={c.key} className="tabular px-3">
                         {["openRate", "clickRate", "conversion"].includes(c.key)
                           ? percentage(Number(row[c.key]))
@@ -314,6 +322,7 @@ export function EmailSubjectPerformance() {
                       </Td>
                     ))}
                     <Td className="sticky right-0 bg-card">
+                      <SubjectInsightButton key={`${insightKey}-${row.subject}`} row={row} label={row.subject} context={contextFor(row)} onDetails={setDetail} />
                       <Btn variant="ghost" onClick={() => setDetail(row)}>
                         View Details
                       </Btn>
