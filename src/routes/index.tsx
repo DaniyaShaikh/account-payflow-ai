@@ -74,7 +74,6 @@ function stageStatus(stage: string): string | undefined {
   }
 }
 
-
 function hashSeed(input: string) {
   let h = 0;
   for (let i = 0; i < input.length; i++) h = (h * 31 + input.charCodeAt(i)) >>> 0;
@@ -243,7 +242,12 @@ function CommunicationFunnel() {
                   label: p.label,
                   volume: p.volume,
                   of: deliveredVolume,
-                  tone: p.label === "Inbox" ? "bg-teal" : p.label === "Spam" ? "bg-warning" : "bg-primary",
+                  tone:
+                    p.label === "Inbox"
+                      ? "bg-teal"
+                      : p.label === "Spam"
+                        ? "bg-warning"
+                        : "bg-primary",
                 }))
               : null;
         return (
@@ -257,11 +261,18 @@ function CommunicationFunnel() {
                 const body = (
                   <>
                     <div className="flex items-center justify-between gap-1.5">
-                      <span className={cn("text-[11.5px] font-semibold", isPaid ? "text-success" : "text-foreground")}>
+                      <span
+                        className={cn(
+                          "text-[11.5px] font-semibold",
+                          isPaid ? "text-success" : "text-foreground",
+                        )}
+                      >
                         {m.label}
                       </span>
                       {expandable && (
-                        <span className="text-[10.5px] text-muted-foreground">{isOpen ? "▴" : "▾"}</span>
+                        <span className="text-[10.5px] text-muted-foreground">
+                          {isOpen ? "▴" : "▾"}
+                        </span>
                       )}
                     </div>
                     <p className="tabular mt-2 text-[19px] leading-none font-bold tracking-tight text-foreground">
@@ -269,7 +280,10 @@ function CommunicationFunnel() {
                     </p>
                     <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-secondary">
                       <div
-                        className={cn("h-full rounded-full", isPaid ? "bg-teal" : i === 0 ? "bg-navy" : "bg-primary")}
+                        className={cn(
+                          "h-full rounded-full",
+                          isPaid ? "bg-teal" : i === 0 ? "bg-navy" : "bg-primary",
+                        )}
                         style={{ width: `${Math.max(5, (m.volume / (total || 1)) * 100)}%` }}
                       />
                     </div>
@@ -283,7 +297,12 @@ function CommunicationFunnel() {
                   isOpen && "bg-surface ring-1 ring-inset ring-primary/40",
                 );
                 return expandable ? (
-                  <button key={m.key} type="button" className={cls} onClick={() => setExpanded(isOpen ? null : m.key)}>
+                  <button
+                    key={m.key}
+                    type="button"
+                    className={cls}
+                    onClick={() => setExpanded(isOpen ? null : m.key)}
+                  >
                     {body}
                   </button>
                 ) : (
@@ -309,14 +328,24 @@ function CommunicationFunnel() {
                 </p>
                 <div className="grid gap-3 sm:grid-cols-3">
                   {breakdown.map((b) => (
-                    <div key={b.label} className="rounded-md border border-border bg-card px-3 py-2.5">
+                    <div
+                      key={b.label}
+                      className="rounded-md border border-border bg-card px-3 py-2.5"
+                    >
                       <div className="flex items-baseline justify-between gap-2">
                         <span className="text-[11.5px] text-muted-foreground">{b.label}</span>
-                        <span className="tabular text-[10.5px] text-muted-foreground">{pct(b.volume, b.of)}</span>
+                        <span className="tabular text-[10.5px] text-muted-foreground">
+                          {pct(b.volume, b.of)}
+                        </span>
                       </div>
-                      <p className="tabular mt-1 text-[16px] font-bold text-foreground">{formatNumber(b.volume)}</p>
+                      <p className="tabular mt-1 text-[16px] font-bold text-foreground">
+                        {formatNumber(b.volume)}
+                      </p>
                       <div className="mt-2 h-1 overflow-hidden rounded-full bg-secondary">
-                        <div className={cn("h-full rounded-full", b.tone)} style={{ width: `${b.of ? (b.volume / b.of) * 100 : 0}%` }} />
+                        <div
+                          className={cn("h-full rounded-full", b.tone)}
+                          style={{ width: `${b.of ? (b.volume / b.of) * 100 : 0}%` }}
+                        />
                       </div>
                     </div>
                   ))}
@@ -350,9 +379,7 @@ function Dashboard() {
     .filter((p): p is NonNullable<typeof p> => !!p);
 
   const scoped =
-    client === "All Clients"
-      ? visibleClients
-      : visibleClients.filter((c) => c.name === client);
+    client === "All Clients" ? visibleClients : visibleClients.filter((c) => c.name === client);
 
   const totalAccounts =
     selectedPortfolios.length > 0
@@ -477,11 +504,14 @@ function Dashboard() {
             </StatusPill>
           </Link>
         </div>
-        {!reviewCounts.awaiting && !failedComms && !paymentTotals.failedPayments && !integrationAttention && (
-          <p className="mt-3 text-[12px] text-muted-foreground">
-            Nothing requires attention right now.
-          </p>
-        )}
+        {!reviewCounts.awaiting &&
+          !failedComms &&
+          !paymentTotals.failedPayments &&
+          !integrationAttention && (
+            <p className="mt-3 text-[12px] text-muted-foreground">
+              Nothing requires attention right now.
+            </p>
+          )}
       </Panel>
 
       <CommunicationFunnel />

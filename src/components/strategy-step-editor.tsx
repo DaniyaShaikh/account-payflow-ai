@@ -109,8 +109,7 @@ export function StepConfigForm({
           </div>
           <Field label="Template" hint="What the customer receives at this step.">
             <SelectInput
-              value={activeTemplate?.name ?? templates[0]?.name ?? ""
-              }
+              value={activeTemplate?.name ?? templates[0]?.name ?? ""}
               options={templates.map((t) => t.name)}
               disabled={!canEdit}
               onChange={(name) => {
@@ -120,11 +119,47 @@ export function StepConfigForm({
             />
           </Field>
           <TemplatePreview node={node} />
-          {(node.config.channel ?? "Email") === "Email" && <>
-            <Field label="Email subject"><TextInput value={activeTemplate?.subject ?? ""} disabled={!canEdit} onChange={subjectOverride => onChange({ subjectOverride })} /></Field>
-            <EmailPerformanceSuggestions key={`${node.id}-${node.config.purpose}`} clientId={strategy.clientId} workflowId={strategy.id} purpose={node.config.purpose ?? "Payment Reminder"} subject={activeTemplate?.subject} canEdit={canEdit} defaultStage={node.config.purpose === "Firm Reminder" ? "Final reminder" : node.config.purpose === "Payment Plan Reminder" ? "Payment plan" : node.config.purpose === "Promise-to-Pay Reminder" ? "Promise to pay" : "First reminder"} onSelect={subjectOverride => onChange({ subjectOverride })} />
-          </>}
-          <details className="border-t border-border pt-3"><summary className="cursor-pointer text-xs font-semibold text-primary">Compliance execution preview</summary><div className="mt-3"><CommunicationCompliance clientId={strategy.clientId} channel={node.config.channel ?? "Email"} templateText={activeTemplate?.body ?? ""} /></div></details>
+          {(node.config.channel ?? "Email") === "Email" && (
+            <>
+              <Field label="Email subject">
+                <TextInput
+                  value={activeTemplate?.subject ?? ""}
+                  disabled={!canEdit}
+                  onChange={(subjectOverride) => onChange({ subjectOverride })}
+                />
+              </Field>
+              <EmailPerformanceSuggestions
+                key={`${node.id}-${node.config.purpose}`}
+                clientId={strategy.clientId}
+                workflowId={strategy.id}
+                purpose={node.config.purpose ?? "Payment Reminder"}
+                subject={activeTemplate?.subject}
+                canEdit={canEdit}
+                defaultStage={
+                  node.config.purpose === "Firm Reminder"
+                    ? "Final reminder"
+                    : node.config.purpose === "Payment Plan Reminder"
+                      ? "Payment plan"
+                      : node.config.purpose === "Promise-to-Pay Reminder"
+                        ? "Promise to pay"
+                        : "First reminder"
+                }
+                onSelect={(subjectOverride) => onChange({ subjectOverride })}
+              />
+            </>
+          )}
+          <details className="border-t border-border pt-3">
+            <summary className="cursor-pointer text-xs font-semibold text-primary">
+              Compliance execution preview
+            </summary>
+            <div className="mt-3">
+              <CommunicationCompliance
+                clientId={strategy.clientId}
+                channel={node.config.channel ?? "Email"}
+                templateText={activeTemplate?.body ?? ""}
+              />
+            </div>
+          </details>
         </>
       )}
 
@@ -163,7 +198,11 @@ export function StepConfigForm({
 
       {node.kind === "Human Review" && (
         <Field label="Review Note" hint="Shown to the supervisor who picks up the review.">
-          <TextArea value={node.config.note ?? ""} disabled={!canEdit} onChange={(v) => onChange({ note: v })} />
+          <TextArea
+            value={node.config.note ?? ""}
+            disabled={!canEdit}
+            onChange={(v) => onChange({ note: v })}
+          />
         </Field>
       )}
 
@@ -223,7 +262,9 @@ export function StepConfigForm({
               <TextInput
                 value={String(node.config.amount ?? 0)}
                 disabled={!canEdit}
-                onChange={(v) => onChange({ amount: Math.max(0, Number(v.replace(/\D/g, "")) || 0) })}
+                onChange={(v) =>
+                  onChange({ amount: Math.max(0, Number(v.replace(/\D/g, "")) || 0) })
+                }
               />
             </Field>
             <Field label="Unit">
