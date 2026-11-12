@@ -5,16 +5,23 @@ import { applicableRules, type ComplianceRule } from "./compliance-data";
 import type { ClientConfig } from "./payflow-data";
 
 export const unsubscribeReasons = [
-  "I receive too many emails",
-  "I have already made the payment",
-  "These emails are not relevant to me",
-  "I prefer another communication method",
-  "I don't recognize this account",
-  "I have privacy concerns",
+  "Too many emails / contacting too often",
+  "Prefer a different channel (SMS, phone or mail)",
+  "Already paid or arranged a plan",
+  "Not the right person / wrong contact",
+  "Dispute this debt / don't believe I owe this",
+  "Working with an attorney or agency",
+  "Content not helpful or relevant",
+  "Prefer not to receive collection emails",
   "Other",
 ] as const;
 export type UnsubscribeReason = (typeof unsubscribeReasons)[number];
-export const reviewReasons: string[] = ["I have already made the payment", "I don't recognize this account"];
+export const reviewReasons: string[] = [
+  "Already paid or arranged a plan",
+  "Not the right person / wrong contact",
+  "Dispute this debt / don't believe I owe this",
+  "Working with an attorney or agency",
+];
 export type UnsubscribeStatus = "Unsubscribed" | "Under Review" | "Resubscribed";
 export const unsubscribeStatuses: UnsubscribeStatus[] = ["Unsubscribed", "Under Review", "Resubscribed"];
 
@@ -51,13 +58,13 @@ const mock = (i: number, clientId: string, customer: string, reference: string, 
   history: [{ at, label: "Unsubscribed via email footer link" }, { at, label: "Email reminders suppressed for this Client" }],
 });
 const seed: UnsubscribeRecord[] = [
-  mock(1, "canadian-tire", "Olivia Martin", "CT-23011", "Your Canadian Tire account balance", "I receive too many emails", daysAgo(0, 9)),
-  mock(2, "paypal", "Ethan Wright", "PP-13402", "A settlement option for your PayPal account", "I have already made the payment", daysAgo(0, 11), "Paid by bank transfer last Friday."),
+  mock(1, "canadian-tire", "Olivia Martin", "CT-23011", "Your Canadian Tire account balance", "Too many emails / contacting too often", daysAgo(0, 9)),
+  mock(2, "paypal", "Ethan Wright", "PP-13402", "A settlement option for your PayPal account", "Already paid or arranged a plan", daysAgo(0, 11), "Paid by bank transfer last Friday."),
   mock(3, "northstar-utilities", "Grace Patel", "NS-30877", "Your Northstar Utilities balance", null, daysAgo(3)),
-  mock(4, "canadian-tire", "Noah Wilson", "CT-22109", "Your next Canadian Tire installment", "I prefer another communication method", daysAgo(6), "Please text me instead."),
-  mock(5, "paypal", "Ava Thompson", "PP-12877", "Reminder: payment due on your PayPal account", "I don't recognize this account", daysAgo(9)),
-  mock(6, "northstar-utilities", "Liam Roy", "NS-29954", "Your Northstar Utilities balance", "I have privacy concerns", daysAgo(14)),
-  mock(7, "canadian-tire", "Mia Gagnon", "CT-21450", "Your Canadian Tire account balance", "These emails are not relevant to me", daysAgo(40)),
+  mock(4, "canadian-tire", "Noah Wilson", "CT-22109", "Your next Canadian Tire installment", "Prefer a different channel (SMS, phone or mail)", daysAgo(6), "Please text me instead."),
+  mock(5, "paypal", "Ava Thompson", "PP-12877", "Reminder: payment due on your PayPal account", "Not the right person / wrong contact", daysAgo(9)),
+  mock(6, "northstar-utilities", "Liam Roy", "NS-29954", "Your Northstar Utilities balance", "Dispute this debt / don't believe I owe this", daysAgo(14)),
+  mock(7, "canadian-tire", "Mia Gagnon", "CT-21450", "Your Canadian Tire account balance", "Content not helpful or relevant", daysAgo(40)),
 ];
 
 let records = seed;
