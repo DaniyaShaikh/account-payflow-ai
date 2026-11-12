@@ -31,6 +31,9 @@ export interface NodeConfig {
   note?: string;
   /** Message template used for Communication steps. */
   templateId?: string;
+  /** Human-selected draft subject; never changes the shared template. */
+  subjectOverride?: string;
+  reminderStage?: string;
 }
 
 export interface StrategyNode {
@@ -840,7 +843,10 @@ export function templateForNode(node: StrategyNode): MessageTemplate | undefined
   const byId = node.config.templateId
     ? messageTemplates.find((t) => t.id === node.config.templateId)
     : undefined;
-  return byId ?? templatesFor(node.config.channel, node.config.purpose)[0];
+  const template = byId ?? templatesFor(node.config.channel, node.config.purpose)[0];
+  return template && node.config.subjectOverride && template.channel === "Email"
+    ? { ...template, subject: node.config.subjectOverride }
+    : template;
 }
 
 /* ------------------------------ segment scope ----------------------------- */

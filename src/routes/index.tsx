@@ -20,6 +20,7 @@ import {
   subClientNamesForClient,
 } from "@/lib/portfolio-data";
 import { cn } from "@/lib/utils";
+import { EmailSubjectPerformance } from "@/components/email-subject-performance";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -484,6 +485,8 @@ function Dashboard() {
       </Panel>
 
       <CommunicationFunnel />
+
+      <EmailSubjectPerformance />
 
       <Panel
         title="Payment Outcomes"

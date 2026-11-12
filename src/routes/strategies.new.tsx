@@ -12,6 +12,7 @@ import {
   StatusPill,
 } from "@/components/payflow-ui";
 import { StrategyCanvas } from "@/components/strategy-canvas";
+import { EmailPerformanceSuggestions } from "@/components/email-performance-suggestions";
 import { useRole } from "@/lib/role-context";
 import { useStrategies } from "@/lib/strategy-context";
 import { clientName } from "@/lib/payflow-data";
@@ -60,6 +61,7 @@ type Step = {
   kind: StrategyNodeKind;
   channel?: string;
   purpose?: string;
+  subjectOverride?: string;
   amount: number;
   unit: string;
 };
@@ -155,6 +157,7 @@ function buildNodes(steps: Step[]): Record<string, StrategyNode> {
         step.kind === "Communication"
           ? {
               channel: step.channel ?? "Email",
+              subjectOverride: step.subjectOverride,
               purpose: step.purpose ?? messagePurposes[0]!,
               referenceEvent: "Previous Action",
               amount: step.amount,
@@ -484,14 +487,14 @@ function CreateStrategyPage() {
                           <SelectInput
                             value={step.channel ?? "Email"}
                             options={channels}
-                            onChange={(v) => patchStep(step.id, { channel: v })}
+                            onChange={(v) => patchStep(step.id, { channel: v, subjectOverride: "" })}
                           />
                         </Field>
                         <Field label="Message purpose">
                           <SelectInput
                             value={step.purpose ?? messagePurposes[0]!}
                             options={messagePurposes}
-                            onChange={(v) => patchStep(step.id, { purpose: v })}
+                            onChange={(v) => patchStep(step.id, { purpose: v, subjectOverride: "" })}
                           />
                         </Field>
                         <Field label="Days after previous step">
@@ -527,6 +530,10 @@ function CreateStrategyPage() {
                         </Field>
                       </div>
                     )}
+                    {step.kind === "Communication" && (step.channel ?? "Email") === "Email" && <>
+                      {step.subjectOverride && <p className="mt-2 break-words text-xs font-semibold">Draft subject: {step.subjectOverride}</p>}
+                      <EmailPerformanceSuggestions key={`${step.id}-${clientId}-${step.purpose}`} clientId={clientId} workflowId="new-workflow" purpose={step.purpose ?? "Payment Reminder"} subject={step.subjectOverride} defaultStage={step.purpose === "Payment Plan Reminder" ? "Payment plan" : step.purpose === "Firm Reminder" ? "Final reminder" : i > 0 ? "Second reminder" : "First reminder"} onSelect={subjectOverride => patchStep(step.id, { subjectOverride })} />
+                    </>}
                     {step.kind === "Condition" && (
                       <p className="mt-2 text-[11.5px] text-muted-foreground">
                         Checks whether the payment was received. YES closes the case as paid; NO
