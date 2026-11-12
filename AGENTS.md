@@ -15,3 +15,5 @@
 - Reuse client rule selectors in onboarding, configuration, Rules and simulated import; keep operational selections in ClientConfig and never clone another client's configuration for a new import.
 - Introduce reusable operational catalogue additions as unassigned drafts in rules-data; explicit activation and client selection prevent silently changing existing client execution.
 - Record jurisdiction research and reusable rule types (JUR codes) in src/lib/jurisdiction-library.ts as pure data seeded as Draft compliance rules; new rule types are added there, not hardcoded in UI.
+- Keep frontend subject analytics in email-subject-data with per-communication unique events and deduplicated successful transaction attribution, so dashboard and draft suggestions share consistent metrics without live services.
+- Store selected email subjects as node configuration overrides rather than mutating shared templates, so draft suggestions preserve other workflows and existing approval controls.

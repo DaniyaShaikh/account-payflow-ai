@@ -1,6 +1,7 @@
 import type { Tone } from "@/components/payflow-ui";
 
-export type StrategyStatus = "Draft" | "AI Proposed" | "Under Review" | "Approved" | "Active" | "Inactive";
+export type StrategyStatus =
+  "Draft" | "AI Proposed" | "Under Review" | "Approved" | "Active" | "Inactive";
 
 export type StrategyNodeKind =
   | "Trigger"
@@ -31,6 +32,9 @@ export interface NodeConfig {
   note?: string;
   /** Message template used for Communication steps. */
   templateId?: string;
+  /** Human-selected draft subject; never changes the shared template. */
+  subjectOverride?: string | undefined;
+  reminderStage?: string;
 }
 
 export interface StrategyNode {
@@ -402,7 +406,12 @@ const financeNodes: StrategyNode[] = [
     kind: "AI Reassessment",
     title: "Reassess engaged customer",
     origin: "AI Proposed",
-    config: { referenceEvent: "Last Customer Response", amount: 1, unit: "Days", direction: "After" },
+    config: {
+      referenceEvent: "Last Customer Response",
+      amount: 1,
+      unit: "Days",
+      direction: "After",
+    },
     next: "o1",
   }),
   n({
@@ -655,7 +664,11 @@ export const seedStrategies: Strategy[] = [
     entryNodeId: "t1",
     nodes: nodeMap(financeNodes),
     versions: [
-      { version: "v1.1", date: "14 Sep 2026", note: "Supervisor replaced second SMS with a firm email" },
+      {
+        version: "v1.1",
+        date: "14 Sep 2026",
+        note: "Supervisor replaced second SMS with a firm email",
+      },
       { version: "v1.0", date: "13 Sep 2026", note: "Proposed by PayFlow AI" },
     ],
   },
@@ -840,19 +853,15 @@ export function templateForNode(node: StrategyNode): MessageTemplate | undefined
   const byId = node.config.templateId
     ? messageTemplates.find((t) => t.id === node.config.templateId)
     : undefined;
-  return byId ?? templatesFor(node.config.channel, node.config.purpose)[0];
+  const template = byId ?? templatesFor(node.config.channel, node.config.purpose)[0];
+  return template && node.config.subjectOverride && template.channel === "Email"
+    ? { ...template, subject: node.config.subjectOverride }
+    : template;
 }
 
 /* ------------------------------ segment scope ----------------------------- */
 
-export const ageBands = [
-  "All ages",
-  "18 – 24",
-  "25 – 34",
-  "35 – 49",
-  "50 – 64",
-  "65 and over",
-];
+export const ageBands = ["All ages", "18 – 24", "25 – 34", "35 – 49", "50 – 64", "65 and over"];
 export const postalRegions = [
   "All regions",
   "Ontario (M, L, K, N, P)",
@@ -967,7 +976,8 @@ for (const strategy of seedStrategies) {
  * The human keeps full control of every step afterwards.
  */
 export function suggestedNodes(segment: StrategySegment): Record<string, StrategyNode> {
-  const smsFirst = segment.balanceBand === "Under $500" || segment.delinquency === "90+ days past due";
+  const smsFirst =
+    segment.balanceBand === "Under $500" || segment.delinquency === "90+ days past due";
   const first: StrategyNode = {
     id: "c1",
     kind: "Communication",
