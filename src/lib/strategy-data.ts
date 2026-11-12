@@ -32,7 +32,7 @@ export interface NodeConfig {
   /** Message template used for Communication steps. */
   templateId?: string;
   /** Human-selected draft subject; never changes the shared template. */
-  subjectOverride?: string;
+  subjectOverride?: string | undefined;
   reminderStage?: string;
 }
 

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Btn, FilterSelect, StatusPill } from './payflow-ui';
 import { historicalExamples, percentage, reminderTypes } from '@/lib/email-subject-data';
-export function EmailPerformanceSuggestions({ clientId, workflowId, purpose, subject, onSelect, canEdit=true, defaultStage='First reminder' }: { clientId:string; workflowId:string; purpose:string; subject?:string; onSelect:(subject:string)=>void; canEdit?:boolean; defaultStage?:string }) {
+export function EmailPerformanceSuggestions({ clientId, workflowId, purpose, subject, onSelect, canEdit=true, defaultStage='First reminder' }: { clientId:string; workflowId:string; purpose:string; subject?:string | undefined; onSelect:(subject:string)=>void; canEdit?:boolean; defaultStage?:string }) {
   const [stage,setStage]=useState(defaultStage);
   const [expanded,setExpanded]=useState(false);
   const history=historicalExamples(clientId,workflowId,stage,purpose);

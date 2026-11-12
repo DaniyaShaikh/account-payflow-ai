@@ -45,7 +45,7 @@ seedPortfolios.filter((_, i) => i % 2 === 0).forEach((portfolio, context) => {
   });
   emailPayments.push({ id: `unlinked-${context}`, communicationId: null, status: 'Succeeded', date: ANALYTICS_DATE, clientId: portfolio.clientId, portfolioId: portfolio.id, workflowId: workflow.id, stage: 'Second reminder' });
 });
-export interface SubjectFilters { clientIds: string[]; portfolioIds?: string[]; workflowId?: string; stage?: string; start?: string; end?: string; search?: string }
+export interface SubjectFilters { clientIds: string[]; portfolioIds?: string[]; workflowId?: string | undefined; stage?: string | undefined; start?: string; end?: string; search?: string }
 export function matchesContext(row: Omit<EmailRecord, 'id' | 'subject' | 'delivered' | 'openEvents' | 'clickEvents' | 'paymentLinkClicked' | 'initiated' | 'bodyId' | 'purpose'>, filters: SubjectFilters) {
   return filters.clientIds.includes(row.clientId) && (!filters.portfolioIds?.length || filters.portfolioIds.includes(row.portfolioId)) && (!filters.workflowId || row.workflowId === filters.workflowId) && (!filters.stage || row.stage === filters.stage) && (!filters.start || row.date >= filters.start) && (!filters.end || row.date <= filters.end);
 }
