@@ -13,6 +13,8 @@ import {
 import { paymentTokenForAccount } from "@/lib/payment-data";
 import { cn } from "@/lib/utils";
 import { CommunicationCompliance } from "@/components/communication-compliance";
+import { useCompliance } from "@/lib/compliance-context";
+import { customerEmail, isSuppressed, unsubscribeFooterRequired, unsubscribeToken, useUnsubscribes } from "@/lib/unsubscribe-data";
 
 export const Route = createFileRoute("/communications/$communicationId")({
   head: () => ({
@@ -57,7 +59,9 @@ function Expandable({ title, children }: { title: string; children: React.ReactN
 
 function CommunicationDetail() {
   const { communicationId } = Route.useParams();
-  const { canSeeClient } = useRole();
+  const { canSeeClient, allClients } = useRole();
+  const { rules } = useCompliance();
+  useUnsubscribes();
   const comm = communicationById(communicationId);
   if (!comm) return <Panel title="Communication unavailable">This communication could not be found.</Panel>;
 
@@ -79,6 +83,9 @@ function CommunicationDetail() {
   const brand = brandingFor(comm.clientId);
   // Secure payment link into the external, client-branded customer experience.
   const payLink = account ? `/pay/${paymentTokenForAccount(account)}` : null;
+
+  const showUnsub = comm.channel === "Email" && unsubscribeFooterRequired(rules, comm.clientId, allClients.find((c) => c.id === comm.clientId)?.config);
+  const suppressed = comm.channel === "Email" && isSuppressed(comm.clientId, customerEmail(comm));
 
   const facts = [
     { label: "Client", value: clientName(comm.clientId) },
@@ -117,6 +124,13 @@ function CommunicationDetail() {
           </div>
         }
       />
+
+      {suppressed && (
+        <div className="mb-5 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-[13px] text-foreground">
+          <StatusPill tone="danger">Unsubscribed</StatusPill>{" "}
+          This customer unsubscribed from {clientName(comm.clientId)} email reminders. Future eligible email reminders for this Client are suppressed; other channels and Clients are not affected.
+        </div>
+      )}
 
       {comm.reviewId && (
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-warning/30 bg-warning/10 px-4 py-3">
@@ -222,6 +236,13 @@ function CommunicationDetail() {
                   </div>
                 )}
                 <p className="text-[12px] text-muted-foreground">{brand.signature}</p>
+                {showUnsub && (
+                  <div className="border-t border-border pt-3 text-center">
+                    <Link to="/unsubscribe/$token" params={{ token: unsubscribeToken(comm.id) }} className="text-[11px] text-muted-foreground underline">
+                      Unsubscribe from these emails
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
           </Panel>

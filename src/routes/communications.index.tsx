@@ -1,6 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader, Panel, KpiCard, StatusPill } from "@/components/payflow-ui";
 import { CommunicationTable, useVisibleCommunications } from "@/components/communication-table";
+import { UnsubscribersPanel } from "@/components/unsubscribers-panel";
+import { Link } from "@tanstack/react-router";
+import { cn } from "@/lib/utils";
 import { commSummary, dropOffSegmentOf, dropOffSegments } from "@/lib/communication-data";
 
 export const Route = createFileRoute("/communications/")({
@@ -28,6 +31,7 @@ export const Route = createFileRoute("/communications/")({
     channel?: string | undefined;
     client?: string | undefined;
     journey?: string | undefined;
+    tab?: string | undefined;
   } => {
     const pick = (key: string) =>
       typeof search[key] === "string" ? (search[key] as string) : undefined;
@@ -36,6 +40,7 @@ export const Route = createFileRoute("/communications/")({
       channel: pick("channel"),
       client: pick("client"),
       journey: pick("journey"),
+      tab: pick("tab"),
     };
   },
 
@@ -54,6 +59,19 @@ function CommunicationsPage() {
         description="Monitor customer collection communications across Clients and channels."
       />
 
+      <div className="mb-4 flex gap-1 border-b border-border">
+        {(["Communications", "Unsubscribers"] as const).map((t) => {
+          const active = (search.tab === "unsubscribers") === (t === "Unsubscribers");
+          return (
+            <Link key={t} to="/communications" search={{ ...search, tab: t === "Unsubscribers" ? "unsubscribers" : undefined }}
+              className={cn("-mb-px border-b-2 px-3 py-2 text-[13px] font-medium", active ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground")}>
+              {t}
+            </Link>
+          );
+        })}
+      </div>
+
+      {search.tab === "unsubscribers" ? <UnsubscribersPanel /> : <>
       <div className="mb-4 grid gap-3 sm:grid-cols-3 xl:grid-cols-5">
         <KpiCard label="Sent Today" value={String(summary.sentToday)} />
         <KpiCard label="Delivered" value={String(summary.delivered)} />
@@ -85,6 +103,7 @@ function CommunicationsPage() {
           initialJourney={search.journey ?? "All Workflows"}
         />
       </Panel>
+      </>}
     </>
   );
 }

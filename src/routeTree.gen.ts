@@ -47,6 +47,7 @@ import { Route as RulesNewRouteImport } from './routes/rules.new'
 import { Route as StrategiesIndexRouteImport } from './routes/strategies.index'
 import { Route as StrategiesStrategyIdRouteImport } from './routes/strategies.$strategyId'
 import { Route as StrategiesNewRouteImport } from './routes/strategies.new'
+import { Route as UnsubscribeTokenRouteImport } from './routes/unsubscribe.$token'
 import { Route as UsersIndexRouteImport } from './routes/users.index'
 import { Route as UsersUserIdRouteImport } from './routes/users.$userId'
 import { Route as PlatformProductsIndexRouteImport } from './routes/platform.products.index'
@@ -244,6 +245,11 @@ const StrategiesNewRoute = StrategiesNewRouteImport.update({
   path: '/strategies/new',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UnsubscribeTokenRoute = UnsubscribeTokenRouteImport.update({
+  id: '/unsubscribe/$token',
+  path: '/unsubscribe/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UsersIndexRoute = UsersIndexRouteImport.update({
   id: '/users/',
   path: '/users/',
@@ -294,6 +300,7 @@ export interface FileRoutesByFullPath {
   '/rules/new': typeof RulesNewRoute
   '/strategies/$strategyId': typeof StrategiesStrategyIdRoute
   '/strategies/new': typeof StrategiesNewRoute
+  '/unsubscribe/$token': typeof UnsubscribeTokenRoute
   '/users/$userId': typeof UsersUserIdRoute
   '/accounts/': typeof AccountsIndexRoute
   '/clients/': typeof ClientsIndexRoute
@@ -338,6 +345,7 @@ export interface FileRoutesByTo {
   '/rules/new': typeof RulesNewRoute
   '/strategies/$strategyId': typeof StrategiesStrategyIdRoute
   '/strategies/new': typeof StrategiesNewRoute
+  '/unsubscribe/$token': typeof UnsubscribeTokenRoute
   '/users/$userId': typeof UsersUserIdRoute
   '/accounts': typeof AccountsIndexRoute
   '/clients': typeof ClientsIndexRoute
@@ -383,6 +391,7 @@ export interface FileRoutesById {
   '/rules/new': typeof RulesNewRoute
   '/strategies/$strategyId': typeof StrategiesStrategyIdRoute
   '/strategies/new': typeof StrategiesNewRoute
+  '/unsubscribe/$token': typeof UnsubscribeTokenRoute
   '/users/$userId': typeof UsersUserIdRoute
   '/accounts/': typeof AccountsIndexRoute
   '/clients/': typeof ClientsIndexRoute
@@ -429,6 +438,7 @@ export interface FileRouteTypes {
     | '/rules/new'
     | '/strategies/$strategyId'
     | '/strategies/new'
+    | '/unsubscribe/$token'
     | '/users/$userId'
     | '/accounts/'
     | '/clients/'
@@ -473,6 +483,7 @@ export interface FileRouteTypes {
     | '/rules/new'
     | '/strategies/$strategyId'
     | '/strategies/new'
+    | '/unsubscribe/$token'
     | '/users/$userId'
     | '/accounts'
     | '/clients'
@@ -517,6 +528,7 @@ export interface FileRouteTypes {
     | '/rules/new'
     | '/strategies/$strategyId'
     | '/strategies/new'
+    | '/unsubscribe/$token'
     | '/users/$userId'
     | '/accounts/'
     | '/clients/'
@@ -562,6 +574,7 @@ export interface RootRouteChildren {
   RulesNewRoute: typeof RulesNewRoute
   StrategiesStrategyIdRoute: typeof StrategiesStrategyIdRoute
   StrategiesNewRoute: typeof StrategiesNewRoute
+  UnsubscribeTokenRoute: typeof UnsubscribeTokenRoute
   UsersUserIdRoute: typeof UsersUserIdRoute
   AccountsIndexRoute: typeof AccountsIndexRoute
   ClientsIndexRoute: typeof ClientsIndexRoute
@@ -847,6 +860,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StrategiesNewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/unsubscribe/$token': {
+      id: '/unsubscribe/$token'
+      path: '/unsubscribe/$token'
+      fullPath: '/unsubscribe/$token'
+      preLoaderRoute: typeof UnsubscribeTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/users/': {
       id: '/users/'
       path: '/users'
@@ -906,6 +926,7 @@ const rootRouteChildren: RootRouteChildren = {
   RulesNewRoute: RulesNewRoute,
   StrategiesStrategyIdRoute: StrategiesStrategyIdRoute,
   StrategiesNewRoute: StrategiesNewRoute,
+  UnsubscribeTokenRoute: UnsubscribeTokenRoute,
   UsersUserIdRoute: UsersUserIdRoute,
   AccountsIndexRoute: AccountsIndexRoute,
   ClientsIndexRoute: ClientsIndexRoute,
