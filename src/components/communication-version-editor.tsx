@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, Plus, RotateCcw, Save, Trash2 } from "lucide-react";
+import { RotateCcw, Save, Trash2 } from "lucide-react";
 import { Btn, Field, SelectInput, StatusPill, TextArea, TextInput } from "./payflow-ui";
 import { TemplatePreview } from "./strategy-step-editor";
 import { EmailPerformanceSuggestions } from "./email-performance-suggestions";
@@ -29,7 +29,6 @@ export function CommunicationVersionEditor({ strategy, node, canEdit, onChange, 
   const [draft, setDraft] = useState<CommunicationVersion | null>(null);
   const [preview, setPreview] = useState("Email");
   const [notice, setNotice] = useState("");
-  const [addSegment, setAddSegment] = useState("");
   const [removeOpen, setRemoveOpen] = useState(false);
   const saved = versions.find((v) => v.id === selected) ?? versions[0];
   if (!saved) return null;
@@ -39,7 +38,7 @@ export function CommunicationVersionEditor({ strategy, node, canEdit, onChange, 
   const edit = (patch: Partial<CommunicationVersion>) => {
     setDraft({ ...value, ...patch });
     if (!dirty) {
-      updateVersions(replaceCommunicationVersion(versions, { ...saved, hasUnsavedChanges: true, status: saved.status === "Reviewed" ? "Pending Review" : "Modified" }));
+      updateVersions(replaceCommunicationVersion(versions, { ...saved, hasUnsavedChanges: true, status: "Modified" }));
       onDirtyChange?.(true);
     }
     setNotice("");
@@ -58,7 +57,7 @@ export function CommunicationVersionEditor({ strategy, node, canEdit, onChange, 
   const rule = segments.rules.find((r) => r.id === saved.id);
   const active = segmentIsActive(segments, saved.id);
   const label = (id: string) => versionLabel(id, segments);
-  const addable = segments.rules.filter((r) => segmentIsActive(segments, r.id) && !versions.some((v) => v.id === r.id));
+  const statusLabel = (version: CommunicationVersion) => version.hasUnsavedChanges ? "Unsaved changes" : version.status === "Final" ? "Final" : "Saved draft";
   const contextValue = (pattern: RegExp) => strategy.aiContext.filter((c) => pattern.test(c.label)).map((c) => `${c.label}: ${c.value}`).join(" · ");
   const context = [
     { label: "Age group", value: rule?.kind === "Age group" ? `Age ${rule.minAge}${rule.maxAge === null ? "+" : `–${rule.maxAge}`}` : "Not used for this version" },
@@ -72,10 +71,10 @@ export function CommunicationVersionEditor({ strategy, node, canEdit, onChange, 
   return <div className="min-w-0 space-y-3 border-t border-border pt-3">
     <div className="flex flex-wrap items-center justify-between gap-2">
       <h3 className="text-xs font-semibold">Communication versions</h3>
-      <StatusPill tone={saved.status === "Reviewed" && !dirty ? "success" : "warning"}>{dirty ? "Unsaved changes" : saved.status}</StatusPill>
+      <StatusPill tone={saved.status === "Final" && !dirty ? "success" : "neutral"}>{dirty ? "Unsaved changes" : statusLabel(saved)}</StatusPill>
       <CommunicationSegmentManager config={segments} availableIds={versions.map((v) => v.id)} canManage={canManage} blocked={dirty} onSave={(next) => {
         onChange(generateCustomerVersions(applyCommunicationSegments(versions, segments, next), next, mockWorkflowCustomers(strategy)));
-        setNotice("Segments saved. Existing mock customer combinations generated; new or changed versions require review.");
+        setNotice("Segments saved. Customer combinations are available in Selected version and will be finalized with workflow approval.");
       }} />
     </div>
     <Field label="Selected version">
@@ -84,15 +83,6 @@ export function CommunicationVersionEditor({ strategy, node, canEdit, onChange, 
     </Field>
     <p className="text-[11px] text-muted-foreground">{saved.id === "default" ? "Fallback when no available segment version matches." : rule ? segmentCriteria(rule) : "Segment criteria unavailable"}{!active && " · Disabled; excluded from approval requirements."}</p>
     <p className="text-[11px] text-muted-foreground">Combined versions use existing mock customer age, location and language data only.</p>
-    {canEdit && addable.length > 0 && <div className="flex flex-wrap items-end gap-2">
-      <Field label="Add communication variant" className="min-w-0 flex-1"><SelectInput value={addable.some((r) => r.id === addSegment) ? label(addSegment) : "Choose a segment"} options={["Choose a segment", ...addable.map((r) => r.name)]} disabled={dirty} onChange={(name) => setAddSegment(addable.find((r) => r.name === name)?.id ?? "")} /></Field>
-      <Btn disabled={dirty || !addable.some((r) => r.id === addSegment)} onClick={() => {
-        const base = versions.find((v) => v.id === "default");
-        if (!base || !addable.some((r) => r.id === addSegment)) return;
-        updateVersions([...versions, { ...mockRegenerateVersion({ ...base, id: addSegment }), explanation: `Simulated AI explanation: ${label(addSegment)} uses neutral, clear wording from the approved context. Shared disclosures, terms and collection pressure remain unchanged.` }]);
-        setSelected(addSegment); setAddSegment(""); setNotice("Variant added. Review is required before approval.");
-      }}><Plus className="size-3.5" />Add variant</Btn>
-    </div>}
     <details className="border-t border-border pt-2">
       <summary className="cursor-pointer text-xs font-semibold">Personalization Context · simulated</summary>
       <dl className="mt-2 grid gap-2 text-[11px] sm:grid-cols-2">{context.map((c) => <div key={c.label} className="min-w-0"><dt className="font-medium">{c.label}</dt><dd className="break-words text-muted-foreground">{c.value}</dd></div>)}</dl>
@@ -109,24 +99,20 @@ export function CommunicationVersionEditor({ strategy, node, canEdit, onChange, 
     <div className="flex flex-wrap gap-2">
       <Btn disabled={!canEdit || !dirty || errors.length > 0} onClick={() => {
         updateVersions(replaceCommunicationVersion(versions, saveCommunicationVersion(saved, value)));
-        clearDraft(); setNotice("Version saved. Review is required before approval.");
+        clearDraft(); setNotice("Version saved. It will be finalized when the workflow is approved and activated.");
       }}><Save className="size-3.5" />Save version</Btn>
       {dirty && <Btn onClick={discard}>Discard changes</Btn>}
       <Btn disabled={!canEdit} onClick={() => {
         if (dirty && !window.confirm("Discard unsaved changes and regenerate only this version?")) return;
         updateVersions(replaceCommunicationVersion(versions, mockRegenerateVersion(saved)));
-        clearDraft(); setNotice("This version was regenerated using mock content. Review is required.");
+        clearDraft(); setNotice("Version regenerated. It will be finalized with workflow approval.");
       }}><RotateCcw className="size-3.5" />Regenerate</Btn>
-      <Btn disabled={!canEdit || !active || dirty || errors.length > 0 || saved.status === "Reviewed"} onClick={() => {
-        updateVersions(replaceCommunicationVersion(versions, { ...saved, status: "Reviewed", hasUnsavedChanges: false }));
-        setNotice("Version validated and marked Reviewed.");
-      }}><Check className="size-3.5" />Mark Reviewed</Btn>
       {saved.id !== "default" && <Btn variant="danger" disabled={!canEdit} onClick={() => setRemoveOpen(true)}><Trash2 className="size-3.5" />Remove version</Btn>}
     </div>
     <AlertDialog open={removeOpen} onOpenChange={setRemoveOpen}>
       <AlertDialogContent className="w-[calc(100%-2rem)]">
         <AlertDialogHeader><AlertDialogTitle>Remove this communication version?</AlertDialogTitle><AlertDialogDescription>
-          <strong>{label(saved.id)}</strong> will be removed from this reminder. Other versions will not change. Customers can use another matching reviewed version, or Main / Default if none matches. You can recreate this version later, but it will need a new review.{dirty && " Your unsaved changes to this version will also be discarded."}
+          <strong>{label(saved.id)}</strong> will be removed from this reminder. Other versions will not change. Customers will use Main / Default instead.{dirty && " Unsaved changes to this version will be discarded."}
         </AlertDialogDescription></AlertDialogHeader>
         <AlertDialogFooter><AlertDialogCancel>Keep version</AlertDialogCancel><AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => {
           updateVersions(removeCommunicationVersion(versions, saved.id)); clearDraft(); setSelected("default"); setNotice("Version removed. Main / Default and other versions are unchanged.");
@@ -147,10 +133,10 @@ export function CommunicationVersionEditor({ strategy, node, canEdit, onChange, 
       <EmailPerformanceSuggestions clientId={strategy.clientId} workflowId={strategy.id} purpose={node.config.purpose ?? "Payment Reminder"} subject={value.subject} canEdit={canEdit} onSelect={(subject) => edit({ subject })} />
     </details>
     <div className="border-t border-border pt-3">
-      <h4 className="mb-2 text-xs font-semibold">Version Review Summary</h4>
-      <p className="mb-2 text-[11px] text-muted-foreground">Mark Reviewed confirms the saved content is checked. All enabled versions in active reminder steps must be reviewed before workflow approval; reviewing does not activate the workflow.</p>
+      <h4 className="mb-2 text-xs font-semibold">Version Summary</h4>
+      <p className="mb-2 text-[11px] text-muted-foreground">Approving and activating the workflow finalizes all enabled, saved messages together.</p>
       <ul className="space-y-1.5">{versions.map((v) => <li key={v.id} className="flex items-center justify-between gap-2 text-xs">
-        <span>{label(v.id)}</span><StatusPill tone={!segmentIsActive(segments,v.id) ? "neutral" : v.status === "Reviewed" && !v.hasUnsavedChanges ? "success" : "warning"}>{segmentIsActive(segments,v.id) ? v.status : "Disabled"}</StatusPill>
+        <span>{label(v.id)}</span><StatusPill tone={segmentIsActive(segments,v.id) && v.status === "Final" && !v.hasUnsavedChanges ? "success" : "neutral"}>{segmentIsActive(segments,v.id) ? statusLabel(v) : "Disabled"}</StatusPill>
       </li>)}</ul>
     </div>
   </div>;

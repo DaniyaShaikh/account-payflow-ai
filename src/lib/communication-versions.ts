@@ -12,7 +12,7 @@ export const communicationAgeGroups = [
   { id: "age-65-plus", label: "Age 65+", min: 65, max: Infinity },
 ];
 
-export type VersionStatus = "Pending Review" | "Reviewed" | "Modified";
+export type VersionStatus = "Pending Review" | "Reviewed" | "Modified" | "Final";
 export interface CommunicationVersion {
   id: string;
   subject: string;
@@ -41,7 +41,7 @@ export function initialCommunicationVersions(node: StrategyNode, reviewed = fals
     emailBody: email?.body ?? "Hi {{first_name}},\n\nPlease review your account when convenient.\n\n{{payment_link}}\n\n{{brand_name}}",
     smsContent: sms?.body ?? "{{brand_name}}: Please review account {{account_reference}}. {{payment_link}}",
     explanation: "Simulated AI explanation: uses the available reminder purpose and approved template. Country, region and balance remain workflow context; no age-based changes to terms, disclosures or contact pressure.",
-    status: reviewed ? "Reviewed" : "Pending Review",
+    status: reviewed ? "Final" : "Pending Review",
     revision: 0,
     protectedEmail: "",
     protectedSms: "",
@@ -65,7 +65,7 @@ export function mockRegenerateVersion(version: CommunicationVersion, reviewed = 
     smsContent: `${revision % 2 ? "Account reminder." : "Account summary."} ${version.protectedSms}`,
     explanation: `Simulated AI explanation: ${versionLabel(version.id)} uses a ${revision % 2 ? "plain-language introduction" : "concise introduction"}. Only presentation changes; the approved reminder copy, legal disclosures, payment terms and collection pressure stay identical. Available geographic, balance and reminder context is retained.`,
     revision,
-    status: reviewed ? "Reviewed" : "Pending Review",
+    status: reviewed ? "Final" : "Pending Review",
     hasUnsavedChanges: false,
   };
 }
@@ -82,7 +82,7 @@ export function validateCommunicationVersion(version: CommunicationVersion): str
 }
 
 export function saveCommunicationVersion(previous: CommunicationVersion, draft: CommunicationVersion): CommunicationVersion {
-  return { ...draft, id: previous.id, protectedEmail: previous.protectedEmail, protectedSms: previous.protectedSms, hasUnsavedChanges: false, status: previous.status === "Reviewed" || previous.status === "Pending Review" ? "Pending Review" : "Modified" };
+  return { ...draft, id: previous.id, protectedEmail: previous.protectedEmail, protectedSms: previous.protectedSms, hasUnsavedChanges: false, status: "Modified" };
 }
 
 export function replaceCommunicationVersion(versions: CommunicationVersion[], replacement: CommunicationVersion) {
@@ -96,7 +96,7 @@ export function removeCommunicationVersion(versions: CommunicationVersion[], id:
 /** For preview/future selection only; not connected to simulated workflow execution. */
 export function selectCommunicationVersion(versions: CommunicationVersion[], age?: number) {
   const group = age === undefined ? undefined : communicationAgeGroups.find((g) => age >= g.min && age <= g.max);
-  return versions.find((v) => v.id === group?.id && v.status === "Reviewed" && validateCommunicationVersion(v).length === 0)
+  return versions.find((v) => v.id === group?.id && (v.status === "Final" || v.status === "Reviewed") && validateCommunicationVersion(v).length === 0)
     ?? versions.find((v) => v.id === "default");
 }
 
@@ -104,12 +104,23 @@ export function communicationReviewIssues(strategy: Strategy): string[] {
   return Object.values(strategy.nodes).filter((n) => n.kind === "Communication" && !n.disabled).flatMap((node) => {
     const versions = node.config.communicationVersions ?? initialCommunicationVersions(node);
     const segments = node.config.communicationSegments ?? defaultCommunicationSegments();
-    const issues = versions.filter((v) => segmentIsActive(segments, v.id) && (v.status !== "Reviewed" || validateCommunicationVersion(v).length > 0)).map((v) => `${node.title}: ${versionLabel(v.id, segments)}`);
+    const issues = versions.filter((v) => segmentIsActive(segments, v.id) && validateCommunicationVersion(v).length > 0).map((v) => `${node.title}: ${versionLabel(v.id, segments)}`);
     issues.push(...validateCommunicationSegments(segments).map((issue) => `${node.title}: ${issue}`));
     if (versions.some((v) => v.id !== "default" && !segments.rules.some((r) => r.id === v.id))) issues.push(`${node.title}: configure the missing segment criteria`);
     if (!versions.some((v) => v.id === "default")) issues.push(`${node.title}: Main / Default is required`);
     return issues;
   });
+}
+
+/** Workflow approval finalizes saved valid messages together, never per version. */
+export function finalizeCommunicationVersions(strategy: Strategy): Strategy {
+  if (communicationReviewIssues(strategy).length > 0) return strategy;
+  return { ...strategy, nodes: Object.fromEntries(Object.entries(strategy.nodes).map(([id, node]) => {
+    if (node.kind !== "Communication" || node.disabled) return [id, node];
+    const segments = node.config.communicationSegments ?? defaultCommunicationSegments();
+    const versions = node.config.communicationVersions ?? initialCommunicationVersions(node);
+    return [id, { ...node, config: { ...node.config, communicationVersions: versions.map((version) => segmentIsActive(segments, version.id) ? { ...version, status: "Final" as const } : version) } }];
+  })) };
 }
 
 export function applyCommunicationSegments(versions: CommunicationVersion[], previous: CommunicationSegments, next: CommunicationSegments) {

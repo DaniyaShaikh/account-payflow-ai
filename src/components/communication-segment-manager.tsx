@@ -65,11 +65,11 @@ export function CommunicationSegmentManager({ config, availableIds, canManage, b
             <Field label="Example language"><SelectInput value={language} options={["English", "French", "Arabic", "Unknown"]} onChange={setLanguage} /></Field>
           </div>
           <p className="text-xs text-muted-foreground">Matches: {matches.map((r) => r.name).join(" → ") || "None"}.</p>
-          <p className="text-xs">Expected variant: <strong>{draft.rules.find((r) => r.id === selected)?.name ?? "Main / Default"}</strong>. Highest-priority matching available variant; rules without a version are skipped. All active versions still require review before approval.</p>
+          <p className="text-xs">Expected variant: <strong>{draft.rules.find((r) => r.id === selected)?.name ?? "Main / Default"}</strong>. Highest-priority matching available variant; rules without a version are skipped. Saved messages are finalized together when the workflow is approved.</p>
           <p className="text-xs text-muted-foreground">{selectedRule ? segmentCriteria(selectedRule) : "No available segment version matches."} No changes to workflow execution.</p>
         </section>
         {errors.length > 0 && <ul role="alert" className="space-y-1 text-xs text-destructive">{errors.map((e,i) => <li key={i}>{e}</li>)}</ul>}
-        <p className="text-xs text-muted-foreground">Saving generates missing combined versions only for existing mock customer combinations. Unknown ages use Main / Default. New versions require review. Legal disclosures, payment terms and collection pressure stay identical.</p>
+        <p className="text-xs text-muted-foreground">Saving generates missing combined versions only for existing mock customer combinations. Unknown ages use Main / Default. Messages are finalized with workflow approval. Legal disclosures, payment terms and collection pressure stay identical.</p>
         <div className="flex flex-wrap justify-end gap-2"><Btn onClick={() => setOpen(false)}>Cancel</Btn><Btn variant="primary" disabled={!canManage || errors.length > 0} onClick={() => { onSave(draft); setOpen(false); }}>Save segments</Btn></div>
       </DialogContent>
     </Dialog>

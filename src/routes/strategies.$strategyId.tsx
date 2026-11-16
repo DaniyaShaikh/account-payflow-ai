@@ -154,7 +154,7 @@ function StrategyBuilder() {
         }
       />
 
-      {reviewIssues.length > 0 && <p className="mb-4 text-xs text-muted-foreground" role="status">Approval requires review and validation of {reviewIssues.length} communication version{reviewIssues.length === 1 ? "" : "s"}. Open each communication step to review its versions.</p>}
+      {reviewIssues.length > 0 && <p className="mb-4 text-xs text-muted-foreground" role="status">Save changes and resolve message or segment validation issues before approving the workflow. {reviewIssues.length} issue{reviewIssues.length === 1 ? "" : "s"} remaining.</p>}
 
       {notice && (
         <div className="mb-4 rounded-lg border border-primary/25 bg-primary/[0.06] px-4 py-2.5 text-[12.5px] text-foreground">
