@@ -49,7 +49,7 @@ export function initialCommunicationVersions(node: StrategyNode, reviewed = fals
   base.protectedEmail = base.emailBody;
   base.protectedSms = base.smsContent;
   return node.origin === "AI Proposed"
-    ? [base, mockRegenerateVersion({ ...base, id: communicationAgeGroups[0].id }, reviewed), mockRegenerateVersion({ ...base, id: communicationAgeGroups[5].id }, reviewed)]
+    ? [base, ...communicationAgeGroups.filter((_, index) => index === 0 || index === 5).map((group) => mockRegenerateVersion({ ...base, id: group.id }, reviewed))]
     : [base];
 }
 

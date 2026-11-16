@@ -13,7 +13,7 @@ import type { NodeConfig, Strategy, StrategyNode } from "@/lib/strategy-data";
 
 export function CommunicationVersionEditor({ strategy, node, canEdit, onChange, onDirtyChange }: {
   strategy: Strategy; node: StrategyNode; canEdit: boolean;
-  onChange: (patch: NodeConfig) => void; onDirtyChange?: (dirty: boolean) => void;
+  onChange: (patch: NodeConfig) => void; onDirtyChange?: ((dirty: boolean) => void) | undefined;
 }) {
   const versions = node.config.communicationVersions ?? initialCommunicationVersions(node);
   const [selected, setSelected] = useState("default");

@@ -38,7 +38,7 @@ const addableKinds: StrategyNodeKind[] = [
   "Case Action",
 ];
 
-export function TemplatePreview({ node, content }: { node: StrategyNode; content?: { name: string; channel: string; subject?: string; body: string } }) {
+export function TemplatePreview({ node, content }: { node: StrategyNode; content?: { name: string; channel: string; subject?: string | undefined; body: string } }) {
   const template = content ?? templateForNode(node);
   if (!template) return null;
   const isSms = template.channel === "SMS";
