@@ -26,6 +26,7 @@ export function CommunicationSegmentManager({ config, availableIds, canManage, b
   const example = { age: age.trim() ? Number(age) : undefined, country, region };
   const matches = matchingCommunicationSegments(draft, example);
   const selected = demonstrateVariantMatch(draft, availableIds, example);
+  const selectedRule = draft.rules.find((r) => r.id === selected);
   return <>
     <Btn disabled={blocked} onClick={() => { setDraft(structuredClone(config)); setOpen(true); }}><Settings2 className="size-3.5" />Manage Segments</Btn>
     <Dialog open={open} onOpenChange={setOpen}>
@@ -62,7 +63,7 @@ export function CommunicationSegmentManager({ config, availableIds, canManage, b
           </div>
           <p className="text-xs text-muted-foreground">Matches: {matches.map((r) => r.name).join(" → ") || "None"}.</p>
           <p className="text-xs">Expected variant: <strong>{draft.rules.find((r) => r.id === selected)?.name ?? "Main / Default"}</strong>. Highest-priority matching available variant; rules without a version are skipped. All active versions still require review before approval.</p>
-          <p className="text-xs text-muted-foreground">{selected === "default" ? "No available segment version matches." : segmentCriteria(draft.rules.find((r) => r.id === selected) ?? matches[0] as CommunicationSegment)} No changes to workflow execution.</p>
+          <p className="text-xs text-muted-foreground">{selectedRule ? segmentCriteria(selectedRule) : "No available segment version matches."} No changes to workflow execution.</p>
         </section>
         {errors.length > 0 && <ul role="alert" className="space-y-1 text-xs text-destructive">{errors.map((e,i) => <li key={i}>{e}</li>)}</ul>}
         <p className="text-xs text-muted-foreground">Legal disclosures, payment terms and collection pressure stay identical across demographics. Saving criteria does not generate new versions.</p>
