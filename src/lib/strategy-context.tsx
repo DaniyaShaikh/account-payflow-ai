@@ -1,6 +1,6 @@
 import { useContext, useMemo, useState, type ReactNode } from "react";
 import { createStableContext } from "./stable-context";
-import { communicationReviewIssues, seedCommunicationVersions } from "./communication-versions";
+import { communicationReviewIssues, seedCommunicationVersions, finalizeCommunicationVersions } from "./communication-versions";
 import { seedPortfolios, type Portfolio } from "./portfolio-data";
 import {
   seedStrategies,
@@ -196,7 +196,7 @@ export function StrategyProvider({ children }: { children: ReactNode }) {
       },
       approveStrategy: (strategyId, approver) =>
         patchStrategy(strategyId, (s) => communicationReviewIssues(s).length ? s : ({
-          ...s,
+          ...finalizeCommunicationVersions(s),
           status: "Active",
           approvedBy: approver,
           approvalDate: today,

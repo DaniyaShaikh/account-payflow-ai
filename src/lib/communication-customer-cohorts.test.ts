@@ -34,10 +34,10 @@ describe("customer-based combined versions", () => {
     expect(first.communicationVersions.filter((v) => v.id.startsWith("cohort-")).map((v) => validateCommunicationVersion(v))).toEqual([[], [], []]);
     expect(first.communicationVersions.filter((v) => v.id.startsWith("cohort-") && v.status === "Pending Review")).toHaveLength(2);
   });
-  it("blocks approval on new combined versions even if all legacy versions are reviewed", () => {
+  it("allows valid combined drafts to be approved together without individual review", () => {
     const seeded = seedCommunicationVersions(strategy);
     for (const step of Object.values(seeded.nodes)) for (const v of step.config.communicationVersions ?? []) if (!v.id.startsWith("cohort-")) v.status = "Reviewed";
-    expect(communicationReviewIssues(seeded).some((issue) => issue.includes("Alberta, French"))).toBe(true);
+    expect(communicationReviewIssues(seeded)).toEqual([]);
   });
   it("merges language combinations when language preference is disabled", () => {
     const config = defaultCommunicationSegments();

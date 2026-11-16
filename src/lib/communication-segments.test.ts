@@ -64,7 +64,7 @@ describe("review-only demographic segments", () => {
     const node = Object.values(strategy.nodes).find((n) => n.kind === "Communication");
     const base = node?.config.communicationVersions?.[0];
     if (!node || !base) throw new Error("Missing default");
-    node.config.communicationVersions?.push(mockRegenerateVersion({...base,id:"country-canada"}));
+    node.config.communicationVersions?.push({...mockRegenerateVersion({...base,id:"country-canada"}),subject:""});
     expect(communicationReviewIssues(strategy).some((e) => e.includes("Canada"))).toBe(true);
     node.config.communicationSegments = defaultCommunicationSegments();
     node.config.communicationSegments.enabled.Country = false;
