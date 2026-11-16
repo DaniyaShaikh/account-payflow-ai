@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { CommunicationCompliance } from "./communication-compliance";
-import { EmailPerformanceSuggestions } from "./email-performance-suggestions";
+import { CommunicationVersionEditor } from "./communication-version-editor";
 import { Mail, MessageSquare } from "lucide-react";
 import {
   Dialog,
@@ -38,8 +37,8 @@ const addableKinds: StrategyNodeKind[] = [
   "Case Action",
 ];
 
-export function TemplatePreview({ node }: { node: StrategyNode }) {
-  const template = templateForNode(node);
+export function TemplatePreview({ node, content }: { node: StrategyNode; content?: { name: string; channel: string; subject?: string | undefined; body: string } }) {
+  const template = content ?? templateForNode(node);
   if (!template) return null;
   const isSms = template.channel === "SMS";
   return (
@@ -73,6 +72,7 @@ export function StepConfigForm({
   onChange,
   onToggleDisabled,
   onAddAfter,
+  onDirtyChange,
 }: {
   strategy: Strategy;
   node: StrategyNode;
@@ -80,6 +80,7 @@ export function StepConfigForm({
   onChange: (patch: NodeConfig) => void;
   onToggleDisabled: () => void;
   onAddAfter: (kind: StrategyNodeKind) => void;
+  onDirtyChange?: (dirty: boolean) => void;
 }) {
   const [addKind, setAddKind] = useState<StrategyNodeKind>("Communication");
   const templates = templatesFor(node.config.channel, node.config.purpose);
@@ -118,48 +119,7 @@ export function StepConfigForm({
               }}
             />
           </Field>
-          <TemplatePreview node={node} />
-          {(node.config.channel ?? "Email") === "Email" && (
-            <>
-              <Field label="Email subject">
-                <TextInput
-                  value={activeTemplate?.subject ?? ""}
-                  disabled={!canEdit}
-                  onChange={(subjectOverride) => onChange({ subjectOverride })}
-                />
-              </Field>
-              <EmailPerformanceSuggestions
-                key={`${node.id}-${node.config.purpose}`}
-                clientId={strategy.clientId}
-                workflowId={strategy.id}
-                purpose={node.config.purpose ?? "Payment Reminder"}
-                subject={activeTemplate?.subject}
-                canEdit={canEdit}
-                defaultStage={
-                  node.config.purpose === "Firm Reminder"
-                    ? "Final reminder"
-                    : node.config.purpose === "Payment Plan Reminder"
-                      ? "Payment plan"
-                      : node.config.purpose === "Promise-to-Pay Reminder"
-                        ? "Promise to pay"
-                        : "First reminder"
-                }
-                onSelect={(subjectOverride) => onChange({ subjectOverride })}
-              />
-            </>
-          )}
-          <details className="border-t border-border pt-3">
-            <summary className="cursor-pointer text-xs font-semibold text-primary">
-              Compliance execution preview
-            </summary>
-            <div className="mt-3">
-              <CommunicationCompliance
-                clientId={strategy.clientId}
-                channel={node.config.channel ?? "Email"}
-                templateText={activeTemplate?.body ?? ""}
-              />
-            </div>
-          </details>
+          <CommunicationVersionEditor key={node.id} strategy={strategy} node={node} canEdit={canEdit} onChange={onChange} onDirtyChange={onDirtyChange} />
         </>
       )}
 
@@ -338,8 +298,15 @@ export function StepEditorDialog({
   onToggleDisabled: () => void;
   onAddAfter: (kind: StrategyNodeKind) => void;
 }) {
+  const [dirty, setDirty] = useState(false);
+  const close = (next: boolean) => {
+    if (!next && dirty && !window.confirm("Close with unsaved changes? Unsaved content will be discarded and this version will still require review.")) return;
+    if (!next && node?.config.communicationVersions) onChange({ communicationVersions: node.config.communicationVersions.map((v) => ({ ...v, hasUnsavedChanges: false })) });
+    setDirty(false);
+    onOpenChange(next);
+  };
   return (
-    <Dialog open={open && !!node} onOpenChange={onOpenChange}>
+    <Dialog open={open && !!node} onOpenChange={close}>
       <DialogContent className="max-h-[88vh] overflow-y-auto sm:max-w-[540px]">
         {node && (
           <>
@@ -356,15 +323,17 @@ export function StepEditorDialog({
               </DialogDescription>
             </DialogHeader>
             <StepConfigForm
+              key={`${node.id}-${open}`}
               strategy={strategy}
               node={node}
               canEdit={canEdit}
               onChange={onChange}
               onToggleDisabled={onToggleDisabled}
               onAddAfter={onAddAfter}
+              onDirtyChange={setDirty}
             />
             <div className="flex justify-end pt-1">
-              <Btn variant="primary" onClick={() => onOpenChange(false)}>
+              <Btn variant="primary" onClick={() => close(false)}>
                 Done
               </Btn>
             </div>

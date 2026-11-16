@@ -1,4 +1,5 @@
 import type { Tone } from "@/components/payflow-ui";
+import type { CommunicationVersion } from "./communication-versions";
 
 export type StrategyStatus =
   "Draft" | "AI Proposed" | "Under Review" | "Approved" | "Active" | "Inactive";
@@ -35,6 +36,8 @@ export interface NodeConfig {
   /** Human-selected draft subject; never changes the shared template. */
   subjectOverride?: string | undefined;
   reminderStage?: string;
+  /** Independent review-only content; does not change workflow routing/execution. */
+  communicationVersions?: CommunicationVersion[];
 }
 
 export interface StrategyNode {

@@ -1,5 +1,6 @@
 import { useContext, useMemo, useState, type ReactNode } from "react";
 import { createStableContext } from "./stable-context";
+import { communicationReviewIssues, seedCommunicationVersions } from "./communication-versions";
 import { seedPortfolios, type Portfolio } from "./portfolio-data";
 import {
   seedStrategies,
@@ -49,7 +50,7 @@ function bumpVersion(version: string) {
 
 export function StrategyProvider({ children }: { children: ReactNode }) {
   const [portfolios, setPortfolios] = useState<Portfolio[]>(seedPortfolios);
-  const [strategies, setStrategies] = useState<Strategy[]>(seedStrategies);
+  const [strategies, setStrategies] = useState<Strategy[]>(() => seedStrategies.map(seedCommunicationVersions));
 
   const value = useMemo<StrategyContextValue>(() => {
     const patchStrategy = (strategyId: string, patch: (s: Strategy) => Strategy) =>
@@ -190,11 +191,11 @@ export function StrategyProvider({ children }: { children: ReactNode }) {
             { version: "v1.0", date: today, note: `Created by ${input.author} with AI assistance` },
           ],
         };
-        setStrategies((prev) => [created, ...prev]);
+        setStrategies((prev) => [seedCommunicationVersions(created), ...prev]);
         return id;
       },
       approveStrategy: (strategyId, approver) =>
-        patchStrategy(strategyId, (s) => ({
+        patchStrategy(strategyId, (s) => communicationReviewIssues(s).length ? s : ({
           ...s,
           status: "Active",
           approvedBy: approver,
