@@ -7,7 +7,7 @@ describe("review-only demographic segments", () => {
   it("provides all six age groups without generating combinations", () => {
     const config = defaultCommunicationSegments();
     expect(config.rules.filter((r) => r.kind === "Age group").map((r) => [r.minAge,r.maxAge])).toEqual([[18,24],[25,34],[35,44],[45,54],[55,64],[65,null]]);
-    expect(config.rules.filter((r) => r.kind === "Country").map((r) => r.country)).toEqual(["Canada","United States"]);
+    expect(config.rules.filter((r) => r.kind === "Country").map((r) => r.country)).toEqual(["Canada","United States","Bahrain"]);
     expect(validateCommunicationSegments(config)).toEqual([]);
   });
   it("rejects overlapping inclusive age ranges", () => {

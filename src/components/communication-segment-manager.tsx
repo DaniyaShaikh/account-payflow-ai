@@ -14,6 +14,7 @@ export function CommunicationSegmentManager({ config, availableIds, canManage, b
   const [age, setAge] = useState("22");
   const [country, setCountry] = useState("Canada");
   const [region, setRegion] = useState("Ontario");
+  const [language, setLanguage] = useState("English");
   const errors = validateCommunicationSegments(draft);
   const patch = (id: string, update: Partial<CommunicationSegment>) => setDraft((prev) => ({ ...prev, rules: prev.rules.map((r) => r.id === id ? { ...r, ...update } : r) }));
   const move = (index: number, direction: number) => {
@@ -23,7 +24,7 @@ export function CommunicationSegmentManager({ config, availableIds, canManage, b
     rules[index] = adjacent; rules[index + direction] = current;
     setDraft({ ...draft, rules });
   };
-  const example = { ...(age.trim() ? { age: Number(age) } : {}), country, region };
+  const example = { ...(age.trim() ? { age: Number(age) } : {}), country, region, language };
   const matches = matchingCommunicationSegments(draft, example);
   const selected = demonstrateVariantMatch(draft, availableIds, example);
   const selectedRule = draft.rules.find((r) => r.id === selected);
@@ -34,6 +35,7 @@ export function CommunicationSegmentManager({ config, availableIds, canManage, b
         <DialogHeader><DialogTitle>Manage Segments</DialogTitle><DialogDescription>Communication wording only · highest priority first. Main / Default always remains the fallback.</DialogDescription></DialogHeader>
         {!canManage && <p className="text-xs text-muted-foreground">Read-only: segment changes require permission to modify AI recommendations.</p>}
         <div className="flex flex-wrap gap-4">{(["Age group", "Country", "Region"] as SegmentKind[]).map((kind) => <label key={kind} className="flex items-center gap-2 text-xs font-medium"><Switch aria-label={`Enable ${kind} segmentation`} disabled={!canManage} checked={draft.enabled[kind]} onCheckedChange={(enabled) => setDraft({ ...draft, enabled: { ...draft.enabled, [kind]: enabled } })} />{kind}</label>)}</div>
+        <label className="flex items-center gap-2 text-xs font-medium"><Switch aria-label="Enable language personalization" disabled={!canManage} checked={draft.languageEnabled !== false} onCheckedChange={(languageEnabled) => setDraft({ ...draft, languageEnabled })} />Language preference</label>
         <div className="divide-y divide-border">{draft.rules.map((rule,index) => <div key={rule.id} className="space-y-2 py-3">
           <div className="flex flex-wrap items-center gap-2">
             <span className="w-5 shrink-0 text-xs text-muted-foreground">{index+1}.</span>
@@ -44,7 +46,7 @@ export function CommunicationSegmentManager({ config, availableIds, canManage, b
           </div>
           <div className="grid gap-2 sm:grid-cols-3">
             <Field label={`Segment name (${index+1})`}><TextInput value={rule.name} disabled={!canManage} onChange={(name) => patch(rule.id, { name })} /></Field>
-            {rule.kind === "Age group" ? <>
+            {rule.combined ? <p className="text-xs text-muted-foreground sm:col-span-2">{segmentCriteria(rule)} · From existing mock customers; configure base criteria below.</p> : rule.kind === "Age group" ? <>
               <Field label={`Minimum age (${rule.name})`}><TextInput value={Number.isNaN(rule.minAge) ? "" : String(rule.minAge)} disabled={!canManage} onChange={(v) => patch(rule.id, { minAge: v.trim() ? Number(v) : NaN })} /></Field>
               <Field label={`Maximum age (${rule.name})`} hint="Empty = no upper limit"><TextInput value={rule.maxAge === null ? "" : String(rule.maxAge)} disabled={!canManage} onChange={(v) => patch(rule.id, { maxAge: v.trim() ? Number(v) : null })} /></Field>
             </> : <>
@@ -60,13 +62,14 @@ export function CommunicationSegmentManager({ config, availableIds, canManage, b
             <Field label="Example age"><TextInput value={age} onChange={setAge} /></Field>
             <Field label="Example country"><SelectInput value={country} options={segmentCountries} onChange={(c) => { setCountry(c); setRegion(segmentRegions[c]?.[0] ?? ""); }} /></Field>
             <Field label="Example region"><SelectInput value={region} options={segmentRegions[country] ?? []} onChange={setRegion} /></Field>
+            <Field label="Example language"><SelectInput value={language} options={["English", "French", "Arabic", "Unknown"]} onChange={setLanguage} /></Field>
           </div>
           <p className="text-xs text-muted-foreground">Matches: {matches.map((r) => r.name).join(" → ") || "None"}.</p>
           <p className="text-xs">Expected variant: <strong>{draft.rules.find((r) => r.id === selected)?.name ?? "Main / Default"}</strong>. Highest-priority matching available variant; rules without a version are skipped. All active versions still require review before approval.</p>
           <p className="text-xs text-muted-foreground">{selectedRule ? segmentCriteria(selectedRule) : "No available segment version matches."} No changes to workflow execution.</p>
         </section>
         {errors.length > 0 && <ul role="alert" className="space-y-1 text-xs text-destructive">{errors.map((e,i) => <li key={i}>{e}</li>)}</ul>}
-        <p className="text-xs text-muted-foreground">Legal disclosures, payment terms and collection pressure stay identical across demographics. Saving criteria does not generate new versions.</p>
+        <p className="text-xs text-muted-foreground">Saving generates missing combined versions only for existing mock customer combinations. Unknown ages use Main / Default. New versions require review. Legal disclosures, payment terms and collection pressure stay identical.</p>
         <div className="flex flex-wrap justify-end gap-2"><Btn onClick={() => setOpen(false)}>Cancel</Btn><Btn variant="primary" disabled={!canManage || errors.length > 0} onClick={() => { onSave(draft); setOpen(false); }}>Save segments</Btn></div>
       </DialogContent>
     </Dialog>
