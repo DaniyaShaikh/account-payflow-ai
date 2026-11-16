@@ -8,7 +8,7 @@ import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
 import {
   initialCommunicationVersions, mockRegenerateVersion, removeCommunicationVersion,
   replaceCommunicationVersion, saveCommunicationVersion, validateCommunicationVersion,
-  versionLabel, generateCustomerVersions, type CommunicationVersion,
+  versionLabel, generateCustomerVersions, applyCommunicationSegments, type CommunicationVersion,
 } from "@/lib/communication-versions";
 import type { NodeConfig, Strategy, StrategyNode } from "@/lib/strategy-data";
 import { defaultCommunicationSegments, segmentCriteria, segmentIsActive } from "@/lib/communication-segments";
@@ -74,7 +74,7 @@ export function CommunicationVersionEditor({ strategy, node, canEdit, onChange, 
       <h3 className="text-xs font-semibold">Communication versions</h3>
       <StatusPill tone={saved.status === "Reviewed" && !dirty ? "success" : "warning"}>{dirty ? "Unsaved changes" : saved.status}</StatusPill>
       <CommunicationSegmentManager config={segments} availableIds={versions.map((v) => v.id)} canManage={canManage} blocked={dirty} onSave={(next) => {
-        onChange(generateCustomerVersions(versions, next, mockWorkflowCustomers(strategy)));
+        onChange(generateCustomerVersions(applyCommunicationSegments(versions, segments, next), next, mockWorkflowCustomers(strategy)));
         setNotice("Segments saved. Existing mock customer combinations generated; new or changed versions require review.");
       }} />
     </div>
