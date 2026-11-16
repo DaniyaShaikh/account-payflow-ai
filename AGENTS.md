@@ -17,3 +17,4 @@
 - Record jurisdiction research and reusable rule types (JUR codes) in src/lib/jurisdiction-library.ts as pure data seeded as Draft compliance rules; new rule types are added there, not hardcoded in UI.
 - Keep frontend subject analytics in email-subject-data with per-communication unique events and deduplicated successful transaction attribution, so dashboard and draft suggestions share consistent metrics without live services.
 - Store selected email subjects as node configuration overrides rather than mutating shared templates, so draft suggestions preserve other workflows and existing approval controls.
+- Keep communication content versions in node configuration with configurable bands in communication-versions; gate existing strategy approval on every active version's saved review and shared-copy validation, without wiring age variants into workflow execution.
