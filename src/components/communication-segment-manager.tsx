@@ -23,7 +23,7 @@ export function CommunicationSegmentManager({ config, availableIds, canManage, b
     rules[index] = adjacent; rules[index + direction] = current;
     setDraft({ ...draft, rules });
   };
-  const example = { age: age.trim() ? Number(age) : undefined, country, region };
+  const example = { ...(age.trim() ? { age: Number(age) } : {}), country, region };
   const matches = matchingCommunicationSegments(draft, example);
   const selected = demonstrateVariantMatch(draft, availableIds, example);
   const selectedRule = draft.rules.find((r) => r.id === selected);
