@@ -1,5 +1,6 @@
 import type { Tone } from "@/components/payflow-ui";
 import type { CommunicationVersion } from "./communication-versions";
+import type { CommunicationSegments } from "./communication-segments";
 
 export type StrategyStatus =
   "Draft" | "AI Proposed" | "Under Review" | "Approved" | "Active" | "Inactive";
@@ -38,6 +39,7 @@ export interface NodeConfig {
   reminderStage?: string;
   /** Independent review-only content; does not change workflow routing/execution. */
   communicationVersions?: CommunicationVersion[];
+  communicationSegments?: CommunicationSegments;
 }
 
 export interface StrategyNode {

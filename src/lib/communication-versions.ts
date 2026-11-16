@@ -1,4 +1,5 @@
 import { templateForNode, templatesFor, type Strategy, type StrategyNode } from "./strategy-data";
+import { defaultCommunicationSegments, segmentIsActive, validateCommunicationSegments, type CommunicationSegments } from "./communication-segments";
 
 /** Content variants only: these bands never change workflow targeting or execution. */
 export const communicationAgeGroups = [
@@ -25,8 +26,8 @@ export interface CommunicationVersion {
   protectedSms: string;
 }
 
-export function versionLabel(id: string) {
-  return id === "default" ? "Main / Default" : communicationAgeGroups.find((g) => g.id === id)?.label ?? id;
+export function versionLabel(id: string, config?: CommunicationSegments) {
+  return id === "default" ? "Main / Default" : (config ?? defaultCommunicationSegments()).rules.find((g) => g.id === id)?.name ?? id;
 }
 
 export function initialCommunicationVersions(node: StrategyNode, reviewed = false): CommunicationVersion[] {
@@ -101,9 +102,22 @@ export function selectCommunicationVersion(versions: CommunicationVersion[], age
 export function communicationReviewIssues(strategy: Strategy): string[] {
   return Object.values(strategy.nodes).filter((n) => n.kind === "Communication" && !n.disabled).flatMap((node) => {
     const versions = node.config.communicationVersions ?? initialCommunicationVersions(node);
-    const issues = versions.filter((v) => v.status !== "Reviewed" || validateCommunicationVersion(v).length > 0).map((v) => `${node.title}: ${versionLabel(v.id)}`);
+    const segments = node.config.communicationSegments ?? defaultCommunicationSegments();
+    const issues = versions.filter((v) => segmentIsActive(segments, v.id) && (v.status !== "Reviewed" || validateCommunicationVersion(v).length > 0)).map((v) => `${node.title}: ${versionLabel(v.id, segments)}`);
+    issues.push(...validateCommunicationSegments(segments).map((issue) => `${node.title}: ${issue}`));
+    if (versions.some((v) => v.id !== "default" && !segments.rules.some((r) => r.id === v.id))) issues.push(`${node.title}: configure the missing segment criteria`);
     if (!versions.some((v) => v.id === "default")) issues.push(`${node.title}: Main / Default is required`);
     return issues;
+  });
+}
+
+export function applyCommunicationSegments(versions: CommunicationVersion[], previous: CommunicationSegments, next: CommunicationSegments) {
+  return versions.map((version) => {
+    if (version.id === "default") return version;
+    const before = previous.rules.find((r) => r.id === version.id);
+    const after = next.rules.find((r) => r.id === version.id);
+    const changed = JSON.stringify(before) !== JSON.stringify(after) || (!segmentIsActive(previous, version.id) && segmentIsActive(next, version.id));
+    return changed ? { ...version, status: "Pending Review" as const } : version;
   });
 }
 
