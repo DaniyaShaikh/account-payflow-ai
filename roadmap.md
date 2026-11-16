@@ -1,5 +1,10 @@
 # Roadmap
 
+## Configurable communication segments
+- [x] Extend review-only segments with validated age, country and region criteria and priority.
+- [x] Add compact segment management, explicit variant creation and personalization context to the existing editor.
+- [x] Verify active-version approval safeguards and desktop/mobile review interactions (17 tests passed; region creation, review reset and matching preview verified).
+
 ## Workflow communication versions
 - [x] Add independent mock communication versions and review/validation safeguards.
 - [x] Extend existing step editing and previews without changing workflow execution.
