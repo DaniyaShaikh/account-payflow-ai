@@ -6,6 +6,7 @@ import { StrategyCanvas } from "@/components/strategy-canvas";
 import { StepConfigForm, StepEditorDialog } from "@/components/strategy-step-editor";
 import { useRole } from "@/lib/role-context";
 import { useStrategies } from "@/lib/strategy-context";
+import { communicationReviewIssues } from "@/lib/communication-versions";
 import { clientName, formatNumber } from "@/lib/payflow-data";
 import {
   excludedTargetingAttributes,
@@ -80,6 +81,15 @@ function StrategyBuilder() {
   // Supervisors approve strategies for their assigned clients; admins for all.
   const canDecide = isAdmin || canSeeClient(strategy.clientId);
   const humanCreated = strategy.origin === "Human Created";
+  const reviewIssues = communicationReviewIssues(strategy);
+  const changeSelection = (id: string) => {
+    if (node?.config.communicationVersions?.some((v) => v.hasUnsavedChanges)) {
+      if (!window.confirm("Discard unsaved communication changes and select another step?")) return false;
+      updateNodeConfig(strategy.id, node.id, { communicationVersions: node.config.communicationVersions.map((v) => ({ ...v, hasUnsavedChanges: false })) });
+    }
+    setSelectedId(id);
+    return true;
+  };
 
   const set = (patch: Parameters<typeof updateNodeConfig>[2]) => {
     if (!node) return;
@@ -132,7 +142,7 @@ function StrategyBuilder() {
             )}
             <Btn
               variant="primary"
-              disabled={!canDecide}
+              disabled={!canDecide || reviewIssues.length > 0}
               onClick={() => {
                 approveStrategy(strategy.id, userName);
                 setNotice(`Strategy approved by ${userName} and is now active.`);
@@ -143,6 +153,8 @@ function StrategyBuilder() {
           </div>
         }
       />
+
+      {reviewIssues.length > 0 && <p className="mb-4 text-xs text-muted-foreground" role="status">Approval requires review and validation of {reviewIssues.length} communication version{reviewIssues.length === 1 ? "" : "s"}. Open each communication step to review its versions.</p>}
 
       {notice && (
         <div className="mb-4 rounded-lg border border-primary/25 bg-primary/[0.06] px-4 py-2.5 text-[12.5px] text-foreground">
@@ -220,10 +232,9 @@ function StrategyBuilder() {
           <StrategyCanvas
             strategy={strategy}
             selectedId={selectedId}
-            onSelect={(id) => setSelectedId(id)}
+            onSelect={changeSelection}
             onExpand={(id) => {
-              setSelectedId(id);
-              setDialogOpen(true);
+              if (changeSelection(id)) setDialogOpen(true);
             }}
           />
         </Panel>
@@ -246,7 +257,8 @@ function StrategyBuilder() {
                 </Btn>
               }
             >
-              <StepConfigForm
+              {!dialogOpen && <StepConfigForm
+                key={node.id}
                 strategy={strategy}
                 node={node}
                 onChange={set}
@@ -258,7 +270,7 @@ function StrategyBuilder() {
                   addNodeAfter(strategy.id, node.id, kind);
                   setNotice(`${kind} step added and marked Human Modified.`);
                 }}
-              />
+              />}
             </Panel>
           )}
 
