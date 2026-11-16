@@ -1,9 +1,9 @@
 # Roadmap
 
 ## Combined customer communication versions
-- [ ] Generate mock versions for existing customer age/location/language combinations only.
-- [ ] Add friendly removal confirmation and preserve individual review safeguards.
-- [ ] Verify combined matching, isolation, approval and the editor interaction.
+- [x] Generate mock versions for existing customer age/location/language combinations only.
+- [x] Add friendly removal confirmation and preserve individual review safeguards.
+- [x] Verify combined matching, isolation, approval and the editor interaction (22 tests; removal cancel/confirm, review reset, approval gate and mobile checked).
 
 ## Configurable communication segments
 - [x] Extend review-only segments with validated age, country and region criteria and priority.
