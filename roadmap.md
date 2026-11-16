@@ -1,9 +1,9 @@
 # Roadmap
 
 ## Workflow-level message approval
-- [ ] Remove individual review and manual variant creation; finalize saved valid messages on workflow approval.
-- [ ] Simplify removal wording and preserve automatic demographic selector, validation and fallback.
-- [ ] Test overall approval, saved/unsaved validation, removal and desktop/mobile interactions.
+- [x] Remove individual review and manual variant creation; finalize saved valid messages on workflow approval.
+- [x] Simplify removal wording and preserve automatic demographic selector, validation and fallback (mock recipient data; no live file parsing).
+- [x] Test overall approval, saved/unsaved validation, removal and desktop/mobile interactions (24 tests; approved workflow, persisted edited subject, final status and removal verified).
 
 ## Combined customer communication versions
 - [x] Generate mock versions for existing customer age/location/language combinations only.
