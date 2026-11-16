@@ -1,5 +1,6 @@
 import { templateForNode, templatesFor, type Strategy, type StrategyNode } from "./strategy-data";
 import { defaultCommunicationSegments, segmentIsActive, validateCommunicationSegments, type CommunicationSegments } from "./communication-segments";
+import { customerCombinationSegments, mockWorkflowCustomers } from "./communication-customer-cohorts";
 
 /** Content variants only: these bands never change workflow targeting or execution. */
 export const communicationAgeGroups = [
@@ -122,5 +123,22 @@ export function applyCommunicationSegments(versions: CommunicationVersion[], pre
 }
 
 export function seedCommunicationVersions(strategy: Strategy): Strategy {
-  return { ...strategy, nodes: Object.fromEntries(Object.entries(strategy.nodes).map(([id, node]) => [id, node.kind === "Communication" ? { ...node, config: { ...node.config, communicationVersions: node.config.communicationVersions ?? initialCommunicationVersions(node, strategy.status === "Active" || strategy.status === "Approved") } } : node])) };
+  return { ...strategy, nodes: Object.fromEntries(Object.entries(strategy.nodes).map(([id, node]) => {
+    if (node.kind !== "Communication") return [id, node];
+    const versions = node.config.communicationVersions ?? initialCommunicationVersions(node, strategy.status === "Active" || strategy.status === "Approved");
+    const generated = strategy.status === "AI Proposed" && !node.config.communicationVersions
+      ? generateCustomerVersions(versions, node.config.communicationSegments ?? defaultCommunicationSegments(), mockWorkflowCustomers(strategy))
+      : { communicationVersions: versions, communicationSegments: node.config.communicationSegments ?? defaultCommunicationSegments() };
+    return [id, { ...node, config: { ...node.config, ...generated } }];
+  })) };
+}
+
+/** Explicit generation during proposal setup or segment-save; never execution. */
+export function generateCustomerVersions(versions: CommunicationVersion[], config: CommunicationSegments, customers: import("./communication-segments").SegmentExample[]) {
+  const combinations = customerCombinationSegments(config, customers);
+  const ids = new Set(combinations.map((r) => r.id));
+  const communicationSegments = { ...config, rules: [...combinations.map((r) => ({ ...r, enabled: config.rules.find((old) => old.id === r.id)?.enabled ?? true })), ...config.rules.filter((r) => !r.combined), ...config.rules.filter((r) => r.combined && !ids.has(r.id)).map((r) => ({ ...r, enabled: false }))] };
+  const base = versions.find((v) => v.id === "default");
+  const additions = base ? combinations.filter((r) => !versions.some((v) => v.id === r.id)).map((r) => ({ ...mockRegenerateVersion({ ...base, id: r.id }), explanation: `Simulated AI explanation: ${r.name} exists in this workflow's mock recipient data. ${r.language === "French" ? "Bonjour — voici un rappel concernant votre compte." : "Here is a clear account reminder."} Language preference informs the introductory wording only; the approved shared copy remains unchanged and requires authorized translation before real use. Disclosures, payment terms and pressure are identical.` , emailBody: `${r.language === "French" ? "Bonjour — voici un rappel concernant votre compte." : "Here is a clear summary of your account reminder."}\n\n${base.protectedEmail}`, smsContent: `${r.language === "French" ? "Rappel concernant votre compte." : "Account reminder."} ${base.protectedSms}` })) : [];
+  return { communicationSegments, communicationVersions: [...applyCommunicationSegments(versions, config, communicationSegments), ...additions] };
 }
