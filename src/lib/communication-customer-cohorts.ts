@@ -9,11 +9,13 @@ export function mockWorkflowCustomers(strategy: Pick<Strategy, "clientId" | "por
     { age: 21, country: "Bahrain" },
     { age: 22, country: "Canada", region: "Alberta", language: "English" },
     { country: "Canada", region: "Alberta", language: "English" },
+    { country: "Canada", region: "Quebec", language: "French" },
   ];
   return [
     { age: 22, country: "Canada", region: "Ontario", language: "English" },
     { age: 68, country: "Canada", region: "Ontario", language: "French" },
     { country: "Canada", region: "Ontario" },
+    { country: "Canada", region: "Ontario", language: "French" },
   ];
 }
 
@@ -22,7 +24,12 @@ export function customerCombinationSegments(config: CommunicationSegments, custo
   for (const customer of customers) {
     const age = config.rules.find((r) => r.kind === "Age group" && !r.combined && segmentIsActive(config, r.id) && customer.age !== undefined && customer.age >= r.minAge && customer.age <= (r.maxAge ?? Infinity));
     // Unknown ages use Main / Default; do not infer customer demographics.
-    if (!age) continue;
+    if (!age) {
+      // Language-only fallback versions of Main / Default for non-English recipients.
+      const lang = config.languageEnabled !== false ? customer.language ?? "" : "";
+      if (lang && lang !== "English") unique.set(`default-lang-${lang}`, { id: `default-lang-${lang}`, kind: "Age group", enabled: true, minAge: 18, maxAge: null, country: "", region: "", language: lang, combined: true, name: `Main / Default (${lang})` });
+      continue;
+    }
     const country = config.enabled.Country ? customer.country ?? "" : "";
     const region = country && config.enabled.Region ? customer.region ?? "" : "";
     const language = config.languageEnabled !== false ? customer.language ?? "" : "";
