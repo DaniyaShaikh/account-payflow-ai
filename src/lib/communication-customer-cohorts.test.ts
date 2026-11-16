@@ -12,13 +12,13 @@ const customers = mockWorkflowCustomers(strategy);
 
 describe("customer-based combined versions", () => {
   it("creates only the three observed combinations, deduplicating recipients and skipping unknown ages", () => {
-    expect(customerCombinationSegments(defaultCommunicationSegments(), customers).map((r) => r.name)).toEqual(["18–24 (Alberta, French)", "18–24 (Alberta, English)", "18–24 (Bahrain)"]);
+    expect(customerCombinationSegments(defaultCommunicationSegments(), customers).map((r) => r.name)).toEqual(["18–24 (Alberta, French)", "18–24 (Alberta, English)", "18–24 (Bahrain)", "Main / Default (French)"]);
   });
   it("matches age, location and language together with a default fallback", () => {
     const result = generateCustomerVersions(initialCommunicationVersions(node), defaultCommunicationSegments(), customers);
     const ids = result.communicationSegments.rules.filter((r) => r.combined).map((r) => r.id);
     expect(demonstrateVariantMatch(result.communicationSegments, ids, { age: 22, country: "Canada", region: "Alberta", language: "French" })).toBe(ids[0]);
-    expect(demonstrateVariantMatch(result.communicationSegments, ids, { age: 22, country: "Canada", region: "Ontario", language: "French" })).toBe("default");
+    expect(demonstrateVariantMatch(result.communicationSegments, ids, { age: 22, country: "Canada", region: "Ontario", language: "French" })).toBe("default-lang-French");
     expect(demonstrateVariantMatch(result.communicationSegments, ids, { country: "Bahrain" })).toBe("default");
   });
   it("preserves reviewed edits during repeated generation and leaves new versions pending", () => {
