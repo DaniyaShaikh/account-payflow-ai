@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { CommunicationCompliance } from "./communication-compliance";
 import { CommunicationVersionEditor } from "./communication-version-editor";
 import { Mail, MessageSquare } from "lucide-react";
 import {
@@ -121,18 +120,6 @@ export function StepConfigForm({
             />
           </Field>
           <CommunicationVersionEditor key={node.id} strategy={strategy} node={node} canEdit={canEdit} onChange={onChange} onDirtyChange={onDirtyChange} />
-          <details className="border-t border-border pt-3">
-            <summary className="cursor-pointer text-xs font-semibold text-primary">
-              Compliance execution preview
-            </summary>
-            <div className="mt-3">
-              <CommunicationCompliance
-                clientId={strategy.clientId}
-                channel={node.config.channel ?? "Email"}
-                templateText={activeTemplate?.body ?? ""}
-              />
-            </div>
-          </details>
         </>
       )}
 

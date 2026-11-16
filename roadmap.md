@@ -1,9 +1,9 @@
 # Roadmap
 
 ## Workflow communication versions
-- [ ] Add independent mock communication versions and review/validation safeguards.
-- [ ] Extend existing step editing and previews without changing workflow execution.
-- [ ] Test version isolation, approval gating, fallback, and desktop/mobile interactions.
+- [x] Add independent mock communication versions and review/validation safeguards.
+- [x] Extend existing step editing and previews without changing workflow execution.
+- [x] Test version isolation, approval gating, fallback, and desktop/mobile interactions.
 
 ## Email subject performance
 - [x] Add consistent mock communication analytics, filters, rankings and rule tests.

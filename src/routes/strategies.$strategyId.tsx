@@ -252,7 +252,7 @@ function StrategyBuilder() {
               title={node.kind}
               description={node.title}
               action={
-                <Btn variant="ghost" onClick={() => setDialogOpen(true)}>
+                <Btn variant="ghost" onClick={() => { if (changeSelection(node.id)) setDialogOpen(true); }}>
                   Expand
                 </Btn>
               }

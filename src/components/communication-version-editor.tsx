@@ -3,6 +3,7 @@ import { Check, RotateCcw, Save, Trash2 } from "lucide-react";
 import { Btn, Field, SelectInput, StatusPill, TextArea, TextInput } from "./payflow-ui";
 import { TemplatePreview } from "./strategy-step-editor";
 import { EmailPerformanceSuggestions } from "./email-performance-suggestions";
+import { CommunicationCompliance } from "./communication-compliance";
 import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
 import {
   initialCommunicationVersions, mockRegenerateVersion, removeCommunicationVersion,
@@ -93,6 +94,10 @@ export function CommunicationVersionEditor({ strategy, node, canEdit, onChange, 
       <TabsList><TabsTrigger value="Email">Email preview</TabsTrigger><TabsTrigger value="SMS">SMS preview</TabsTrigger></TabsList>
     </Tabs>
     <TemplatePreview node={node} content={{ name: `${versionLabel(saved.id)} · ${preview}`, channel: preview, subject: preview === "Email" ? value.subject : undefined, body: preview === "Email" ? value.emailBody : value.smsContent }} />
+    <details className="border-t border-border pt-2">
+      <summary className="cursor-pointer text-xs font-semibold text-primary">Compliance execution preview</summary>
+      <div className="mt-3"><CommunicationCompliance clientId={strategy.clientId} channel={preview} templateText={preview === "Email" ? `${value.subject}\n${value.emailBody}` : value.smsContent} /></div>
+    </details>
     <details className="border-t border-border pt-2">
       <summary className="cursor-pointer text-xs font-semibold">Performance insights</summary>
       <EmailPerformanceSuggestions clientId={strategy.clientId} workflowId={strategy.id} purpose={node.config.purpose ?? "Payment Reminder"} subject={value.subject} canEdit={canEdit} onSelect={(subject) => edit({ subject })} />
