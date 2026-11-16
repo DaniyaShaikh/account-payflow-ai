@@ -18,3 +18,4 @@
 - Keep frontend subject analytics in email-subject-data with per-communication unique events and deduplicated successful transaction attribution, so dashboard and draft suggestions share consistent metrics without live services.
 - Store selected email subjects as node configuration overrides rather than mutating shared templates, so draft suggestions preserve other workflows and existing approval controls.
 - Keep communication versions and ordered demographic segment criteria in node configuration; validate segments and gate approval on every active version's saved review and shared-copy validation, while priority matching remains a review-only demonstration, never workflow execution.
+- Generate combined communication versions from explicit workflow-scoped mock recipient cohorts during proposal setup or segment-save, never a demographic cross-product; preserve existing edits and reviews to avoid silent content replacement.
