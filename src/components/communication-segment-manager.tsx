@@ -29,7 +29,7 @@ export function CommunicationSegmentManager({ config, availableIds, canManage, b
   const selected = demonstrateVariantMatch(draft, availableIds, example);
   const selectedRule = draft.rules.find((r) => r.id === selected);
   return <>
-    <Btn disabled={blocked} onClick={() => { setDraft(structuredClone(config)); setOpen(true); }}><Settings2 className="size-3.5" />Manage Segments</Btn>
+    <Btn disabled title="Coming soon" onClick={() => { setDraft(structuredClone(config)); setOpen(true); }}><Settings2 className="size-3.5" />Manage Segments · Coming soon</Btn>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] max-w-2xl overflow-y-auto">
         <DialogHeader><DialogTitle>Manage Segments</DialogTitle><DialogDescription>Communication wording only · highest priority first. Main / Default always remains the fallback.</DialogDescription></DialogHeader>
