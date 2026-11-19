@@ -73,7 +73,7 @@ export function CommunicationTable({
   initialChannel?: string;
   initialClient?: string;
   initialJourney?: string;
-  /** Enables recipient/date-range filters, Apply/Clear actions and export. */
+  /** Enables instant date-range filtering, retention and the shared export report. */
   advanced?: boolean;
 }) {
   const { visibleClients } = useRole();

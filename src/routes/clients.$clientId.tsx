@@ -279,7 +279,13 @@ function ClientDetail() {
           title="Communications"
           description={`Customer communications sent for ${client.name} accounts`}
         >
-          <CommunicationTable rows={communicationsForClient(client.id)} showClientFilter={false} />
+          <CommunicationTable
+            key={client.id}
+            rows={communicationsForClient(client.id)}
+            showClientFilter={false}
+            initialClient={client.name}
+            advanced
+          />
         </Panel>
       )}
 

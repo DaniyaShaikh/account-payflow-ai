@@ -19,3 +19,4 @@
 - Store selected email subjects as node configuration overrides rather than mutating shared templates, so draft suggestions preserve other workflows and existing approval controls.
 - Keep communication versions and ordered demographic criteria in node configuration; workflow approval finalizes saved valid active messages together, retaining shared-copy and segment validation, while priority matching remains review-only and never workflow execution.
 - Generate combined communication versions from explicit workflow-scoped mock recipient cohorts during proposal setup or segment-save, never a demographic cross-product; preserve existing edits and reviews to avoid silent content replacement.
+- Reuse CommunicationTable and CommunicationExport on client communications with client-scoped rows and initialClient set to the owner name so portfolio filters and report headers share the same scope.

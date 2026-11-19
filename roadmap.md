@@ -1,5 +1,9 @@
 # Roadmap
 
+## Client communications export
+- [x] Reuse the existing export and instant filters within client communications, with all/single/multiple portfolio selection and scoped report headers.
+- [x] Verify client scope, portfolio filtering and printed report headers (3 tests passed; all/single/multiple selections and PDF print view checked in the browser without runtime errors).
+
 ## Workflow-level message approval
 - [x] Remove individual review and manual variant creation; finalize saved valid messages on workflow approval.
 - [x] Simplify removal wording and preserve automatic demographic selector, validation and fallback (mock recipient data; no live file parsing).

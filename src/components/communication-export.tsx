@@ -63,7 +63,7 @@ function reportHtml(rows: Communication[], f: ExportFilterSummary, generatedOn: 
     <h1>Email Communication History</h1>
     <div class="summary">
       <div><span>Client:</span> ${escapeHtml(f.client)}</div>
-      <div><span>Sub-Client:</span> ${escapeHtml(f.subClients.length ? f.subClients.join(", ") : "All")}</div>
+      <div><span>Sub-Clients / Portfolios:</span> ${escapeHtml(f.subClients.length ? f.subClients.join(", ") : "All Sub-Clients / Portfolios")}</div>
       ${f.email ? `<div><span>Recipient:</span> ${escapeHtml(f.email)}</div>` : ""}
       <div><span>Date range:</span> ${escapeHtml(f.from || "Any")} – ${escapeHtml(f.to || "Any")}</div>
       <div><span>Total emails:</span> ${rows.length}</div>
@@ -110,8 +110,8 @@ export function CommunicationExport({
           <div className="grid gap-x-6 gap-y-1 sm:grid-cols-2">
             <div><span className="text-muted-foreground">Client:</span> {filters.client}</div>
             <div>
-              <span className="text-muted-foreground">Sub-Client:</span>{" "}
-              {filters.subClients.length ? filters.subClients.join(", ") : "All"}
+              <span className="text-muted-foreground">Sub-Clients / Portfolios:</span>{" "}
+              {filters.subClients.length ? filters.subClients.join(", ") : "All Sub-Clients / Portfolios"}
             </div>
             {filters.email && (
               <div><span className="text-muted-foreground">Recipient:</span> {filters.email}</div>
