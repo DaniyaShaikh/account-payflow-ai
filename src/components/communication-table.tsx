@@ -96,14 +96,9 @@ export function CommunicationTable({
 
   const setFilter = <K extends keyof CommFilters>(key: K, value: CommFilters[K]) => {
     setPending((p) => ({ ...p, [key]: value }));
-    if (!advanced) setApplied((p) => ({ ...p, [key]: value }));
+    setApplied((p) => ({ ...p, [key]: value }));
   };
 
-  const applyFilters = () => setApplied(pending);
-  const clearFilters = () => {
-    setPending(initial);
-    setApplied(initial);
-  };
 
   const f = applied;
   const journeyNames = useMemo(
@@ -121,7 +116,9 @@ export function CommunicationTable({
       q &&
       !c.customer.toLowerCase().includes(q) &&
       !c.reference.toLowerCase().includes(q) &&
-      !c.id.toLowerCase().includes(q)
+      !c.id.toLowerCase().includes(q) &&
+      !clientName(c.clientId).toLowerCase().includes(q) &&
+      !recipientEmailOf(c).toLowerCase().includes(q)
     )
       return false;
     if (f.date !== "All Dates" && c.dateBucket !== f.date) return false;
@@ -132,23 +129,22 @@ export function CommunicationTable({
     if (f.status !== "All Statuses" && c.status !== f.status) return false;
     if (f.journey !== "All Workflows" && journeyById(c.journeyId)?.name !== f.journey) return false;
     if (f.purpose !== "All Purposes" && c.purpose !== f.purpose) return false;
-    const email = f.email.trim().toLowerCase();
-    if (email && !recipientEmailOf(c).toLowerCase().includes(email)) return false;
     if (f.from && commSentDate(c) < new Date(`${f.from}T00:00:00`)) return false;
     if (f.to && commSentDate(c) > new Date(`${f.to}T23:59:59`)) return false;
     return true;
   });
 
-  const shown = advanced ? pending : applied;
+  const shown = pending;
 
   return (
     <>
-      <div className="mb-3 flex flex-wrap items-center gap-2">
+      <div className="mb-3 flex flex-wrap items-start gap-3">
+      <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
         <SearchInput
           value={shown.query}
           onChange={(v) => setFilter("query", v)}
-          placeholder="Customer, account reference or ID"
-          className="w-64"
+          placeholder="Search client, customer, email or account"
+          className="w-72"
         />
         <FilterSelect
           label="Date"
@@ -208,43 +204,34 @@ export function CommunicationTable({
           options={["All Purposes", ...commPurposes]}
         />
         {advanced && (
-          <>
-            <SearchInput
-              value={shown.email}
-              onChange={(v) => setFilter("email", v)}
-              placeholder="Recipient email"
-              className="w-52"
+          <div className="flex h-8 items-center gap-1.5 rounded-md border border-border bg-card px-2.5">
+            <span className="text-[11px] font-medium text-muted-foreground">From</span>
+            <input
+              type="date"
+              value={shown.from}
+              onChange={(e) => setFilter("from", e.target.value)}
+              className="bg-transparent text-[13px] text-foreground outline-none"
             />
-            <label className="flex h-8 items-center gap-1.5 rounded-md border border-border bg-card px-2.5">
-              <span className="text-[11px] font-medium text-muted-foreground">From</span>
-              <input
-                type="date"
-                value={shown.from}
-                onChange={(e) => setFilter("from", e.target.value)}
-                className="bg-transparent text-[13px] text-foreground outline-none"
-              />
-            </label>
-            <label className="flex h-8 items-center gap-1.5 rounded-md border border-border bg-card px-2.5">
-              <span className="text-[11px] font-medium text-muted-foreground">To</span>
-              <input
-                type="date"
-                value={shown.to}
-                onChange={(e) => setFilter("to", e.target.value)}
-                className="bg-transparent text-[13px] text-foreground outline-none"
-              />
-            </label>
-            <Btn variant="primary" onClick={applyFilters}>Apply Filters</Btn>
-            <Btn variant="ghost" onClick={clearFilters}>Clear Filters</Btn>
-            <Btn variant="secondary" onClick={() => setExportOpen(true)}>
-              Generate Exportable View
-            </Btn>
-          </>
+            <span className="text-[11px] font-medium text-muted-foreground">To</span>
+            <input
+              type="date"
+              value={shown.to}
+              onChange={(e) => setFilter("to", e.target.value)}
+              className="bg-transparent text-[13px] text-foreground outline-none"
+            />
+          </div>
+        )}
+      </div>
+        {advanced && (
+          <Btn variant="primary" className="ml-auto shrink-0" onClick={() => setExportOpen(true)}>
+            Generate Exportable View
+          </Btn>
         )}
       </div>
 
       {advanced && (
         <p className="mb-2 text-[12px] text-muted-foreground">
-          {filtered.length} communication{filtered.length === 1 ? "" : "s"} match the applied
+          {filtered.length} communication{filtered.length === 1 ? "" : "s"} match the current
           filters. Records older than each client's retention period are excluded.
         </p>
       )}
