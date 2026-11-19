@@ -97,6 +97,7 @@ function CommunicationsPage() {
       >
         <CommunicationTable
           rows={rows}
+          advanced
           initialStatus={search.status ?? "All Statuses"}
           initialChannel={search.channel ?? "All Channels"}
           initialClient={search.client ?? "All Clients"}

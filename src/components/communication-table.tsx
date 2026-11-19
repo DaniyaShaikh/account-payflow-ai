@@ -10,6 +10,7 @@ import {
   FilterMultiSelect,
   PrimaryCell,
   EmptyState,
+  Btn,
 } from "@/components/payflow-ui";
 import { useRole } from "@/lib/role-context";
 import { clientName } from "@/lib/payflow-data";
@@ -20,10 +21,14 @@ import {
   commPurposes,
   commStatuses,
   commStatusTone,
+  commSentDate,
   communications,
   engagementLabel,
+  recipientEmailOf,
+  withinRetention,
   type Communication,
 } from "@/lib/communication-data";
+import { CommunicationExport } from "@/components/communication-export";
 
 export function useVisibleCommunications() {
   const { visibleClientIds } = useRole();
@@ -39,6 +44,20 @@ import {
   subClientNamesForClient,
 } from "@/lib/portfolio-data";
 
+interface CommFilters {
+  query: string;
+  date: string;
+  client: string;
+  subClients: string[];
+  channel: string;
+  status: string;
+  journey: string;
+  purpose: string;
+  email: string;
+  from: string;
+  to: string;
+}
+
 export function CommunicationTable({
   rows,
   showClientFilter = true,
@@ -46,6 +65,7 @@ export function CommunicationTable({
   initialChannel = "All Channels",
   initialClient = "All Clients",
   initialJourney = "All Workflows",
+  advanced = false,
 }: {
   rows: Communication[];
   showClientFilter?: boolean;
@@ -53,17 +73,39 @@ export function CommunicationTable({
   initialChannel?: string;
   initialClient?: string;
   initialJourney?: string;
+  /** Enables recipient/date-range filters, Apply/Clear actions and export. */
+  advanced?: boolean;
 }) {
   const { visibleClients } = useRole();
-  const [query, setQuery] = useState("");
-  const [date, setDate] = useState("All Dates");
-  const [client, setClient] = useState(initialClient);
-  const [subClients, setSubClients] = useState<string[]>([]);
-  const [channel, setChannel] = useState(initialChannel);
-  const [status, setStatus] = useState(initialStatus);
-  const [journey, setJourney] = useState(initialJourney);
-  const [purpose, setPurpose] = useState("All Purposes");
+  const initial: CommFilters = {
+    query: "",
+    date: "All Dates",
+    client: initialClient,
+    subClients: [],
+    channel: initialChannel,
+    status: initialStatus,
+    journey: initialJourney,
+    purpose: "All Purposes",
+    email: "",
+    from: "",
+    to: "",
+  };
+  const [applied, setApplied] = useState<CommFilters>(initial);
+  const [pending, setPending] = useState<CommFilters>(initial);
+  const [exportOpen, setExportOpen] = useState(false);
 
+  const setFilter = <K extends keyof CommFilters>(key: K, value: CommFilters[K]) => {
+    setPending((p) => ({ ...p, [key]: value }));
+    if (!advanced) setApplied((p) => ({ ...p, [key]: value }));
+  };
+
+  const applyFilters = () => setApplied(pending);
+  const clearFilters = () => {
+    setPending(initial);
+    setApplied(initial);
+  };
+
+  const f = applied;
   const journeyNames = useMemo(
     () =>
       Array.from(
@@ -73,7 +115,8 @@ export function CommunicationTable({
   );
 
   const filtered = rows.filter((c) => {
-    const q = query.trim().toLowerCase();
+    if (advanced && !withinRetention(c)) return false;
+    const q = f.query.trim().toLowerCase();
     if (
       q &&
       !c.customer.toLowerCase().includes(q) &&
@@ -81,56 +124,62 @@ export function CommunicationTable({
       !c.id.toLowerCase().includes(q)
     )
       return false;
-    if (date !== "All Dates" && c.dateBucket !== date) return false;
-    if (showClientFilter && client !== "All Clients" && clientName(c.clientId) !== client)
+    if (f.date !== "All Dates" && c.dateBucket !== f.date) return false;
+    if (showClientFilter && f.client !== "All Clients" && clientName(c.clientId) !== f.client)
       return false;
-    if (!matchesSubClients(c.clientId, c.accountId, subClients)) return false;
-    if (channel !== "All Channels" && c.channel !== channel) return false;
-    if (status !== "All Statuses" && c.status !== status) return false;
-    if (journey !== "All Workflows" && journeyById(c.journeyId)?.name !== journey) return false;
-    if (purpose !== "All Purposes" && c.purpose !== purpose) return false;
+    if (!matchesSubClients(c.clientId, c.accountId, f.subClients)) return false;
+    if (f.channel !== "All Channels" && c.channel !== f.channel) return false;
+    if (f.status !== "All Statuses" && c.status !== f.status) return false;
+    if (f.journey !== "All Workflows" && journeyById(c.journeyId)?.name !== f.journey) return false;
+    if (f.purpose !== "All Purposes" && c.purpose !== f.purpose) return false;
+    const email = f.email.trim().toLowerCase();
+    if (email && !recipientEmailOf(c).toLowerCase().includes(email)) return false;
+    if (f.from && commSentDate(c) < new Date(`${f.from}T00:00:00`)) return false;
+    if (f.to && commSentDate(c) > new Date(`${f.to}T23:59:59`)) return false;
     return true;
   });
+
+  const shown = advanced ? pending : applied;
 
   return (
     <>
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <SearchInput
-          value={query}
-          onChange={setQuery}
+          value={shown.query}
+          onChange={(v) => setFilter("query", v)}
           placeholder="Customer, account reference or ID"
           className="w-64"
         />
         <FilterSelect
           label="Date"
-          value={date}
-          onChange={setDate}
+          value={shown.date}
+          onChange={(v) => setFilter("date", v)}
           options={["All Dates", ...commDateRanges]}
         />
         {showClientFilter && (
           <FilterSelect
             label="Client"
-            value={client}
+            value={shown.client}
             onChange={(v) => {
-              setClient(v);
-              setSubClients([]);
+              setFilter("client", v);
+              setFilter("subClients", []);
             }}
             options={["All Clients", ...visibleClients.map((c) => c.name)]}
           />
         )}
-        {isSingleClientSelected(client) && (
+        {isSingleClientSelected(shown.client) && (
           <FilterMultiSelect
             label="Sub-Client"
             allLabel="All Sub-Clients"
-            selected={subClients}
-            onChange={setSubClients}
-            options={subClientNamesForClient(visibleClients, client)}
+            selected={shown.subClients}
+            onChange={(v) => setFilter("subClients", v)}
+            options={subClientNamesForClient(visibleClients, shown.client)}
           />
         )}
         <FilterSelect
           label="Channel"
-          value={channel}
-          onChange={setChannel}
+          value={shown.channel}
+          onChange={(v) => setFilter("channel", v)}
           options={["All Channels", ...commChannels]}
         />
         <span
@@ -142,28 +191,72 @@ export function CommunicationTable({
         </span>
         <FilterSelect
           label="Status"
-          value={status}
-          onChange={setStatus}
+          value={shown.status}
+          onChange={(v) => setFilter("status", v)}
           options={["All Statuses", ...commStatuses]}
         />
         <FilterSelect
           label="Workflow"
-          value={journey}
-          onChange={setJourney}
+          value={shown.journey}
+          onChange={(v) => setFilter("journey", v)}
           options={["All Workflows", ...journeyNames]}
         />
         <FilterSelect
           label="Purpose"
-          value={purpose}
-          onChange={setPurpose}
+          value={shown.purpose}
+          onChange={(v) => setFilter("purpose", v)}
           options={["All Purposes", ...commPurposes]}
         />
+        {advanced && (
+          <>
+            <SearchInput
+              value={shown.email}
+              onChange={(v) => setFilter("email", v)}
+              placeholder="Recipient email"
+              className="w-52"
+            />
+            <label className="flex h-8 items-center gap-1.5 rounded-md border border-border bg-card px-2.5">
+              <span className="text-[11px] font-medium text-muted-foreground">From</span>
+              <input
+                type="date"
+                value={shown.from}
+                onChange={(e) => setFilter("from", e.target.value)}
+                className="bg-transparent text-[13px] text-foreground outline-none"
+              />
+            </label>
+            <label className="flex h-8 items-center gap-1.5 rounded-md border border-border bg-card px-2.5">
+              <span className="text-[11px] font-medium text-muted-foreground">To</span>
+              <input
+                type="date"
+                value={shown.to}
+                onChange={(e) => setFilter("to", e.target.value)}
+                className="bg-transparent text-[13px] text-foreground outline-none"
+              />
+            </label>
+            <Btn variant="primary" onClick={applyFilters}>Apply Filters</Btn>
+            <Btn variant="ghost" onClick={clearFilters}>Clear Filters</Btn>
+            <Btn variant="secondary" onClick={() => setExportOpen(true)}>
+              Generate Exportable View
+            </Btn>
+          </>
+        )}
       </div>
+
+      {advanced && (
+        <p className="mb-2 text-[12px] text-muted-foreground">
+          {filtered.length} communication{filtered.length === 1 ? "" : "s"} match the applied
+          filters. Records older than each client's retention period are excluded.
+        </p>
+      )}
 
       {filtered.length === 0 ? (
         <EmptyState
           title="No communications match these filters"
-          description="Adjust the search or filters to see customer communications."
+          description={
+            advanced
+              ? "No retained communications match the selected filters. Adjust the filters or check the client's retention period."
+              : "Adjust the search or filters to see customer communications."
+          }
         />
       ) : (
         <DataTable
@@ -213,6 +306,21 @@ export function CommunicationTable({
             </Tr>
           ))}
         </DataTable>
+      )}
+
+      {advanced && (
+        <CommunicationExport
+          open={exportOpen}
+          onClose={() => setExportOpen(false)}
+          rows={filtered}
+          filters={{
+            client: f.client === "All Clients" ? "All Clients" : f.client,
+            subClients: f.subClients,
+            email: f.email,
+            from: f.from,
+            to: f.to,
+          }}
+        />
       )}
     </>
   );

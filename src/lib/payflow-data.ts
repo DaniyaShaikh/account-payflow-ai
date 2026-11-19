@@ -37,6 +37,8 @@ export interface ClientConfig {
   governanceRules: string[];
   permissions: string[];
   paymentOptions: PaymentOptions;
+  /** Days this client's communication history remains searchable/exportable. */
+  retentionDays: number;
 }
 
 /** Balance tier that limits how long a payment plan may run. */
@@ -201,6 +203,7 @@ export function makeConfig(overrides: Partial<ClientConfig> = {}): ClientConfig 
     governanceRules: [],
     permissions: [...defaultPermissions],
     paymentOptions: defaultPaymentOptions(),
+    retentionDays: 30,
     jurisdiction: { country: "Canada", state: "Ontario", region: "", postal: "", timezone: "America/Toronto" },
     disabledComplianceRules: [],
     ...overrides,
@@ -283,6 +286,7 @@ export const clients: Client[] = [
       emailFrom: "billing@northstar.com",
       smsSenderId: "NORTHSTAR",
       governanceRules: ["Low Confidence Review", "Dispute Detected Review"],
+      retentionDays: 180,
     }),
   },
 ];

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Field,
   TextInput,
@@ -413,10 +414,17 @@ export function AiGovernanceSection({ draft, patch, patchConfig }: SectionProps)
 const limitToOptions = ["500", "1000", "2000", "No limit"];
 const limitTermOptions = ["3 months", "5 months", "6 months", "9 months", "12 months"];
 
+const retentionOptions = ["30 Days", "60 Days", "90 Days", "180 Days", "Custom"];
+
 export function PaymentOptionsSection({ draft, patchConfig }: SectionProps) {
   const opts = draft.config.paymentOptions ?? defaultPaymentOptions();
   const patchOpts = (p: Partial<typeof opts>) =>
     patchConfig({ paymentOptions: { ...opts, ...p } });
+  const retentionDays = draft.config.retentionDays ?? 30;
+  const [customRetention, setCustomRetention] = useState(![30, 60, 90, 180].includes(retentionDays));
+  const retentionChoice = customRetention
+    ? "Custom"
+    : `${([30, 60, 90, 180].includes(retentionDays) ? retentionDays : 30)} Days`;
 
   const patchRule = (id: string, p: Partial<PlanLimitRule>) =>
     patchOpts({ planLimits: opts.planLimits.map((r) => (r.id === id ? { ...r, ...p } : r)) });
@@ -561,6 +569,46 @@ export function PaymentOptionsSection({ draft, patchConfig }: SectionProps) {
           </p>
         </div>
       )}
+
+      <div className="mt-6 border-t border-border pt-4">
+        <p className="text-[13px] font-semibold text-foreground">Communication Retention Period</p>
+        <p className="mb-3 text-[11px] leading-relaxed text-muted-foreground">
+          Determines how long this Client's communication history and content remain available for
+          search and export, subject to applicable retention requirements.
+        </p>
+        <div className="flex flex-wrap items-end gap-3">
+          <Field label="Retention period">
+            <SelectInput
+              value={retentionChoice}
+              options={retentionOptions}
+              onChange={(v) => {
+                if (v === "Custom") {
+                  setCustomRetention(true);
+                } else {
+                  setCustomRetention(false);
+                  patchConfig({ retentionDays: Number(v.split(" ")[0]) });
+                }
+              }}
+              className="w-40"
+            />
+          </Field>
+          {customRetention && (
+            <Field label="Custom days">
+              <TextInput
+                value={String(retentionDays)}
+                onChange={(v) =>
+                  patchConfig({ retentionDays: Math.max(1, Number(v.replace(/[^0-9]/g, "")) || 1) })
+                }
+                placeholder="30"
+              />
+            </Field>
+          )}
+        </div>
+        <p className="mt-2 text-[11px] text-muted-foreground">
+          Currently retained: <span className="font-medium text-foreground">{retentionDays} days</span> of
+          communication history.
+        </p>
+      </div>
     </div>
   );
 }

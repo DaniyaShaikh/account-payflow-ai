@@ -77,6 +77,10 @@ export interface Communication {
   time: string;
   createdAt: string;
   sentAt: string | null;
+  /** ISO timestamp of the send; generated history records always set this. */
+  sentISO?: string;
+  /** Recipient email address; derived from the customer name when absent. */
+  recipientEmail?: string;
   balance: number;
   subject?: string;
   bodyLines: string[];
@@ -574,6 +578,125 @@ export const communications: Communication[] = [
 export function communicationById(id: string) {
   return communications.find((c) => c.id === id);
 }
+
+/* ---------------- Searchable email history (mock) ---------------- */
+
+export function recipientEmailOf(c: Communication): string {
+  if (c.recipientEmail) return c.recipientEmail;
+  const slug = c.customer
+    .toLowerCase()
+    .replace(/[^a-z]+/g, ".")
+    .replace(/^\.|\.$/g, "");
+  return `${slug}@example.com`;
+}
+
+export function fromEmailOf(c: Communication): string {
+  return clients.find((cl) => cl.id === c.clientId)?.config.emailFrom ?? "collections@payflow.io";
+}
+
+/** Best-effort send date; legacy records fall back to their date bucket. */
+export function commSentDate(c: Communication): Date {
+  if (c.sentISO) return new Date(c.sentISO);
+  const offset =
+    c.dateBucket === "Today" ? 0 : c.dateBucket === "Yesterday" ? 1 : c.dateBucket === "Last 7 Days" ? 4 : 15;
+  return new Date(Date.now() - offset * 86400000);
+}
+
+export function clientRetentionDays(clientId: string): number {
+  return clients.find((cl) => cl.id === clientId)?.config.retentionDays ?? 30;
+}
+
+/** Whether a record is still inside its client's retention window. */
+export function withinRetention(c: Communication, now: Date = new Date()): boolean {
+  const ageDays = (now.getTime() - commSentDate(c).getTime()) / 86400000;
+  return ageDays <= clientRetentionDays(c.clientId);
+}
+
+const historyPeople: Record<string, { accountId: string; reference: string; name: string; balance: number }[]> = {
+  paypal: [
+    { accountId: "pp-10482", reference: "PP-10482", name: "Daniel Reyes", balance: 1240 },
+    { accountId: "pp-11021", reference: "PP-11021", name: "Aisha Khan", balance: 860 },
+    { accountId: "pp-12098", reference: "PP-12098", name: "Tom Becker", balance: 2310 },
+  ],
+  "canadian-tire": [
+    { accountId: "ct-20394", reference: "CT-20394", name: "Marie Dubois", balance: 640 },
+    { accountId: "ct-21877", reference: "CT-21877", name: "James Li", balance: 1490 },
+  ],
+  "northstar-utilities": [
+    { accountId: "ns-30112", reference: "NS-30112", name: "Elena Petrova", balance: 420 },
+    { accountId: "ns-31450", reference: "NS-31450", name: "Marcus Webb", balance: 5400 },
+  ],
+};
+
+const historySubjects = [
+  "Reminder: your account balance is due",
+  "Payment plan options for your account",
+  "Your payment reminder",
+  "Settlement offer available for a limited time",
+  "Final notice before further action",
+];
+
+const historyStatuses: CommStatus[] = ["Delivered", "Opened / Read", "Payment Link Clicked", "Sent", "Failed"];
+
+/** Deterministic generated email history spanning ~200 days for retention demos. */
+function generateEmailHistory(): Communication[] {
+  const out: Communication[] = [];
+  const now = Date.now();
+  let n = 0;
+  for (const [clientId, people] of Object.entries(historyPeople)) {
+    // One email per person every ~9 days, going back 200 days.
+    for (let day = 2; day <= 200; day += 9) {
+      const person = people[n % people.length]!;
+      const sent = new Date(now - day * 86400000 - ((day * 37) % 700) * 60000);
+      const status = historyStatuses[(day + n) % historyStatuses.length]!;
+      const subject = historySubjects[(day + n * 2) % historySubjects.length]!;
+      const dateLabel = sent.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+      const time = sent.toTimeString().slice(0, 5);
+      const stamp = `${dateLabel} · ${time}`;
+      const age = day;
+      out.push({
+        id: `gx-${clientId.slice(0, 2)}-${day}-${n}`,
+        clientId,
+        accountId: person.accountId,
+        customer: person.name,
+        reference: person.reference,
+        channel: "Email",
+        purpose: commPurposes[(day + n) % commPurposes.length]!,
+        journeyId: "promise-to-pay-follow-up",
+        journeyStage: "Payment Reminder",
+        status,
+        engagement: status === "Opened / Read" || status === "Payment Link Clicked" ? "Opened" : null,
+        dateBucket: age === 0 ? "Today" : age === 1 ? "Yesterday" : age <= 7 ? "Last 7 Days" : "This Month",
+        dateLabel,
+        time,
+        createdAt: stamp,
+        sentAt: stamp,
+        sentISO: sent.toISOString(),
+        recipientEmail: recipientEmailOf({ customer: person.name } as Communication),
+        balance: person.balance,
+        subject,
+        bodyLines: [
+          `Hello ${person.name.split(" ")[0]},`,
+          `This is a reminder about the outstanding balance of $${person.balance.toLocaleString()} on account ${person.reference}.`,
+          "You can pay in full, make a partial payment, or set up a payment plan using the secure link below.",
+          "If you have already made a payment, please disregard this message.",
+        ],
+        paymentLink: true,
+        whyMessage: "Scheduled reminder based on the account's collection workflow stage.",
+        whyChannel: "Email is the customer's confirmed contact channel.",
+        whyTiming: "Sent within the permitted contact window for the customer's time zone.",
+        events: [
+          { at: stamp, label: "Email sent" },
+          ...(status !== "Failed" && status !== "Sent" ? [{ at: stamp, label: "Email delivered" }] : []),
+        ],
+      });
+      n++;
+    }
+  }
+  return out;
+}
+
+communications.push(...generateEmailHistory());
 
 export function communicationsForAccount(accountId: string) {
   return communications.filter((c) => c.accountId === accountId);
