@@ -99,6 +99,17 @@ export function CommunicationTable({
     setApplied((p) => ({ ...p, [key]: value }));
   };
 
+  /** Date-range edits stay pending until the user applies them. */
+  const setDate = (key: "from" | "to", value: string) => {
+    setPending((p) => ({ ...p, [key]: value }));
+  };
+
+  const rangeDirty = pending.from !== applied.from || pending.to !== applied.to;
+  const applyRange = () =>
+    setApplied((p) => ({ ...p, from: pending.from, to: pending.to }));
+  const resetRange = () =>
+    setPending((p) => ({ ...p, from: applied.from, to: applied.to }));
+
 
   const f = applied;
   const journeyNames = useMemo(
@@ -209,16 +220,26 @@ export function CommunicationTable({
             <input
               type="date"
               value={shown.from}
-              onChange={(e) => setFilter("from", e.target.value)}
+              onChange={(e) => setDate("from", e.target.value)}
               className="bg-transparent text-[13px] text-foreground outline-none"
             />
             <span className="text-[11px] font-medium text-muted-foreground">To</span>
             <input
               type="date"
               value={shown.to}
-              onChange={(e) => setFilter("to", e.target.value)}
+              onChange={(e) => setDate("to", e.target.value)}
               className="bg-transparent text-[13px] text-foreground outline-none"
             />
+          </div>
+        )}
+        {advanced && rangeDirty && (
+          <div className="flex h-8 items-center gap-1.5">
+            <Btn variant="primary" className="h-8 px-3" onClick={applyRange}>
+              Apply
+            </Btn>
+            <Btn variant="ghost" className="h-8 px-2.5" onClick={resetRange}>
+              Reset
+            </Btn>
           </div>
         )}
       </div>
