@@ -105,10 +105,14 @@ export function CommunicationTable({
   };
 
   const rangeDirty = pending.from !== applied.from || pending.to !== applied.to;
+  const rangeActive = !!applied.from || !!applied.to;
   const applyRange = () =>
     setApplied((p) => ({ ...p, from: pending.from, to: pending.to }));
-  const resetRange = () =>
-    setPending((p) => ({ ...p, from: applied.from, to: applied.to }));
+  /** Clears the date range from the applied filters and the inputs. */
+  const resetRange = () => {
+    setPending((p) => ({ ...p, from: "", to: "" }));
+    setApplied((p) => ({ ...p, from: "", to: "" }));
+  };
 
 
   const f = applied;
@@ -232,11 +236,13 @@ export function CommunicationTable({
             />
           </div>
         )}
-        {advanced && rangeDirty && (
+        {advanced && (rangeDirty || rangeActive) && (
           <div className="flex h-8 items-center gap-1.5">
-            <Btn variant="primary" className="h-8 px-3" onClick={applyRange}>
-              Apply
-            </Btn>
+            {rangeDirty && (
+              <Btn variant="primary" className="h-8 px-3" onClick={applyRange}>
+                Apply
+              </Btn>
+            )}
             <Btn variant="ghost" className="h-8 px-2.5" onClick={resetRange}>
               Reset
             </Btn>
