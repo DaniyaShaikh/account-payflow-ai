@@ -179,13 +179,20 @@ export function communicationReviewIssues(strategy: Strategy): string[] {
   return [
     ...Object.values(strategy.nodes),
     ...(strategy.adaptiveEnabled
-      ? (strategy.adaptiveFollowups ?? []).map((f): StrategyNode => ({
-          id: f.id,
-          title: f.name,
-          kind: "Communication",
-          origin: "AI Proposed",
-          config: f.config,
-        }))
+      ? (strategy.adaptiveFollowups ?? []).flatMap((f) =>
+          [
+            { set: "First Time", config: f.config },
+            ...(f.repeat ? [{ set: "Repeat", config: f.repeat }] : []),
+          ].map(
+            ({ set, config }): StrategyNode => ({
+              id: `${f.id}-${set}`,
+              title: set === "First Time" ? f.name : `${f.name} (Repeat)`,
+              kind: "Communication",
+              origin: "AI Proposed",
+              config,
+            }),
+          ),
+        )
       : []),
   ]
     .filter((n) => n.kind === "Communication" && !n.disabled)
@@ -215,20 +222,17 @@ export function finalizeCommunicationVersions(strategy: Strategy): Strategy {
     ...strategy,
     ...(strategy.adaptiveEnabled
       ? {
-          adaptiveFollowups: (strategy.adaptiveFollowups ?? []).map((f) => ({
-            ...f,
-            config: {
-              ...f.config,
-              communicationVersions: (f.config.communicationVersions ?? []).map((v) =>
-                segmentIsActive(
-                  f.config.communicationSegments ?? defaultCommunicationSegments(),
-                  v.id,
-                )
+          adaptiveFollowups: (strategy.adaptiveFollowups ?? []).map((f) => {
+            const final = (c: Strategy["nodes"][string]["config"]) => ({
+              ...c,
+              communicationVersions: (c.communicationVersions ?? []).map((v) =>
+                segmentIsActive(c.communicationSegments ?? defaultCommunicationSegments(), v.id)
                   ? { ...v, status: "Final" as const }
                   : v,
               ),
-            },
-          })),
+            });
+            return { ...f, config: final(f.config), ...(f.repeat ? { repeat: final(f.repeat) } : {}) };
+          }),
         }
       : {}),
     nodes: Object.fromEntries(

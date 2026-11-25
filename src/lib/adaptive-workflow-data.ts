@@ -1,46 +1,105 @@
 import type { NodeConfig, Strategy, StrategyNode } from "./strategy-data";
 import { initialCommunicationVersions } from "./communication-versions";
 
+export type Occurrence = "first" | "repeat";
+export const occurrenceLabel: Record<Occurrence, string> = { first: "First Time", repeat: "Repeat" };
+
 export interface AdaptiveFollowup {
   id: string;
   name: string;
   trigger: string;
+  waiting?: string;
+  /** First Time communication set. */
   config: NodeConfig;
+  /** Repeat communication set — a different approach for subsequent occurrences. */
+  repeat?: NodeConfig;
+}
+
+/** Each communication set as an independently validated pseudo-node. */
+export function followupSets(f: AdaptiveFollowup): { occurrence: Occurrence; config: NodeConfig }[] {
+  return [
+    { occurrence: "first", config: f.config },
+    { occurrence: "repeat", config: f.repeat ?? { communicationVersions: [] } },
+  ];
 }
 
 export const standardFollowups = [
   {
     id: "not-opened",
+    waiting: "48 hours",
     name: "Not Opened",
     trigger: "No email open recorded within 48 hours of delivery.",
   },
   {
     id: "opened-not-paid",
+    waiting: "48 hours",
     name: "Opened, Not Paid",
     trigger: "Email opened; no payment activity within 48 hours of the open.",
   },
   {
     id: "no-engagement",
+    waiting: "72 hours",
     name: "No Engagement",
     trigger:
       "No observable open, click or payment activity within 72 hours of the last communication.",
   },
   {
     id: "payment-not-finished",
+    waiting: "24 hours",
     name: "Payment Not Finished",
     trigger: "Payment page accessed; no completed payment within 24 hours.",
   },
   {
     id: "payment-failed",
+    waiting: "2 hours",
     name: "Payment Failed",
     trigger: "Verified payment failure; reassess after 2 hours before another contact.",
   },
   {
     id: "part-paid",
+    waiting: "24 hours",
     name: "Part Paid",
     trigger: "Confirmed partial payment; reassess remaining balance after 24 hours.",
   },
+  {
+    id: "plan-setup-not-finished",
+    waiting: "Pending configuration",
+    name: "Plan Setup Not Finished",
+    trigger: "Customer started setting up a payment plan but did not complete it.",
+  },
 ];
+
+/** Progressive mock content: Repeat takes a different approach, never a rephrase. */
+const progressiveContent: Record<string, Record<Occurrence, { subject: string; body: string; sms: string }>> = {
+  "not-opened": {
+    first: { subject: "A quick reminder about your account", body: "Hi {{first_name}},\n\nThis is a reminder that a balance remains on account {{account_reference}}. You can review and pay securely online.\n\n{{payment_link}}\n\n{{brand_name}}", sms: "{{brand_name}}: A balance remains on {{account_reference}}. Pay securely: {{payment_link}}" },
+    repeat: { subject: "We're here to help with your account", body: "Hi {{first_name}},\n\nIf now isn't a good time, that's okay. Our team can help you find an option that works for you, or you can review your account at your own pace.\n\n{{payment_link}}\n\n{{brand_name}}", sms: "{{brand_name}}: Need help with {{account_reference}}? We can find an option that works for you: {{payment_link}}" },
+  },
+  "opened-not-paid": {
+    first: { subject: "How to complete your payment", body: "Hi {{first_name}},\n\nPaying takes a few minutes: open the secure link, confirm your balance and choose your payment method.\n\n{{payment_link}}\n\n{{brand_name}}", sms: "{{brand_name}}: Pay {{account_reference}} in a few steps: {{payment_link}}" },
+    repeat: { subject: "Options that may suit you better", body: "Hi {{first_name}},\n\nIf paying the full balance isn't possible, you may be able to pay part now or set up a payment plan, where available for your account.\n\n{{payment_link}}\n\n{{brand_name}}", sms: "{{brand_name}}: Other options may be available for {{account_reference}}: {{payment_link}}" },
+  },
+  "no-engagement": {
+    first: { subject: "A friendly reminder from {{brand_name}}", body: "Hi {{first_name}},\n\nJust a friendly reminder that your account {{account_reference}} is still open.\n\n{{payment_link}}\n\n{{brand_name}}", sms: "{{brand_name}}: Friendly reminder about {{account_reference}}: {{payment_link}}" },
+    repeat: { subject: "Let's resolve your account together", body: "Hi {{first_name}},\n\nWe'd like to help you resolve this. Reply through the secure page or contact our team, and we'll walk you through the available choices.\n\n{{payment_link}}\n\n{{brand_name}}", sms: "{{brand_name}}: We'd like to help resolve {{account_reference}}. See your choices: {{payment_link}}" },
+  },
+  "payment-not-finished": {
+    first: { subject: "Finish your payment in a few steps", body: "Hi {{first_name}},\n\nYour payment wasn't completed. You can return to the secure page and finish where you left off.\n\n{{payment_link}}\n\n{{brand_name}}", sms: "{{brand_name}}: Finish your payment for {{account_reference}}: {{payment_link}}" },
+    repeat: { subject: "Other ways to pay, or get help", body: "Hi {{first_name}},\n\nIf something got in the way, you can try another available payment method, or contact our team and we'll help you complete it.\n\n{{payment_link}}\n\n{{brand_name}}", sms: "{{brand_name}}: Try another payment method or get help for {{account_reference}}: {{payment_link}}" },
+  },
+  "payment-failed": {
+    first: { subject: "Your payment didn't go through", body: "Hi {{first_name}},\n\nYour recent payment could not be processed. Please check your details and try again using the secure link.\n\n{{payment_link}}\n\n{{brand_name}}", sms: "{{brand_name}}: Your payment didn't go through. Retry securely: {{payment_link}}" },
+    repeat: { subject: "Try a different payment method", body: "Hi {{first_name}},\n\nIf the same method keeps failing, you can choose another available method, or our team can help you find an alternative.\n\n{{payment_link}}\n\n{{brand_name}}", sms: "{{brand_name}}: Use another payment method or get help: {{payment_link}}" },
+  },
+  "part-paid": {
+    first: { subject: "Thank you for your payment", body: "Hi {{first_name}},\n\nThank you — we received your payment. A remaining balance of {{balance}} is still open on {{account_reference}}.\n\n{{payment_link}}\n\n{{brand_name}}", sms: "{{brand_name}}: Thanks for your payment. Remaining balance: {{balance}}. {{payment_link}}" },
+    repeat: { subject: "Arrangements for your remaining balance", body: "Hi {{first_name}},\n\nTo settle the remaining {{balance}}, you can pay in parts or set up a payment plan, where available for your account.\n\n{{payment_link}}\n\n{{brand_name}}", sms: "{{brand_name}}: Arrange the remaining {{balance}} on your terms: {{payment_link}}" },
+  },
+  "plan-setup-not-finished": {
+    first: { subject: "Complete your payment plan setup", body: "Hi {{first_name}},\n\nYou started setting up a payment plan. Choose your frequency and amount to finish — it only takes a minute.\n\n{{payment_link}}\n\n{{brand_name}}", sms: "{{brand_name}}: Finish setting up your payment plan: {{payment_link}}" },
+    repeat: { subject: "Setting up a plan, made simple", body: "Hi {{first_name}},\n\nJust pick how often you'd like to pay and the amount each time — we'll show your dates. Prefer help? Our team can set it up with you.\n\n{{payment_link}}\n\n{{brand_name}}", sms: "{{brand_name}}: Pick a frequency and amount to set up your plan, or ask us for help: {{payment_link}}" },
+  },
+};
 
 export function followupNode(followup: AdaptiveFollowup): StrategyNode {
   return {
@@ -52,13 +111,25 @@ export function followupNode(followup: AdaptiveFollowup): StrategyNode {
   };
 }
 
-export function writeFollowup(strategy: Strategy, followup: AdaptiveFollowup): AdaptiveFollowup {
+export function writeFollowup(
+  strategy: Strategy,
+  followup: AdaptiveFollowup,
+  only?: Occurrence,
+): AdaptiveFollowup {
+  const write = (occurrence: Occurrence) => writeSet(strategy, followup, occurrence);
+  return {
+    ...followup,
+    config: only === "repeat" ? followup.config : write("first"),
+    repeat: only === "first" ? (followup.repeat ?? { communicationVersions: [] }) : write("repeat"),
+  };
+}
+
+function writeSet(strategy: Strategy, followup: AdaptiveFollowup, occurrence: Occurrence): NodeConfig {
   const source = Object.values(strategy.nodes).find((node) => node.kind === "Communication");
   const base =
     source?.config.communicationVersions ?? initialCommunicationVersions(followupNode(followup));
+  const copy = progressiveContent[followup.id]?.[occurrence];
   return {
-    ...followup,
-    config: {
       channel: "Email",
       purpose: "Payment Reminder",
       reminderStage: followup.name,
@@ -67,12 +138,18 @@ export function writeFollowup(strategy: Strategy, followup: AdaptiveFollowup): A
         : {}),
       communicationVersions: base.map((version) => ({
         ...version,
-        subject: `Your account — ${followup.name.toLowerCase()}`,
+        subject: copy?.subject ?? `Your account — ${followup.name.toLowerCase()}`,
+        // Progressive intros keep each version's protected approved copy unchanged.
+        ...(copy
+          ? {
+              emailBody: `${copy.body.split("\n\n{{payment_link}}")[0]?.replace(/^Hi \{\{first_name\}\},\n\n/, "")}\n\n${version.protectedEmail}`,
+              smsContent: `${copy.sms.replace(/^\{\{brand_name\}\}: /, "").replace(/:?\s*\{\{payment_link\}\}$/, ".")} ${version.protectedSms}`,
+            }
+          : {}),
         status: "Modified",
         hasUnsavedChanges: false,
-        explanation: `Simulated AI reasoning: ${followup.trigger} Replace the next eligible reminder rather than add contact volume. Use approved account copy and existing recipient versions; mandatory protections still apply.`,
+        explanation: `Simulated AI reasoning (${occurrenceLabel[occurrence]}): ${followup.trigger} ${occurrence === "repeat" ? "First-time content was already sent, so take a different, more supportive approach with assistance or available arrangements." : "Initial occurrence: a clear, direct next step."} Replace the next eligible reminder rather than add contact volume; mandatory protections still apply.`,
       })),
-    },
   };
 }
 
@@ -83,22 +160,16 @@ export function seedAdaptiveWorkflow(strategy: Strategy): Strategy {
     const followup: AdaptiveFollowup = {
       ...scenario,
       config: { channel: "Email", purpose: "Payment Reminder", communicationVersions: [] },
+      repeat: { channel: "Email", purpose: "Payment Reminder", communicationVersions: [] },
     };
     if (!finalized && index === 2) return followup;
     const written = writeFollowup(strategy, followup);
-    return finalized
-      ? {
-          ...written,
-          config: {
-            ...written.config,
-            communicationVersions:
-              written.config.communicationVersions?.map((v) => ({
-                ...v,
-                status: "Final" as const,
-              })) ?? [],
-          },
-        }
-      : written;
+    const final = (c: NodeConfig | undefined): NodeConfig => ({
+      ...c,
+      communicationVersions:
+        c?.communicationVersions?.map((v) => ({ ...v, status: "Final" as const })) ?? [],
+    });
+    return finalized ? { ...written, config: final(written.config), repeat: final(written.repeat) } : written;
   });
   return { ...strategy, adaptiveEnabled: enabled, adaptiveFollowups: followups };
 }
@@ -150,6 +221,41 @@ export interface AdaptiveDecision {
   subject: string;
   body: string;
   sms: string;
+  occurrence?: Occurrence;
+  contentVersion?: string;
+  replaces?: string;
+}
+export type UsageStatus = "Available" | "Scheduled" | "Sent" | "Not Written Yet" | "Not Applicable";
+export interface UsageEntry {
+  status: "Scheduled" | "Sent" | "Not Applicable";
+  at?: string;
+  replaced?: string;
+}
+export type FollowupUsage = Record<string, Partial<Record<Occurrence, UsageEntry>>>;
+
+/** Scheduled content is not consumed until sent; cancelled/superseded entries are simply removed. */
+export function usageStatus(
+  usage: FollowupUsage | undefined,
+  followup: AdaptiveFollowup,
+  occurrence: Occurrence,
+): UsageStatus {
+  const entry = usage?.[followup.id]?.[occurrence];
+  if (entry) return entry.status;
+  const set = occurrence === "first" ? followup.config : followup.repeat;
+  return set?.communicationVersions?.length ? "Available" : "Not Written Yet";
+}
+export function isExhausted(usage: FollowupUsage | undefined, followupId: string): boolean {
+  return usage?.[followupId]?.first?.status === "Sent" && usage[followupId]?.repeat?.status === "Sent";
+}
+/** Next eligible, approved, unused content for a follow-up (First Time before Repeat). */
+export function nextOccurrence(
+  usage: FollowupUsage | undefined,
+  followup: AdaptiveFollowup,
+): Occurrence | null {
+  return (["first", "repeat"] as const).find((o) => usageStatus(usage, followup, o) === "Available") ?? null;
+}
+export function sentLabel(name: string, occurrence: Occurrence, replaced: string, version: string) {
+  return `Follow-up: ${name} · ${occurrenceLabel[occurrence]} (Replaced ${replaced}) · ${version}`;
 }
 export interface AdaptiveCase {
   accountId: string;
@@ -161,6 +267,7 @@ export interface AdaptiveCase {
   originalScheduled: string;
   decision: AdaptiveDecision;
   history: AdaptiveEvent[];
+  usage?: FollowupUsage;
 }
 
 export function canReviewDecision(
@@ -260,6 +367,9 @@ function decision(id: string, pending: boolean): AdaptiveDecision {
     subject: "A clear reminder about your account",
     body: "Hi {{first_name}},\n\nPlease review your remaining balance and approved payment options.\n\n{{payment_link}}\n\n{{brand_name}}",
     sms: "{{brand_name}}: Review account {{account_reference}} and payment options. {{payment_link}}",
+    occurrence: pending ? "repeat" : "first",
+    contentVersion: pending ? "Age 35–44 · English" : "Main / Default · English",
+    replaces: "Reminder 3",
   };
 }
 
@@ -274,6 +384,10 @@ export const seedAdaptiveCases: AdaptiveCase[] = [
     originalScheduled: "2026-11-26T14:00",
     decision: decision("ad-john", false),
     history: journeyHistory,
+    usage: {
+      "payment-not-finished": { first: { status: "Sent", at: "2026-11-21T14:00:00Z", replaced: "Reminder 3" } },
+      "part-paid": { first: { status: "Scheduled", at: "2026-11-26T14:00:00Z", replaced: "Reminder 3" } },
+    },
   },
   {
     accountId: "pp-88831",
@@ -284,8 +398,24 @@ export const seedAdaptiveCases: AdaptiveCase[] = [
     originalChannel: "Email",
     originalScheduled: "2026-11-26T14:00",
     decision: decision("ad-david", true),
+    usage: {
+      "not-opened": { first: { status: "Sent", at: "2026-11-18T14:00:00Z", replaced: "Reminder 2" } },
+      "payment-not-finished": {
+        first: { status: "Sent", at: "2026-11-19T14:00:00Z", replaced: "Reminder 2" },
+        repeat: { status: "Sent", at: "2026-11-22T14:00:00Z", replaced: "Reminder 3" },
+      },
+      "payment-failed": {
+        first: { status: "Sent", at: "2026-11-24T14:00:00Z", replaced: "Reminder 3" },
+        repeat: { status: "Scheduled", at: "2026-11-26T14:00:00Z", replaced: "Reminder 3" },
+      },
+    },
     history: [
-      ...journeyHistory.slice(0, 6),
+      { at: "2026-11-16T14:00:00Z", label: "Day 1 · Reminder 1 sent", detail: "Original workflow step · Main / Default · English." },
+      { at: "2026-11-18T14:00:00Z", label: "Day 3 · Payment page visited without completed payment", detail: "Rule-Based: Payment Not Finished selected." },
+      { at: "2026-11-19T14:00:00Z", label: "Day 4 · Follow-up sent", detail: sentLabel("Payment Not Finished", "first", "Reminder 2", "Main / Default · English"), status: "Applied" },
+      { at: "2026-11-21T11:00:00Z", label: "Day 6 · Payment page revisited without completed payment", detail: "Repeated incomplete payment activity." },
+      { at: "2026-11-22T14:00:00Z", label: "Day 7 · Follow-up sent", detail: sentLabel("Payment Not Finished", "repeat", "Reminder 3", "Age 35–44 · English"), status: "Applied" },
+      { at: "2026-11-24T14:00:00Z", label: "Day 9 · Follow-up sent", detail: sentLabel("Payment Failed", "first", "Reminder 3", "Age 35–44 · English"), status: "Applied" },
       {
         at: "2026-11-25T14:00:00Z",
         label: "Verified payment failure",
@@ -295,7 +425,7 @@ export const seedAdaptiveCases: AdaptiveCase[] = [
         at: "2026-11-25T16:00:00Z",
         label: "AI Decision Awaiting Approval",
         detail:
-          "Payment Failed follow-up recommended to replace Reminder 3. Operations review required.",
+          "Payment Failed · Repeat recommended to replace Reminder 3 (Age 35–44 · English). Operations review required. Scheduled content is not used until sent.",
         status: "Pending",
       },
     ],
@@ -352,6 +482,7 @@ export function reassessAdaptiveCase(
     };
   const completed = outcome === "completed";
   const blocked = outcome === "blocked";
+  const exhausted = isExhausted(state.usage, state.decision.followupId);
   return {
     ...state,
     status: completed ? "Completed" : blocked ? "Paused" : "Requires Review",
@@ -378,7 +509,9 @@ export function reassessAdaptiveCase(
         ? "Full payment confirmed. Stop applicable collection reminders and cancel pending contact."
         : blocked
           ? "A mandatory contact restriction prevents this communication. Route the issue to Operations; no approval can bypass this restriction."
-          : "The latest engagement supersedes the previous recommendation. Move the approved follow-up to the next eligible contact window; human approval is required.",
+          : exhausted
+            ? "Both First Time and Repeat content for this follow-up have been sent. Continue with the existing workflow and reschedule the next planned reminder for an eligible window; human approval is required."
+            : "The latest engagement supersedes the previous recommendation. Move the approved follow-up to the next eligible contact window; human approval is required.",
       scheduled: "2026-11-27T14:00",
     },
     history: [

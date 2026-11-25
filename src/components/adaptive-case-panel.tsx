@@ -11,6 +11,10 @@ import {
   canReviewDecision,
   resolveAdaptiveDecision,
   reassessAdaptiveCase,
+  usageStatus,
+  isExhausted,
+  occurrenceLabel,
+  type Occurrence,
 } from "@/lib/adaptive-workflow-data";
 import type { CustomerAccount } from "@/lib/payflow-data";
 
@@ -37,6 +41,7 @@ export function AdaptiveCasePanel({ account }: { account: CustomerAccount }) {
     subject: "",
     body: "",
     sms: "",
+    content: "",
   });
   const state = adaptiveCases.find((c) => c.accountId === account.id);
   if (!state) return null;
@@ -50,6 +55,16 @@ export function AdaptiveCasePanel({ account }: { account: CustomerAccount }) {
     state.status !== "Completed" &&
     canReviewDecision(d, authorized, new Date().toISOString());
   const followup = strategy?.adaptiveFollowups?.find((f) => f.id === d.followupId);
+  const followups = strategy?.adaptiveFollowups ?? [];
+  // Modify may only pick approved, unused content (the decision's own scheduled set stays selectable).
+  const eligible = followups.flatMap((f) =>
+    (["first", "repeat"] as const)
+      .filter((o) => {
+        const st = usageStatus(state.usage, f, o);
+        return st === "Available" || (st === "Scheduled" && f.id === d.followupId && o === d.occurrence);
+      })
+      .map((o) => ({ f, o, key: `${f.name} · ${occurrenceLabel[o]}` })),
+  );
   const terminal = ["Rejected", "Cancelled", "Superseded", "Expired", "Blocked"].includes(d.status);
   const noSend = [
     "Wait for further activity",
@@ -151,7 +166,21 @@ export function AdaptiveCasePanel({ account }: { account: CustomerAccount }) {
               {d.source} · {timestamp(d.at)}
               {d.confidence !== undefined && ` · ${d.confidence}% mock confidence`}
             </p>
-            <p className="mt-2 font-medium">Trigger · {d.trigger}</p>
+            <p className="mt-2 font-medium">Customer Engagement Event · {d.trigger}</p>
+            <dl className="mt-2 grid gap-x-4 gap-y-1 sm:grid-cols-2">
+              <div><dt className="inline text-muted-foreground">Follow-up · </dt><dd className="inline">{followup?.name ?? "—"}</dd></div>
+              <div><dt className="inline text-muted-foreground">Occurrence · </dt><dd className="inline">{d.occurrence ? occurrenceLabel[d.occurrence] : "—"}</dd></div>
+              <div><dt className="inline text-muted-foreground">Content Version · </dt><dd className="inline">{d.contentVersion ?? "Main / Default"}</dd></div>
+              <div><dt className="inline text-muted-foreground">Replaces · </dt><dd className="inline">{d.replaces ?? state.originalStep}</dd></div>
+              <div><dt className="inline text-muted-foreground">Channel · </dt><dd className="inline">{d.channel}</dd></div>
+              <div><dt className="inline text-muted-foreground">Scheduled Execution · </dt><dd className="inline">{timestamp(d.scheduled)}</dd></div>
+              <div className="sm:col-span-2"><dt className="inline text-muted-foreground">Decision Source · </dt><dd className="inline">{d.source}</dd></div>
+            </dl>
+            {isExhausted(state.usage, d.followupId) && (
+              <p className="mt-2 text-warning">
+                Both First Time and Repeat content for {followup?.name} have been sent — reassess for the next eligible action.
+              </p>
+            )}
             <p className="mt-2 leading-relaxed text-muted-foreground">{d.explanation}</p>
             <p className="mt-2">Compliance · {d.compliance}</p>
             <p className="mt-1 text-muted-foreground">
@@ -195,6 +224,7 @@ export function AdaptiveCasePanel({ account }: { account: CustomerAccount }) {
                       subject: d.subject,
                       body: d.body,
                       sms: d.sms,
+                      content: followup && d.occurrence ? `${followup.name} · ${occurrenceLabel[d.occurrence]}` : (eligible[0]?.key ?? ""),
                     });
                     setEditing(true);
                   }}
@@ -278,6 +308,53 @@ export function AdaptiveCasePanel({ account }: { account: CustomerAccount }) {
               {notice}
             </p>
           )}
+          <div>
+            <h3 className="font-semibold">Adaptive Follow-up Usage</h3>
+            <p className="mt-1 leading-relaxed text-muted-foreground">
+              First-time content is used for the initial occurrence. Repeat content provides a
+              different approach for subsequent occurrences. Once both have been sent, further
+              occurrences are handled through the existing workflow and AI reassessment.
+            </p>
+            <div className="mt-2 overflow-x-auto">
+              <table className="w-full min-w-[420px] text-left">
+                <thead className="text-muted-foreground">
+                  <tr className="border-b border-border">
+                    <th className="py-1.5 pr-2 font-medium">Follow-up</th>
+                    <th className="py-1.5 pr-2 font-medium">First Time</th>
+                    <th className="py-1.5 font-medium">Repeat</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {followups.map((f) => (
+                    <tr key={f.id} className="border-b border-border/60 align-top">
+                      <td className="py-1.5 pr-2">
+                        {f.name}
+                        {isExhausted(state.usage, f.id) && (
+                          <span className="ml-1.5"><StatusPill tone="neutral">Exhausted</StatusPill></span>
+                        )}
+                      </td>
+                      {(["first", "repeat"] as Occurrence[]).map((o) => {
+                        const st = usageStatus(state.usage, f, o);
+                        const entry = state.usage?.[f.id]?.[o];
+                        return (
+                          <td key={o} className="py-1.5 pr-2">
+                            <StatusPill tone={st === "Sent" ? "success" : st === "Scheduled" ? "warning" : st === "Not Written Yet" ? "warning" : "neutral"}>
+                              {st}
+                            </StatusPill>
+                            {entry?.at && (
+                              <p className="mt-0.5 text-[11px] text-muted-foreground">
+                                {timestamp(entry.at)}{entry.replaced ? ` · Replaced ${entry.replaced}` : ""}
+                              </p>
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
           <details>
             <summary className="cursor-pointer font-semibold">
               Engagement & Decision History · {state.history.length} events
@@ -334,18 +411,25 @@ export function AdaptiveCasePanel({ account }: { account: CustomerAccount }) {
               onChange={(e) => setDraft((v) => ({ ...v, scheduled: e.target.value }))}
             />
           </Field>
-          <Field label="Email subject">
-            <TextInput
-              value={draft.subject}
-              onChange={(subject) => setDraft((v) => ({ ...v, subject }))}
+          <Field label="Follow-up content (approved, unused)">
+            <SelectInput
+              value={draft.content}
+              options={eligible.map((e) => e.key)}
+              onChange={(content) => setDraft((v) => ({ ...v, content }))}
             />
           </Field>
-          <Field label="Email body">
-            <TextArea value={draft.body} onChange={(body) => setDraft((v) => ({ ...v, body }))} />
-          </Field>
-          <Field label="SMS content">
-            <TextArea value={draft.sms} onChange={(sms) => setDraft((v) => ({ ...v, sms }))} />
-          </Field>
+          {(() => {
+            const pick = eligible.find((e) => e.key === draft.content);
+            const v = (pick?.o === "repeat" ? pick.f.repeat : pick?.f.config)?.communicationVersions?.find((x) => x.id === "default");
+            return v ? (
+              <div className="rounded-md border border-border p-3 text-xs">
+                <p className="font-medium">{v.subject}</p>
+                <p className="mt-1 line-clamp-4 whitespace-pre-wrap text-muted-foreground">{v.emailBody}</p>
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground">No eligible unused content remains.</p>
+            );
+          })()}
           <div className="flex justify-end gap-2">
             <Btn onClick={() => setEditing(false)}>Cancel</Btn>
             <Btn
@@ -353,22 +437,26 @@ export function AdaptiveCasePanel({ account }: { account: CustomerAccount }) {
               disabled={
                 !actionable ||
                 !modifiable ||
-                !draft.body.trim() ||
-                !draft.subject.trim() ||
-                !draft.sms.trim() ||
+                !eligible.some((e) => e.key === draft.content) ||
                 !draft.scheduled ||
                 Date.parse(draft.scheduled + "Z") <= Date.now()
               }
               onClick={() => {
                 if (!actionable || !modifiable) return;
+                const pick = eligible.find((e) => e.key === draft.content);
+                const v = (pick?.o === "repeat" ? pick.f.repeat : pick?.f.config)?.communicationVersions?.find((x) => x.id === "default");
+                if (!pick || !v) return;
                 updateAdaptiveCase(
-                  resolveAdaptiveDecision(
-                    state,
-                    "Modified",
-                    userName,
-                    new Date().toISOString(),
-                    draft,
-                  ),
+                  resolveAdaptiveDecision(state, "Modified", userName, new Date().toISOString(), {
+                    action: draft.action,
+                    channel: draft.channel,
+                    scheduled: draft.scheduled,
+                    followupId: pick.f.id,
+                    occurrence: pick.o,
+                    subject: v.subject,
+                    body: v.emailBody,
+                    sms: v.smsContent,
+                  }),
                 );
                 setEditing(false);
                 setNotice("Modified decision saved. Approval is still required.");

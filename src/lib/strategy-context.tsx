@@ -2,6 +2,7 @@ import {
   seedAdaptiveWorkflow,
   seedAdaptiveCases,
   writeFollowup,
+  type Occurrence,
   type AdaptiveCase,
 } from "./adaptive-workflow-data";
 import { useContext, useMemo, useState, type ReactNode } from "react";
@@ -25,8 +26,13 @@ interface StrategyContextValue {
   adaptiveCases: AdaptiveCase[];
   updateAdaptiveCase: (state: AdaptiveCase) => void;
   setAdaptiveEnabled: (strategyId: string, enabled: boolean) => void;
-  updateFollowup: (strategyId: string, followupId: string, patch: NodeConfig) => void;
-  writeFollowupMessages: (strategyId: string, followupId: string) => void;
+  updateFollowup: (
+    strategyId: string,
+    followupId: string,
+    patch: NodeConfig,
+    occurrence?: Occurrence,
+  ) => void;
+  writeFollowupMessages: (strategyId: string, followupId: string, occurrence?: Occurrence) => void;
   portfolios: Portfolio[];
   portfoliosForClient: (clientId: string) => Portfolio[];
   portfolioById: (id: string) => Portfolio | undefined;
@@ -98,19 +104,23 @@ export function StrategyProvider({ children }: { children: ReactNode }) {
           adaptiveEnabled: enabled,
           adaptiveFollowups: s.adaptiveFollowups ?? seedAdaptiveWorkflow(s).adaptiveFollowups ?? [],
         })),
-      updateFollowup: (id, followupId, patch) =>
+      updateFollowup: (id, followupId, patch, occurrence = "first") =>
         patchStrategy(id, (s) => ({
           ...edited(s),
           adaptiveFollowups:
             s.adaptiveFollowups?.map((f) =>
-              f.id === followupId ? { ...f, config: { ...f.config, ...patch } } : f,
+              f.id !== followupId
+                ? f
+                : occurrence === "repeat"
+                  ? { ...f, repeat: { ...f.repeat, ...patch } }
+                  : { ...f, config: { ...f.config, ...patch } },
             ) ?? [],
         })),
-      writeFollowupMessages: (id, followupId) =>
+      writeFollowupMessages: (id, followupId, occurrence) =>
         patchStrategy(id, (s) => ({
           ...edited(s),
           adaptiveFollowups:
-            s.adaptiveFollowups?.map((f) => (f.id === followupId ? writeFollowup(s, f) : f)) ?? [],
+            s.adaptiveFollowups?.map((f) => (f.id === followupId ? writeFollowup(s, f, occurrence) : f)) ?? [],
         })),
       portfolios,
       portfoliosForClient: (clientId) => portfolios.filter((p) => p.clientId === clientId),

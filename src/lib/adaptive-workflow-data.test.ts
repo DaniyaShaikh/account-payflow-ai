@@ -7,6 +7,9 @@ import {
   seedAdaptiveCases,
   seedAdaptiveWorkflow,
   standardFollowups,
+  usageStatus,
+  isExhausted,
+  nextOccurrence,
   writeFollowup,
 } from "./adaptive-workflow-data";
 import { seedStrategies } from "./strategy-data";
@@ -29,7 +32,20 @@ function pendingCase() {
 }
 
 describe("adaptive workflow safeguards", () => {
-  it("keeps all six standard scenarios outside the original graph", () => {
+  it("tracks First Time and Repeat separately; scheduled content is not used until sent", () => {
+    const s = proposal();
+    const f = s.adaptiveFollowups?.find((x) => x.id === "payment-failed");
+    if (!f) throw new Error("missing");
+    const usage = { "payment-failed": { first: { status: "Sent" as const }, repeat: { status: "Scheduled" as const } } };
+    expect(usageStatus(usage, f, "repeat")).toBe("Scheduled");
+    expect(isExhausted(usage, "payment-failed")).toBe(false);
+    expect(nextOccurrence(usage, f)).toBeNull();
+    expect(isExhausted({ x: { first: { status: "Sent" }, repeat: { status: "Sent" } } }, "x")).toBe(true);
+    const repeatSubject = f.repeat?.communicationVersions?.[0]?.subject;
+    expect(repeatSubject).toBeTruthy();
+    expect(repeatSubject).not.toBe(f.config.communicationVersions?.[0]?.subject);
+  });
+  it("keeps all seven standard scenarios outside the original graph", () => {
     const s = proposal();
     expect(s.adaptiveFollowups?.map((f) => f.name)).toEqual([
       "Not Opened",
@@ -38,6 +54,7 @@ describe("adaptive workflow safeguards", () => {
       "Payment Not Finished",
       "Payment Failed",
       "Part Paid",
+      "Plan Setup Not Finished",
     ]);
     expect(standardFollowups.find((f) => f.id === "not-opened")?.trigger).toContain("48 hours");
     expect(Object.keys(s.nodes)).not.toContain("not-opened");
