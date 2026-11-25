@@ -29,6 +29,8 @@ import { permissionGroups } from "@/lib/users-data";
 import { cn } from "@/lib/utils";
 import { ClientCompliance } from "./client-compliance";
 import { ClientOperationalRules } from "./client-operational-rules";
+import { EmailSenderConfig } from "./sender-management";
+import { getEmailSetup, primarySender } from "@/lib/sender-data";
 
 export interface ClientDraft {
   clientId?: string;
@@ -329,11 +331,6 @@ export function BrandingSection({ draft, patchConfig }: SectionProps) {
           <ToggleRow label="WhatsApp" badge="Coming Later" checked={false} disabled />
         </div>
 
-        {c.channels.email && (
-          <Field label="Email From Address">
-            <TextInput value={c.emailFrom} onChange={(v) => patchConfig({ emailFrom: v })} />
-          </Field>
-        )}
         {c.channels.sms && (
           <Field label="SMS Sender ID">
             <TextInput value={c.smsSenderId} onChange={(v) => patchConfig({ smsSenderId: v })} />
@@ -350,7 +347,7 @@ export function BrandingSection({ draft, patchConfig }: SectionProps) {
             </div>
             <div className="text-[12px]">
               <p className="font-medium text-foreground">{c.senderName || brand}</p>
-              <p className="text-muted-foreground">{c.emailFrom}</p>
+              <p className="text-muted-foreground">{primarySender(getEmailSetup(draft.clientId ?? "", c))?.email ?? "No sender email yet"}</p>
             </div>
           </div>
           <p className="mt-3 text-[13px] font-medium text-foreground">
@@ -371,6 +368,12 @@ export function BrandingSection({ draft, patchConfig }: SectionProps) {
           </p>
         </div>
       </div>
+      {c.channels.email && (
+        <div className="lg:col-span-2">
+          <p className="text-eyebrow mb-2">Email Configuration</p>
+          <EmailSenderConfig clientId={draft.clientId ?? ""} config={c} patchConfig={patchConfig} />
+        </div>
+      )}
     </div>
   );
 }

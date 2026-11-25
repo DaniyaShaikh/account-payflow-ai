@@ -9,6 +9,7 @@ import {
   commStatusTone,
   communicationById,
   engagementLabel,
+  sentViaOf,
 } from "@/lib/communication-data";
 import { paymentTokenForAccount } from "@/lib/payment-data";
 import { cn } from "@/lib/utils";
@@ -93,6 +94,14 @@ function CommunicationDetail() {
     { label: "Account Reference", value: comm.reference },
     { label: "Collection Case", value: account ? account.status : "—" },
     { label: "Channel", value: comm.channel },
+    ...(comm.channel === "Email"
+      ? [
+          { label: "Actual From Email", value: sentViaOf(comm).email },
+          { label: "From Display Name", value: sentViaOf(comm).displayName },
+          { label: "Sender Identity", value: sentViaOf(comm).type === "Primary" ? "Primary sender" : "Alternative sender · Sent via failover" },
+          { label: "Sender Selection Reason", value: sentViaOf(comm).reason },
+        ]
+      : []),
     { label: "Purpose", value: comm.purpose },
     { label: "Workflow", value: journey?.name ?? "—" },
     { label: "Workflow Stage", value: comm.journeyStage },

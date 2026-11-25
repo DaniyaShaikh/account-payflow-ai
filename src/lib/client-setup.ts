@@ -1,11 +1,13 @@
 import type { ClientConfig } from "./payflow-data";
 import { mappingSummary } from "@/components/client-config-sections";
+import { activationIssues, getEmailSetup } from "./sender-data";
 
 /** Required onboarding sections that are still incomplete. Optional items (governance rules, portfolios) never count. */
 export function incompleteSetupSections(
   name: string,
   c: ClientConfig,
   assignedUsers: number,
+  clientId = "",
 ): string[] {
   const m = mappingSummary(c);
   const out: string[] = [];
@@ -14,12 +16,14 @@ export function incompleteSetupSections(
   if (!(m.unmapped === 0 && m.attention === 0 && m.mapped > 0)) out.push("Data Mapping");
   if (!c.brandName || !c.senderName || !(c.channels.email || c.channels.sms))
     out.push("Branding & Channels");
+  else if (activationIssues({ channels: c.channels, emailSetup: getEmailSetup(clientId, c) }).length)
+    out.push("Branding & Channels");
   if (assignedUsers === 0) out.push("Assigned Users");
   return out;
 }
 
 /** Plain-language reasons for each missing required item. */
-export function setupIssueDetails(name: string, c: ClientConfig, assignedUsers: number): string[] {
+export function setupIssueDetails(name: string, c: ClientConfig, assignedUsers: number, clientId = ""): string[] {
   const m = mappingSummary(c);
   const out: string[] = [];
   if (!name) out.push("Client Profile: client name is required");
@@ -32,6 +36,7 @@ export function setupIssueDetails(name: string, c: ClientConfig, assignedUsers: 
   if (!c.senderName) out.push("Branding & Channels: Sender name is required");
   if (!(c.channels.email || c.channels.sms))
     out.push("Branding & Channels: enable at least one channel");
+  out.push(...activationIssues({ channels: c.channels, emailSetup: getEmailSetup(clientId, c) }));
   if (assignedUsers === 0) out.push("Supervisor Assignment: assign at least one supervisor");
   return out;
 }

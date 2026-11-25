@@ -22,3 +22,4 @@
 - Reuse CommunicationTable and CommunicationExport on client communications with client-scoped rows and initialClient set to the owner name so portfolio filters and report headers share the same scope.
 
 - Keep optional adaptive follow-ups outside the fixed node graph and case decisions in StrategyProvider session state; reuse message validation/finalization and permission-gated case review so mock reassessment never changes the original flow or invokes services.
+- Keep client SendGrid status, sender identities, domain authentication and sender audit in ClientConfig.emailSetup via src/lib/sender-data.ts (seeded lazily per client); communications record the actual sender at send time so history never follows later sender changes, and sender eligibility stays separate from customer consent.

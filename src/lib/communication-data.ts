@@ -1,5 +1,6 @@
 import type { Tone } from "@/components/payflow-ui";
 import { clients } from "@/lib/payflow-data";
+import { sentViaFor } from "@/lib/sender-data";
 
 export type CommChannel = "Email" | "SMS" | "WhatsApp";
 
@@ -590,8 +591,12 @@ export function recipientEmailOf(c: Communication): string {
   return `${slug}@example.com`;
 }
 
+/** Actual sender recorded at send time — never the client's current Primary sender. */
+export function sentViaOf(c: Pick<Communication, "id" | "clientId">) {
+  return sentViaFor(c.id, c.clientId);
+}
 export function fromEmailOf(c: Communication): string {
-  return clients.find((cl) => cl.id === c.clientId)?.config.emailFrom ?? "collections@payflow.io";
+  return c.channel === "Email" ? sentViaOf(c).email : "—";
 }
 
 /** Best-effort send date; legacy records fall back to their date bucket. */

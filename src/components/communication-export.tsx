@@ -7,6 +7,7 @@ import {
   commSentDate,
   commStatusTone,
   fromEmailOf,
+  sentViaOf,
   recipientEmailOf,
   type Communication,
 } from "@/lib/communication-data";
@@ -36,7 +37,7 @@ function reportHtml(rows: Communication[], f: ExportFilterSummary, generatedOn: 
         <div class="email-head">${escapeHtml(c.subject ?? c.purpose)} <span class="status">${escapeHtml(c.status)}</span></div>
         <table class="meta">
           <tr><td>Sent</td><td>${fmtDateTime(sent)}</td></tr>
-          <tr><td>From</td><td>${escapeHtml(fromEmailOf(c))}</td></tr>
+          <tr><td>From</td><td>${escapeHtml(sentViaOf(c).displayName)} &lt;${escapeHtml(fromEmailOf(c))}&gt;${sentViaOf(c).type === "Alternative" ? " (alternative sender)" : ""}</td></tr>
           <tr><td>To</td><td>${escapeHtml(recipientEmailOf(c))}</td></tr>
           <tr><td>Subject</td><td>${escapeHtml(c.subject ?? c.purpose)}</td></tr>
           <tr><td>Delivery status</td><td>${escapeHtml(c.status)}</td></tr>
@@ -144,7 +145,7 @@ export function CommunicationExport({
                     <span className="text-muted-foreground">Sent:</span> {fmtDateTime(commSentDate(c))}
                   </div>
                   <div>
-                    <span className="text-muted-foreground">From:</span> {fromEmailOf(c)}
+                    <span className="text-muted-foreground">From:</span> {sentViaOf(c).displayName} &lt;{fromEmailOf(c)}&gt;
                   </div>
                   <div>
                     <span className="text-muted-foreground">To:</span> {recipientEmailOf(c)}

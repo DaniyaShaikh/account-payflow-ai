@@ -1,3 +1,4 @@
+import { getEmailSetup, primarySender } from "@/lib/sender-data";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { ReviewQueue } from "@/components/review-queue";
@@ -61,8 +62,10 @@ import { cn } from "@/lib/utils";
 import { useStrategies } from "@/lib/strategy-context";
 
 export const Route = createFileRoute("/clients/$clientId")({
-  validateSearch: (search: Record<string, unknown>): { tab?: string } =>
-    typeof search["tab"] === "string" ? { tab: search["tab"] } : {},
+  validateSearch: (search: Record<string, unknown>): { tab?: string; section?: string } => ({
+    ...(typeof search["tab"] === "string" ? { tab: search["tab"] } : {}),
+    ...(typeof search["section"] === "string" ? { section: search["section"] } : {}),
+  }),
   head: () => ({
     meta: [
       { title: "Client detail — PayFlow Collections" },
@@ -157,6 +160,7 @@ function ClientDetail() {
     client.name,
     client.config,
     assignedSupervisors.length,
+    client.id,
   );
   const canActivate =
     (client.status === "Draft" || client.status === "Onboarding") && missingSetup.length === 0;
@@ -216,6 +220,7 @@ function ClientDetail() {
             client.name,
             client.config,
             assignedSupervisors.length,
+            client.id,
           );
           if (missing.length === 0) return null;
           const label = (m: string) =>
@@ -603,9 +608,11 @@ function ClientConfiguration({
     draft.name,
     draft.config,
     supervisorsForClient(clientId).length,
+    clientId,
   );
+  const { section: linkedSection } = Route.useSearch();
   const [section, setSection] = useState<(typeof configSections)[number]>(
-    () => (configSections.find((s) => incomplete.includes(s)) ?? "General") as (typeof configSections)[number],
+    () => (configSections.find((s) => s === linkedSection) ?? configSections.find((s) => incomplete.includes(s)) ?? "General") as (typeof configSections)[number],
   );
   const { permissionsForClient } = useRole();
   const myPermissions = permissionsForClient(clientId);
@@ -798,7 +805,7 @@ function ConfigurationOverview({
           `${m.unmapped} unmapped`,
         ], onJump && (() => onJump("Data Mapping")))}
         {card("Branding & Communication", c.brandName && channels.length ? "success" : "warning", c.clientType === "First Party" ? "Client branded" : "PayFlow branded", [
-          `${c.senderName || "No sender"} · ${c.emailFrom}`,
+          `${c.senderName || "No sender"} · ${primarySender(getEmailSetup(clientId ?? "", c))?.email ?? "No sender email"}`,
           `Channels: ${channels.join(", ") || "None"} · WhatsApp coming later`,
         ], onJump && (() => onJump("Branding & Channels")))}
         <div className="rounded-lg border border-border bg-surface p-4">

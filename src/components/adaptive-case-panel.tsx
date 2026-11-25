@@ -3,6 +3,7 @@ import { Loader2, RefreshCw } from "lucide-react";
 import { Panel, Btn, Field, SelectInput, StatusPill, TextInput, TextArea } from "./payflow-ui";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 import { CommunicationCompliance } from "./communication-compliance";
+import { ExpectedSender } from "./sender-management";
 import { useStrategies } from "@/lib/strategy-context";
 import { useRole } from "@/lib/role-context";
 import {
@@ -170,6 +171,7 @@ export function AdaptiveCasePanel({ account }: { account: CustomerAccount }) {
                   {d.body}
                 </p>
                 <p className="border-t border-border pt-2 text-muted-foreground">SMS · {d.sms}</p>
+                <ExpectedSender accountId={account.id} clientId={account.clientId} channel={d.channel} />
                 <CommunicationCompliance
                   clientId={account.clientId}
                   channel={d.channel}

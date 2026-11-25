@@ -1,3 +1,4 @@
+import { getEmailSetup, senderAlerts } from "@/lib/sender-data";
 import { useStrategies } from "@/lib/strategy-context";
 import { accounts, clientName } from "@/lib/payflow-data";
 import { Link, useNavigate, useLocation } from "@tanstack/react-router";
@@ -217,7 +218,11 @@ function ReviewBell() {
   const pendingAdaptive = adaptiveNotifications.filter(
     (state) => state.decision.status === "Pending",
   ).length;
-  const totalAwaiting = counts.awaiting + pendingAdaptive;
+  const { visibleClients } = useRole();
+  const senderIssues = visibleClients.flatMap((c) =>
+    senderAlerts(getEmailSetup(c.id, c.config), c.config.channels.email).map((text) => ({ client: c, text })),
+  );
+  const totalAwaiting = counts.awaiting + pendingAdaptive + senderIssues.length;
 
   return (
     <DropdownMenu>
@@ -316,6 +321,19 @@ function ReviewBell() {
               </Link>
             </DropdownMenuItem>
           ))}
+        {senderIssues.map(({ client, text }) => (
+          <DropdownMenuItem key={`${client.id}-${text}`} asChild>
+            <Link
+              to="/clients/$clientId"
+              params={{ clientId: client.id }}
+              search={{ tab: "Configuration", section: "Branding & Channels" }}
+              className="flex flex-col items-start whitespace-normal"
+            >
+              <span className="text-xs font-semibold">Email sender issue · {client.name}</span>
+              <span className="text-[11px] text-muted-foreground">{text}</span>
+            </Link>
+          </DropdownMenuItem>
+        ))}
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link to="/human-review" className="text-[12px] font-medium">

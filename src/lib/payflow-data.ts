@@ -32,6 +32,8 @@ export interface ClientConfig {
   brandName: string;
   senderName: string;
   emailFrom: string;
+  /** Client-level SendGrid account and sender identities (mock). Seeded lazily when absent. */
+  emailSetup?: import("./sender-data").EmailSetup;
   smsSenderId: string;
   channels: { email: boolean; sms: boolean; whatsapp: boolean };
   governanceRules: string[];

@@ -3,6 +3,7 @@ import { communications, type Communication } from "./communication-data";
 import { subClientNameFor } from "./portfolio-data";
 import { applicableRules, type ComplianceRule } from "./compliance-data";
 import type { ClientConfig } from "./payflow-data";
+import { sentViaFor } from "./sender-data";
 
 export const unsubscribeReasons = [
   "Too many emails / contacting too often",
@@ -30,12 +31,18 @@ export interface UnsubscribeRecord {
   customer: string; email: string; reference: string; subject: string; senderAddress: string;
   reason: UnsubscribeReason | null; comments: string; at: string; status: UnsubscribeStatus;
   history: { at: string; label: string }[];
+  /** Customer opt-out vs spam complaint — both suppress email; neither is restored by changing sender. */
+  eventType?: "Unsubscribe" | "Spam Report";
+  /** Separate technical/sender context, never treated as consent. */
+  senderContext?: { kind: "Sender-specific technical failure" | "Sender identity unavailable" | "Account-level sender override"; previous?: string; current?: string };
 }
+
+export const eventTypeOf = (r: UnsubscribeRecord) => r.eventType ?? "Unsubscribe";
 
 export function customerEmail(c: Pick<Communication, "customer">) {
   return `${c.customer.toLowerCase().replace(/[^a-z]+/g, ".")}@example.com`;
 }
-export function senderAddressFor(clientId: string) { return `reminders@${clientId.replace(/[^a-z]/g, "")}.payflow-mail.com`; }
+export function senderAddressFor(clientId: string, commId = "") { return sentViaFor(commId, clientId).email; }
 export function maskEmail(email: string) {
   const [u = "", d = ""] = email.split("@");
   return `${u.slice(0, 2)}${"•".repeat(Math.max(2, u.length - 2))}@${d}`;
@@ -65,6 +72,10 @@ const seed: UnsubscribeRecord[] = [
   mock(5, "paypal", "Ava Thompson", "PP-12877", "Reminder: payment due on your PayPal account", "Not the right person / wrong contact", daysAgo(9)),
   mock(6, "northstar-utilities", "Liam Roy", "NS-29954", "Your Northstar Utilities balance", "Dispute this debt / don't believe I owe this", daysAgo(14)),
   mock(7, "canadian-tire", "Mia Gagnon", "CT-21450", "Your Canadian Tire account balance", "Content not helpful or relevant", daysAgo(40)),
+  { ...mock(8, "paypal", "Lucas Brown", "PP-14210", "Reminder: payment due on your PayPal account", null, daysAgo(2)), eventType: "Spam Report", senderAddress: "payments@paypal.com",
+    history: [{ at: daysAgo(2), label: "Spam report received from mailbox provider via SendGrid Event Webhook" }, { at: daysAgo(2), label: "Email reminders suppressed for this Client" }] },
+  { ...mock(9, "paypal", "David Miller", "PP-88831", "Your PayPal payment plan", "Prefer a different channel (SMS, phone or mail)", daysAgo(1)), senderAddress: "payments@paypal.com",
+    senderContext: { kind: "Account-level sender override", previous: "collections@paypal.com", current: "payments@paypal.com" } },
 ];
 
 let records = seed;
@@ -84,7 +95,7 @@ export function confirmUnsubscribe(comm: Communication, reason: UnsubscribeReaso
   const rec: UnsubscribeRecord = {
     id: `UNS-${1100 + records.length}`, token, communicationId: comm.id, clientId: comm.clientId,
     subClient: subClientNameFor(comm.clientId, comm.reference) || "Main Portfolio", customer: comm.customer, email: customerEmail(comm),
-    reference: comm.reference, subject: comm.subject ?? comm.purpose, senderAddress: senderAddressFor(comm.clientId), reason, comments: comments.trim(), at,
+    reference: comm.reference, subject: comm.subject ?? comm.purpose, senderAddress: senderAddressFor(comm.clientId, comm.id), reason, comments: comments.trim(), at,
     status: reason && reviewReasons.includes(reason) ? "Under Review" : "Unsubscribed",
     history: [{ at, label: "Unsubscribed via email footer link" }, { at, label: "Email reminders suppressed for this Client only; other channels unchanged" }, ...(reason && reviewReasons.includes(reason) ? [{ at, label: "Flagged for Operations review" }] : [])],
   };

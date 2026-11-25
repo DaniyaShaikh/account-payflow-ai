@@ -176,7 +176,7 @@ function ClientsPage() {
           const intake = intakeForClient(c);
           const isSettingUp = c.status === "Draft" || c.status === "Onboarding";
           const missing = isSettingUp
-            ? incompleteSetupSections(c.name, c.config, supervisorsForClient(c.id).length)
+            ? incompleteSetupSections(c.name, c.config, supervisorsForClient(c.id).length, c.id)
             : [];
           const remaining = missing.length;
           return (
@@ -191,7 +191,7 @@ function ClientsPage() {
                 </Link>
                 <div className="text-xs text-muted-foreground">{c.industry}</div>
                 {isSettingUp && (() => {
-                  const details = setupIssueDetails(c.name, c.config, supervisorsForClient(c.id).length);
+                  const details = setupIssueDetails(c.name, c.config, supervisorsForClient(c.id).length, c.id);
                   if (remaining > 0) {
                     details.unshift(
                       "Sub-Clients / Portfolios: add at least one sub-client (optional but recommended)",

@@ -1,4 +1,6 @@
 import { AdaptiveCasePanel } from "@/components/adaptive-case-panel";
+import { CaseSenderPanel } from "@/components/sender-management";
+import { senderTimelineEvents } from "@/lib/sender-data";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState } from "react";
 import { PageHeader, Panel, StatusPill, statusTone, Btn } from "@/components/payflow-ui";
@@ -83,6 +85,7 @@ function AccountDetail() {
     ...communicationTimelineEvents(accountId),
     ...paymentTimelineEvents(accountId),
     ...accountReviewEvents(accountId),
+    ...senderTimelineEvents(accountId),
   ];
 
   if (!canSeeClient(account.clientId)) {
@@ -305,6 +308,7 @@ function AccountDetail() {
 
         <div className="space-y-5">
           <AdaptiveCasePanel key={account.id} account={account} />
+          <CaseSenderPanel accountId={account.id} clientId={account.clientId} />
           {caseReviews.length > 0 && (
             <Panel
               title="Human Review"

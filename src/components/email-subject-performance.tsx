@@ -1,3 +1,4 @@
+import { historicalSenderEmails } from "@/lib/sender-data";
 import { useEffect, useMemo, useState } from "react";
 import {
   ArrowDown,
@@ -61,6 +62,7 @@ export function EmailSubjectPerformance() {
   const [start, setStart] = useState("2026-10-14");
   const [end, setEnd] = useState(ANALYTICS_DATE);
   const [search, setSearch] = useState("");
+  const [sender, setSender] = useState("All Senders");
   const [sort, setSort] = useState<keyof SubjectMetrics>("completed");
   const [ascending, setAscending] = useState(false);
   const [detail, setDetail] = useState<SubjectMetrics>();
@@ -90,6 +92,7 @@ export function EmailSubjectPerformance() {
     portfolioIds: portfolioOptions.filter((p) => portfolios.includes(p.name)).map((p) => p.id),
     workflowId,
     stage: stage === "All Reminder Types" ? undefined : stage,
+    sender: clientId && sender !== "All Senders" ? sender : undefined,
     start: startDate,
     end: endDate,
     search,
@@ -141,6 +144,7 @@ export function EmailSubjectPerformance() {
     setStage("All Reminder Types");
     setRange("Last 30 Days");
     setSearch("");
+    setSender("All Senders");
     setStart("2026-10-14");
     setEnd(ANALYTICS_DATE);
   };
@@ -176,9 +180,18 @@ export function EmailSubjectPerformance() {
                 setClient(v);
                 setPortfolios([]);
                 setWorkflow("All Workflows");
+                setSender("All Senders");
               }}
               options={["All Clients", ...visibleClients.map((c) => c.name)]}
             />
+            {clientId && historicalSenderEmails(clientId).length > 0 && (
+              <FilterSelect
+                label="Sender Email"
+                value={sender}
+                onChange={setSender}
+                options={["All Senders", ...historicalSenderEmails(clientId)]}
+              />
+            )}
             <Btn variant="ghost" onClick={() => setMoreFilters((v) => !v)}>
               <SlidersHorizontal className="size-3.5" />
               Filters

@@ -1,3 +1,4 @@
+import { sentViaFor } from "./sender-data";
 import { seedStrategies } from "./strategy-data";
 import { seedPortfolios } from "./portfolio-data";
 
@@ -165,6 +166,8 @@ export interface SubjectFilters {
   start?: string;
   end?: string;
   search?: string;
+  /** Actual From Email recorded at send time. */
+  sender?: string | undefined;
 }
 export function matchesContext(
   row: Omit<
@@ -194,6 +197,7 @@ export function filterEmails(filters: SubjectFilters) {
   return emailRecords.filter(
     (row) =>
       matchesContext(row, filters) &&
+      (!filters.sender || sentViaFor(row.id, row.clientId).email === filters.sender) &&
       (!filters.search ||
         normalizeSubject(row.subject).toLowerCase().includes(filters.search.toLowerCase().trim())),
   );

@@ -24,6 +24,8 @@ import {
   commSentDate,
   communications,
   engagementLabel,
+  fromEmailOf,
+  sentViaOf,
   recipientEmailOf,
   withinRetention,
   type Communication,
@@ -54,6 +56,7 @@ interface CommFilters {
   journey: string;
   purpose: string;
   email: string;
+  sender: string;
   from: string;
   to: string;
 }
@@ -87,6 +90,7 @@ export function CommunicationTable({
     journey: initialJourney,
     purpose: "All Purposes",
     email: "",
+    sender: "All Senders",
     from: "",
     to: "",
   };
@@ -124,6 +128,13 @@ export function CommunicationTable({
     [rows],
   );
 
+  const senderOptions = useMemo(() => {
+    const scoped = rows.filter(
+      (r) => r.channel === "Email" && (!showClientFilter || clientName(r.clientId) === pending.client),
+    );
+    return Array.from(new Set(scoped.map(fromEmailOf)));
+  }, [rows, showClientFilter, pending.client]);
+
   const filtered = rows.filter((c) => {
     if (advanced && !withinRetention(c)) return false;
     const q = f.query.trim().toLowerCase();
@@ -144,6 +155,7 @@ export function CommunicationTable({
     if (f.status !== "All Statuses" && c.status !== f.status) return false;
     if (f.journey !== "All Workflows" && journeyById(c.journeyId)?.name !== f.journey) return false;
     if (f.purpose !== "All Purposes" && c.purpose !== f.purpose) return false;
+    if (f.sender !== "All Senders" && (c.channel !== "Email" || fromEmailOf(c) !== f.sender)) return false;
     if (f.from && commSentDate(c) < new Date(`${f.from}T00:00:00`)) return false;
     if (f.to && commSentDate(c) > new Date(`${f.to}T23:59:59`)) return false;
     return true;
@@ -174,6 +186,7 @@ export function CommunicationTable({
             onChange={(v) => {
               setFilter("client", v);
               setFilter("subClients", []);
+              setFilter("sender", "All Senders");
             }}
             options={["All Clients", ...visibleClients.map((c) => c.name)]}
           />
@@ -185,6 +198,14 @@ export function CommunicationTable({
             selected={shown.subClients}
             onChange={(v) => setFilter("subClients", v)}
             options={subClientNamesForClient(visibleClients, shown.client)}
+          />
+        )}
+        {(isSingleClientSelected(shown.client) || !showClientFilter) && senderOptions.length > 0 && (
+          <FilterSelect
+            label="Sender"
+            value={shown.sender}
+            onChange={(v) => setFilter("sender", v)}
+            options={["All Senders", ...senderOptions]}
           />
         )}
         <FilterSelect
@@ -274,13 +295,14 @@ export function CommunicationTable({
         />
       ) : (
         <DataTable
-          minWidth={1100}
+          minWidth={1260}
           head={[
             "Time",
             "Client",
             "Customer",
             "Account",
             "Channel",
+            "From Email",
             "Purpose",
             "Workflow",
             "Status",
@@ -310,6 +332,18 @@ export function CommunicationTable({
               </Td>
               <Td>
                 <StatusPill tone={c.channel === "SMS" ? "info" : "neutral"}>{c.channel}</StatusPill>
+              </Td>
+              <Td className="text-[12px]">
+                {c.channel === "Email" ? (
+                  <span className="flex flex-col">
+                    <span>{fromEmailOf(c)}</span>
+                    {sentViaOf(c).type === "Alternative" && (
+                      <span className="text-[10px] text-warning-foreground">Sent via failover</span>
+                    )}
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground">—</span>
+                )}
               </Td>
               <Td>{c.purpose}</Td>
               <Td className="text-muted-foreground">{journeyById(c.journeyId)?.name ?? "—"}</Td>
