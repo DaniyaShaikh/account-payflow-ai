@@ -61,8 +61,6 @@ export function AdaptiveFollowups({ strategy, canEdit }: { strategy: Strategy; c
             {(strategy.adaptiveFollowups ?? []).map((f) => {
               const versions = f.config.communicationVersions ?? [];
               const written = versions.length > 0;
-              const final =
-                written && versions.every((v) => v.status === "Final" && !v.hasUnsavedChanges);
               return (
                 <div key={f.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
                   <div className="min-w-0 flex-1">
@@ -74,9 +72,6 @@ export function AdaptiveFollowups({ strategy, canEdit }: { strategy: Strategy; c
                   <div className="flex flex-wrap items-center gap-2">
                     <StatusPill tone={written ? "neutral" : "warning"}>
                       {written ? `${versions.length} content versions` : "Not Written Yet"}
-                    </StatusPill>
-                    <StatusPill tone={final ? "success" : "warning"}>
-                      {final ? "Approved with workflow" : "Awaiting workflow approval"}
                     </StatusPill>
                     <Btn variant="ghost" onClick={() => setSelected(f.id)}>
                       Details
