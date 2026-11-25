@@ -1,6 +1,14 @@
 import { templateForNode, templatesFor, type Strategy, type StrategyNode } from "./strategy-data";
-import { defaultCommunicationSegments, segmentIsActive, validateCommunicationSegments, type CommunicationSegments } from "./communication-segments";
-import { customerCombinationSegments, mockWorkflowCustomers } from "./communication-customer-cohorts";
+import {
+  defaultCommunicationSegments,
+  segmentIsActive,
+  validateCommunicationSegments,
+  type CommunicationSegments,
+} from "./communication-segments";
+import {
+  customerCombinationSegments,
+  mockWorkflowCustomers,
+} from "./communication-customer-cohorts";
 
 /** Content variants only: these bands never change workflow targeting or execution. */
 export const communicationAgeGroups = [
@@ -28,19 +36,30 @@ export interface CommunicationVersion {
 }
 
 export function versionLabel(id: string, config?: CommunicationSegments) {
-  return id === "default" ? "Main / Default" : (config ?? defaultCommunicationSegments()).rules.find((g) => g.id === id)?.name ?? id;
+  return id === "default"
+    ? "Main / Default"
+    : ((config ?? defaultCommunicationSegments()).rules.find((g) => g.id === id)?.name ?? id);
 }
 
-export function initialCommunicationVersions(node: StrategyNode, reviewed = false): CommunicationVersion[] {
+export function initialCommunicationVersions(
+  node: StrategyNode,
+  reviewed = false,
+): CommunicationVersion[] {
   const email = templatesFor("Email", node.config.purpose)[0];
   const sms = templatesFor("SMS", node.config.purpose)[0];
   const current = templateForNode(node);
   const base: CommunicationVersion = {
     id: "default",
-    subject: (current?.channel === "Email" ? current.subject : email?.subject) ?? "A reminder about your account",
-    emailBody: email?.body ?? "Hi {{first_name}},\n\nPlease review your account when convenient.\n\n{{payment_link}}\n\n{{brand_name}}",
-    smsContent: sms?.body ?? "{{brand_name}}: Please review account {{account_reference}}. {{payment_link}}",
-    explanation: "Simulated AI explanation: uses the available reminder purpose and approved template. Country, region and balance remain workflow context; no age-based changes to terms, disclosures or contact pressure.",
+    subject:
+      (current?.channel === "Email" ? current.subject : email?.subject) ??
+      "A reminder about your account",
+    emailBody:
+      email?.body ??
+      "Hi {{first_name}},\n\nPlease review your account when convenient.\n\n{{payment_link}}\n\n{{brand_name}}",
+    smsContent:
+      sms?.body ?? "{{brand_name}}: Please review account {{account_reference}}. {{payment_link}}",
+    explanation:
+      "Simulated AI explanation: uses the available reminder purpose and approved template. Country, region and balance remain workflow context; no age-based changes to terms, disclosures or contact pressure.",
     status: reviewed ? "Final" : "Pending Review",
     revision: 0,
     protectedEmail: "",
@@ -51,16 +70,30 @@ export function initialCommunicationVersions(node: StrategyNode, reviewed = fals
   base.protectedEmail = base.emailBody;
   base.protectedSms = base.smsContent;
   return node.origin === "AI Proposed"
-    ? [base, ...communicationAgeGroups.filter((_, index) => index === 0 || index === 5).map((group) => mockRegenerateVersion({ ...base, id: group.id }, reviewed))]
+    ? [
+        base,
+        ...communicationAgeGroups
+          .filter((_, index) => index === 0 || index === 5)
+          .map((group) => mockRegenerateVersion({ ...base, id: group.id }, reviewed)),
+      ]
     : [base];
 }
 
-export function mockRegenerateVersion(version: CommunicationVersion, reviewed = false): CommunicationVersion {
+export function mockRegenerateVersion(
+  version: CommunicationVersion,
+  reviewed = false,
+): CommunicationVersion {
   const revision = version.revision + 1;
-  const intro = revision % 2 ? "Here is a clear summary of your account reminder." : "Here is your account reminder in a concise format.";
+  const intro =
+    revision % 2
+      ? "Here is a clear summary of your account reminder."
+      : "Here is your account reminder in a concise format.";
   return {
     ...version,
-    subject: revision % 2 ? "Your account reminder — a quick summary" : "A clear reminder about your account",
+    subject:
+      revision % 2
+        ? "Your account reminder — a quick summary"
+        : "A clear reminder about your account",
     emailBody: `${intro}\n\n${version.protectedEmail}`,
     smsContent: `${revision % 2 ? "Account reminder." : "Account summary."} ${version.protectedSms}`,
     explanation: `Simulated AI explanation: ${versionLabel(version.id)} uses a ${revision % 2 ? "plain-language introduction" : "concise introduction"}. Only presentation changes; the approved reminder copy, legal disclosures, payment terms and collection pressure stay identical. Available geographic, balance and reminder context is retained.`,
@@ -72,21 +105,54 @@ export function mockRegenerateVersion(version: CommunicationVersion, reviewed = 
 
 export function validateCommunicationVersion(version: CommunicationVersion): string[] {
   const errors: string[] = [];
-  if (!version.subject.trim() || !version.emailBody.trim() || !version.smsContent.trim()) errors.push("Email subject, email body and SMS content are required.");
-  if (!version.emailBody.endsWith(version.protectedEmail) || !version.smsContent.endsWith(version.protectedSms)) errors.push("Restore the shared approved reminder copy; disclosures and payment terms must stay unchanged across versions.");
-  const emailIntro = version.emailBody.slice(0, Math.max(0, version.emailBody.length - version.protectedEmail.length));
-  const smsIntro = version.smsContent.slice(0, Math.max(0, version.smsContent.length - version.protectedSms.length));
-  if (/(?:\d|[$€£%]|legal action|penalt|deadline|urgent|immediately|must pay|discount|interest|fee)/i.test(`${version.subject} ${emailIntro} ${smsIntro}`)) errors.push("Use neutral introductory wording without new amounts, terms, deadlines or collection pressure.");
+  if (!version.subject.trim() || !version.emailBody.trim() || !version.smsContent.trim())
+    errors.push("Email subject, email body and SMS content are required.");
+  if (
+    !version.emailBody.endsWith(version.protectedEmail) ||
+    !version.smsContent.endsWith(version.protectedSms)
+  )
+    errors.push(
+      "Restore the shared approved reminder copy; disclosures and payment terms must stay unchanged across versions.",
+    );
+  const emailIntro = version.emailBody.slice(
+    0,
+    Math.max(0, version.emailBody.length - version.protectedEmail.length),
+  );
+  const smsIntro = version.smsContent.slice(
+    0,
+    Math.max(0, version.smsContent.length - version.protectedSms.length),
+  );
+  if (
+    /(?:\d|[$€£%]|legal action|penalt|deadline|urgent|immediately|must pay|discount|interest|fee)/i.test(
+      `${version.subject} ${emailIntro} ${smsIntro}`,
+    )
+  )
+    errors.push(
+      "Use neutral introductory wording without new amounts, terms, deadlines or collection pressure.",
+    );
   if (version.hasUnsavedChanges) errors.push("Save or discard unsaved changes first.");
   return errors;
 }
 
-export function saveCommunicationVersion(previous: CommunicationVersion, draft: CommunicationVersion): CommunicationVersion {
-  return { ...draft, id: previous.id, protectedEmail: previous.protectedEmail, protectedSms: previous.protectedSms, hasUnsavedChanges: false, status: "Modified" };
+export function saveCommunicationVersion(
+  previous: CommunicationVersion,
+  draft: CommunicationVersion,
+): CommunicationVersion {
+  return {
+    ...draft,
+    id: previous.id,
+    protectedEmail: previous.protectedEmail,
+    protectedSms: previous.protectedSms,
+    hasUnsavedChanges: false,
+    status: "Modified",
+  };
 }
 
-export function replaceCommunicationVersion(versions: CommunicationVersion[], replacement: CommunicationVersion) {
-  return versions.map((v) => v.id === replacement.id ? replacement : v);
+export function replaceCommunicationVersion(
+  versions: CommunicationVersion[],
+  replacement: CommunicationVersion,
+) {
+  return versions.map((v) => (v.id === replacement.id ? replacement : v));
 }
 
 export function removeCommunicationVersion(versions: CommunicationVersion[], id: string) {
@@ -95,61 +161,183 @@ export function removeCommunicationVersion(versions: CommunicationVersion[], id:
 
 /** For preview/future selection only; not connected to simulated workflow execution. */
 export function selectCommunicationVersion(versions: CommunicationVersion[], age?: number) {
-  const group = age === undefined ? undefined : communicationAgeGroups.find((g) => age >= g.min && age <= g.max);
-  return versions.find((v) => v.id === group?.id && (v.status === "Final" || v.status === "Reviewed") && validateCommunicationVersion(v).length === 0)
-    ?? versions.find((v) => v.id === "default");
+  const group =
+    age === undefined
+      ? undefined
+      : communicationAgeGroups.find((g) => age >= g.min && age <= g.max);
+  return (
+    versions.find(
+      (v) =>
+        v.id === group?.id &&
+        (v.status === "Final" || v.status === "Reviewed") &&
+        validateCommunicationVersion(v).length === 0,
+    ) ?? versions.find((v) => v.id === "default")
+  );
 }
 
 export function communicationReviewIssues(strategy: Strategy): string[] {
-  return Object.values(strategy.nodes).filter((n) => n.kind === "Communication" && !n.disabled).flatMap((node) => {
-    const versions = node.config.communicationVersions ?? initialCommunicationVersions(node);
-    const segments = node.config.communicationSegments ?? defaultCommunicationSegments();
-    const issues = versions.filter((v) => segmentIsActive(segments, v.id) && validateCommunicationVersion(v).length > 0).map((v) => `${node.title}: ${versionLabel(v.id, segments)}`);
-    issues.push(...validateCommunicationSegments(segments).map((issue) => `${node.title}: ${issue}`));
-    if (versions.some((v) => v.id !== "default" && !segments.rules.some((r) => r.id === v.id))) issues.push(`${node.title}: configure the missing segment criteria`);
-    if (!versions.some((v) => v.id === "default")) issues.push(`${node.title}: Main / Default is required`);
-    return issues;
-  });
+  return [
+    ...Object.values(strategy.nodes),
+    ...(strategy.adaptiveEnabled
+      ? (strategy.adaptiveFollowups ?? []).map((f): StrategyNode => ({
+          id: f.id,
+          title: f.name,
+          kind: "Communication",
+          origin: "AI Proposed",
+          config: f.config,
+        }))
+      : []),
+  ]
+    .filter((n) => n.kind === "Communication" && !n.disabled)
+    .flatMap((node) => {
+      const versions = node.config.communicationVersions ?? initialCommunicationVersions(node);
+      const segments = node.config.communicationSegments ?? defaultCommunicationSegments();
+      const issues = versions
+        .filter(
+          (v) => segmentIsActive(segments, v.id) && validateCommunicationVersion(v).length > 0,
+        )
+        .map((v) => `${node.title}: ${versionLabel(v.id, segments)}`);
+      issues.push(
+        ...validateCommunicationSegments(segments).map((issue) => `${node.title}: ${issue}`),
+      );
+      if (versions.some((v) => v.id !== "default" && !segments.rules.some((r) => r.id === v.id)))
+        issues.push(`${node.title}: configure the missing segment criteria`);
+      if (!versions.some((v) => v.id === "default"))
+        issues.push(`${node.title}: Main / Default is required`);
+      return issues;
+    });
 }
 
 /** Workflow approval finalizes saved valid messages together, never per version. */
 export function finalizeCommunicationVersions(strategy: Strategy): Strategy {
   if (communicationReviewIssues(strategy).length > 0) return strategy;
-  return { ...strategy, nodes: Object.fromEntries(Object.entries(strategy.nodes).map(([id, node]) => {
-    if (node.kind !== "Communication" || node.disabled) return [id, node];
-    const segments = node.config.communicationSegments ?? defaultCommunicationSegments();
-    const versions = node.config.communicationVersions ?? initialCommunicationVersions(node);
-    return [id, { ...node, config: { ...node.config, communicationVersions: versions.map((version) => segmentIsActive(segments, version.id) ? { ...version, status: "Final" as const } : version) } }];
-  })) };
+  return {
+    ...strategy,
+    ...(strategy.adaptiveEnabled
+      ? {
+          adaptiveFollowups: (strategy.adaptiveFollowups ?? []).map((f) => ({
+            ...f,
+            config: {
+              ...f.config,
+              communicationVersions: (f.config.communicationVersions ?? []).map((v) =>
+                segmentIsActive(
+                  f.config.communicationSegments ?? defaultCommunicationSegments(),
+                  v.id,
+                )
+                  ? { ...v, status: "Final" as const }
+                  : v,
+              ),
+            },
+          })),
+        }
+      : {}),
+    nodes: Object.fromEntries(
+      Object.entries(strategy.nodes).map(([id, node]) => {
+        if (node.kind !== "Communication" || node.disabled) return [id, node];
+        const segments = node.config.communicationSegments ?? defaultCommunicationSegments();
+        const versions = node.config.communicationVersions ?? initialCommunicationVersions(node);
+        return [
+          id,
+          {
+            ...node,
+            config: {
+              ...node.config,
+              communicationVersions: versions.map((version) =>
+                segmentIsActive(segments, version.id)
+                  ? { ...version, status: "Final" as const }
+                  : version,
+              ),
+            },
+          },
+        ];
+      }),
+    ),
+  };
 }
 
-export function applyCommunicationSegments(versions: CommunicationVersion[], previous: CommunicationSegments, next: CommunicationSegments) {
+export function applyCommunicationSegments(
+  versions: CommunicationVersion[],
+  previous: CommunicationSegments,
+  next: CommunicationSegments,
+) {
   return versions.map((version) => {
     if (version.id === "default") return version;
     const before = previous.rules.find((r) => r.id === version.id);
     const after = next.rules.find((r) => r.id === version.id);
-    const changed = JSON.stringify(before) !== JSON.stringify(after) || (!segmentIsActive(previous, version.id) && segmentIsActive(next, version.id));
+    const changed =
+      JSON.stringify(before) !== JSON.stringify(after) ||
+      (!segmentIsActive(previous, version.id) && segmentIsActive(next, version.id));
     return changed ? { ...version, status: "Pending Review" as const } : version;
   });
 }
 
 export function seedCommunicationVersions(strategy: Strategy): Strategy {
-  return { ...strategy, nodes: Object.fromEntries(Object.entries(strategy.nodes).map(([id, node]) => {
-    if (node.kind !== "Communication") return [id, node];
-    const versions = node.config.communicationVersions ?? initialCommunicationVersions(node, strategy.status === "Active" || strategy.status === "Approved");
-    const generated = strategy.status === "AI Proposed" && !node.config.communicationVersions
-      ? generateCustomerVersions(versions, node.config.communicationSegments ?? defaultCommunicationSegments(), mockWorkflowCustomers(strategy))
-      : { communicationVersions: versions, communicationSegments: node.config.communicationSegments ?? defaultCommunicationSegments() };
-    return [id, { ...node, config: { ...node.config, ...generated } }];
-  })) };
+  return {
+    ...strategy,
+    nodes: Object.fromEntries(
+      Object.entries(strategy.nodes).map(([id, node]) => {
+        if (node.kind !== "Communication") return [id, node];
+        const versions =
+          node.config.communicationVersions ??
+          initialCommunicationVersions(
+            node,
+            strategy.status === "Active" || strategy.status === "Approved",
+          );
+        const generated =
+          strategy.status === "AI Proposed" && !node.config.communicationVersions
+            ? generateCustomerVersions(
+                versions,
+                node.config.communicationSegments ?? defaultCommunicationSegments(),
+                mockWorkflowCustomers(strategy),
+              )
+            : {
+                communicationVersions: versions,
+                communicationSegments:
+                  node.config.communicationSegments ?? defaultCommunicationSegments(),
+              };
+        return [id, { ...node, config: { ...node.config, ...generated } }];
+      }),
+    ),
+  };
 }
 
 /** Explicit generation during proposal setup or segment-save; never execution. */
-export function generateCustomerVersions(versions: CommunicationVersion[], config: CommunicationSegments, customers: import("./communication-segments").SegmentExample[]) {
+export function generateCustomerVersions(
+  versions: CommunicationVersion[],
+  config: CommunicationSegments,
+  customers: import("./communication-segments").SegmentExample[],
+) {
   const combinations = customerCombinationSegments(config, customers);
   const ids = new Set(combinations.map((r) => r.id));
-  const communicationSegments = { ...config, rules: [...combinations.map((r) => ({ ...r, enabled: config.rules.find((old) => old.id === r.id)?.enabled ?? true })), ...config.rules.filter((r) => !r.combined), ...config.rules.filter((r) => r.combined && !ids.has(r.id)).map((r) => ({ ...r, enabled: false }))] };
+  const communicationSegments = {
+    ...config,
+    rules: [
+      ...combinations.map((r) => ({
+        ...r,
+        enabled: config.rules.find((old) => old.id === r.id)?.enabled ?? true,
+      })),
+      ...config.rules.filter((r) => !r.combined),
+      ...config.rules
+        .filter((r) => r.combined && !ids.has(r.id))
+        .map((r) => ({ ...r, enabled: false })),
+    ],
+  };
   const base = versions.find((v) => v.id === "default");
-  const additions = base ? combinations.filter((r) => !versions.some((v) => v.id === r.id)).map((r) => ({ ...mockRegenerateVersion({ ...base, id: r.id }), explanation: `Simulated AI explanation: ${r.name} exists in this workflow's mock recipient data. ${r.language === "French" ? "Bonjour — voici un rappel concernant votre compte." : "Here is a clear account reminder."} Language preference informs the introductory wording only; the approved shared copy remains unchanged and requires authorized translation before real use. Disclosures, payment terms and pressure are identical.` , emailBody: `${r.language === "French" ? "Bonjour — voici un rappel concernant votre compte." : "Here is a clear summary of your account reminder."}\n\n${base.protectedEmail}`, smsContent: `${r.language === "French" ? "Rappel concernant votre compte." : "Account reminder."} ${base.protectedSms}` })) : [];
-  return { communicationSegments, communicationVersions: [...applyCommunicationSegments(versions, config, communicationSegments), ...additions] };
+  const additions = base
+    ? combinations
+        .filter((r) => !versions.some((v) => v.id === r.id))
+        .map((r) => ({
+          ...mockRegenerateVersion({ ...base, id: r.id }),
+          explanation: `Simulated AI explanation: ${r.name} exists in this workflow's mock recipient data. ${r.language === "French" ? "Bonjour — voici un rappel concernant votre compte." : "Here is a clear account reminder."} Language preference informs the introductory wording only; the approved shared copy remains unchanged and requires authorized translation before real use. Disclosures, payment terms and pressure are identical.`,
+          emailBody: `${r.language === "French" ? "Bonjour — voici un rappel concernant votre compte." : "Here is a clear summary of your account reminder."}\n\n${base.protectedEmail}`,
+          smsContent: `${r.language === "French" ? "Rappel concernant votre compte." : "Account reminder."} ${base.protectedSms}`,
+        }))
+    : [];
+  return {
+    communicationSegments,
+    communicationVersions: [
+      ...applyCommunicationSegments(versions, config, communicationSegments),
+      ...additions,
+    ],
+  };
 }

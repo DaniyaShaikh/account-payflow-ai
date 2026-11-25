@@ -51,3 +51,8 @@
 - [x] Connect jurisdiction-based client inheritance and mandatory-rule protection.
 - [x] Connect communication previews to unified compliance and operational evaluation.
 - [x] Test enforcement and verify connected prototype screens (17 tests; creation, inheritance, locked mandatory rules, blocking and audit verified).
+
+## Adaptive workflows
+- [x] Add optional workflow follow-ups with shared content editing and overall approval.
+- [x] Add case-level mock reassessment, decisions, history and existing-bell notifications.
+- [x] Test protections, approval and fixed-sequence preservation (33 tests); verify writing, workflow approval, case modification/approval/rejection, notifications, automatic follow-ups, reassessment outcomes and desktop/mobile layouts without overflow or runtime errors.

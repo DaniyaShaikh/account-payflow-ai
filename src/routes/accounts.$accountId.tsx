@@ -1,3 +1,4 @@
+import { AdaptiveCasePanel } from "@/components/adaptive-case-panel";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState } from "react";
 import { PageHeader, Panel, StatusPill, statusTone, Btn } from "@/components/payflow-ui";
@@ -61,7 +62,8 @@ function AccountDetail() {
   const [showAllTimeline, setShowAllTimeline] = useState(false);
   const { canSeeClient } = useRole();
   const { reviewsForAccount, accountReviewEvents } = useReviews();
-  const account = accounts.find((a) => a.id === accountId)!;
+  const account = accounts.find((a) => a.id === accountId);
+  if (!account) throw notFound();
   const caseReviews = reviewsForAccount(accountId);
   const journeyState = journeyStateForAccount(accountId, account.journey);
   const accountComms = communicationsForAccount(accountId);
@@ -144,7 +146,11 @@ function AccountDetail() {
               title="Payment"
               description="Payment outcomes received from the customer payment experience"
               action={
-                <a href={`/pay/${paymentTokenForAccount(account)}`} target="_blank" rel="noreferrer">
+                <a
+                  href={`/pay/${paymentTokenForAccount(account)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   <Btn>Preview Payment Experience</Btn>
                 </a>
               }
@@ -187,7 +193,8 @@ function AccountDetail() {
                   <div className="flex items-center justify-between gap-4 px-4 py-2.5">
                     <dt className="text-[13px] text-muted-foreground">Next Installment</dt>
                     <dd className="tabular text-[13px] font-medium text-foreground">
-                      {formatCurrency(payment.plan.installmentAmount)} · {payment.plan.nextInstallment}
+                      {formatCurrency(payment.plan.installmentAmount)} ·{" "}
+                      {payment.plan.nextInstallment}
                     </dd>
                   </div>
                 )}
@@ -220,7 +227,6 @@ function AccountDetail() {
               title="Current Workflow"
               description="The collection strategy currently applied to this case"
             >
-
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-[14px] font-semibold text-foreground">
                   {journeyState.journey.name}
@@ -268,7 +274,6 @@ function AccountDetail() {
             />
           )}
 
-
           {accountComms.length > 0 && (
             <Panel
               title="Communications"
@@ -299,6 +304,7 @@ function AccountDetail() {
         </div>
 
         <div className="space-y-5">
+          <AdaptiveCasePanel key={account.id} account={account} />
           {caseReviews.length > 0 && (
             <Panel
               title="Human Review"
@@ -359,14 +365,14 @@ function AccountDetail() {
                 </li>
               ))}
             </ol>
-              {timeline.length > 6 && (
-                <button
-                  onClick={() => setShowAllTimeline(!showAllTimeline)}
-                  className="mt-4 text-[12px] font-medium text-primary hover:underline"
-                >
-                  {showAllTimeline ? "Show less" : `Show ${timeline.length - 6} more events`}
-                </button>
-              )}
+            {timeline.length > 6 && (
+              <button
+                onClick={() => setShowAllTimeline(!showAllTimeline)}
+                className="mt-4 text-[12px] font-medium text-primary hover:underline"
+              >
+                {showAllTimeline ? "Show less" : `Show ${timeline.length - 6} more events`}
+              </button>
+            )}
           </Panel>
         </div>
       </div>

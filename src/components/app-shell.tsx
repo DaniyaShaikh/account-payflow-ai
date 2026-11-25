@@ -1,3 +1,5 @@
+import { useStrategies } from "@/lib/strategy-context";
+import { accounts, clientName } from "@/lib/payflow-data";
 import { Link, useNavigate, useLocation } from "@tanstack/react-router";
 import {
   LayoutDashboard,
@@ -161,7 +163,11 @@ function UserMenu({ compact = false }: { compact?: boolean }) {
           )}
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align={compact ? "end" : "start"} side={compact ? "bottom" : "top"} className="w-60">
+      <DropdownMenuContent
+        align={compact ? "end" : "start"}
+        side={compact ? "bottom" : "top"}
+        className="w-60"
+      >
         <DropdownMenuItem asChild>
           <Link to="/profile">
             <UserRound className="mr-2 size-4" />
@@ -197,19 +203,34 @@ function UserMenu({ compact = false }: { compact?: boolean }) {
 
 function ReviewBell() {
   const { notifications, counts } = useReviews();
+  const { adaptiveCases, strategyById, portfolioById } = useStrategies();
+  const { canSeeClient } = useRole();
+  const adaptiveNotifications = adaptiveCases.filter((state) => {
+    const account = accounts.find((a) => a.id === state.accountId);
+    return (
+      account &&
+      canSeeClient(account.clientId) &&
+      strategyById(state.strategyId)?.adaptiveEnabled &&
+      state.decision.requiresApproval
+    );
+  });
+  const pendingAdaptive = adaptiveNotifications.filter(
+    (state) => state.decision.status === "Pending",
+  ).length;
+  const totalAwaiting = counts.awaiting + pendingAdaptive;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          aria-label={`Human reviews awaiting decision: ${counts.awaiting}`}
+          aria-label={`Human reviews awaiting decision: ${totalAwaiting}`}
           className="relative flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           <Bell className="size-[17px]" />
-          {counts.awaiting > 0 && (
+          {totalAwaiting > 0 && (
             <span className="absolute top-1.5 right-1.5 flex min-w-[15px] justify-center rounded-full bg-destructive px-1 text-[9px] leading-[15px] font-semibold text-white">
-              {counts.awaiting}
+              {totalAwaiting}
             </span>
           )}
         </button>
@@ -218,7 +239,7 @@ function ReviewBell() {
         <DropdownMenuLabel className="text-[11px] tracking-wide text-muted-foreground uppercase">
           Awaiting your review
         </DropdownMenuLabel>
-        {notifications.length === 0 ? (
+        {notifications.length === 0 && adaptiveNotifications.length === 0 ? (
           <DropdownMenuLabel className="text-[12px] font-normal text-muted-foreground">
             Nothing needs a decision. Automation is running within governance.
           </DropdownMenuLabel>
@@ -240,6 +261,61 @@ function ReviewBell() {
             </DropdownMenuItem>
           ))
         )}
+        {adaptiveNotifications.map((state) => {
+          const account = accounts.find((a) => a.id === state.accountId);
+          const strategy = strategyById(state.strategyId);
+          if (!account) return null;
+          const expired = Date.parse(state.decision.expiresAt) <= Date.now();
+          return (
+            <DropdownMenuItem key={state.accountId} asChild>
+              <Link
+                to="/accounts/$accountId"
+                params={{ accountId: state.accountId }}
+                hash="adaptive-decision"
+                className="flex flex-col items-start gap-1 whitespace-normal"
+              >
+                <span className="text-xs font-semibold">
+                  {state.decision.status === "Pending" && !expired
+                    ? "AI Decision Awaiting Approval"
+                    : `AI Decision · ${expired ? "Expired" : state.decision.status}`}
+                </span>
+                <span className="text-xs">
+                  {account.caseReference} · {clientName(account.clientId)} /{" "}
+                  {strategy ? portfolioById(strategy.portfolioId)?.name : "Portfolio"}
+                </span>
+                <span className="text-[11px] text-muted-foreground">
+                  {state.decision.action} · {state.decision.trigger}
+                </span>
+                <span className="text-[11px] text-muted-foreground">
+                  {new Date(state.decision.at).toLocaleString("en-GB", { timeZone: "UTC" })} UTC
+                </span>
+              </Link>
+            </DropdownMenuItem>
+          );
+        })}
+        {adaptiveCases
+          .filter(
+            (state) =>
+              state.decision.status === "Blocked" &&
+              canSeeClient(accounts.find((a) => a.id === state.accountId)?.clientId ?? ""),
+          )
+          .map((state) => (
+            <DropdownMenuItem key={`blocked-${state.accountId}`} asChild>
+              <Link
+                to="/accounts/$accountId"
+                params={{ accountId: state.accountId }}
+                hash="adaptive-decision"
+                className="flex flex-col items-start whitespace-normal"
+              >
+                <span className="text-xs font-semibold">
+                  Operations attention · Adaptive exception
+                </span>
+                <span className="text-[11px] text-muted-foreground">
+                  {state.decision.explanation}
+                </span>
+              </Link>
+            </DropdownMenuItem>
+          ))}
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link to="/human-review" className="text-[12px] font-medium">
@@ -338,7 +414,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-surface">
-        <Sidebar collapsible="icon" className="border-r border-sidebar-border shadow-[8px_0_32px_-24px_var(--brand-navy)]">
+        <Sidebar
+          collapsible="icon"
+          className="border-r border-sidebar-border shadow-[8px_0_32px_-24px_var(--brand-navy)]"
+        >
           <SidebarHeader className="flex h-[68px] items-center px-4 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
             <PayflowWordmark tagline invert className="group-data-[collapsible=icon]:hidden" />
             <div className="hidden group-data-[collapsible=icon]:block">
@@ -363,9 +442,10 @@ export function AppShell({ children }: { children: ReactNode }) {
                   <SidebarGroupContent>
                     <SidebarMenu>
                       {group.items.map((item) => {
-                        const isActive = location.pathname === item.to || 
+                        const isActive =
+                          location.pathname === item.to ||
                           (item.to !== "/" && location.pathname.startsWith(item.to));
-                        
+
                         return (
                           <SidebarMenuItem key={item.to}>
                             <SidebarMenuButton
@@ -378,8 +458,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                                 to={item.to}
                                 activeOptions={{ exact: "exact" in item ? item.exact : false }}
                               >
-                                 <span className="absolute top-1.5 bottom-1.5 -left-1 w-[3px] rounded-full bg-sidebar-primary opacity-0 transition-opacity group-data-[active=true]/btn:opacity-100 group-data-[collapsible=icon]:hidden" />
-                                 <item.icon className="size-[17px] shrink-0 opacity-80" />
+                                <span className="absolute top-1.5 bottom-1.5 -left-1 w-[3px] rounded-full bg-sidebar-primary opacity-0 transition-opacity group-data-[active=true]/btn:opacity-100 group-data-[collapsible=icon]:hidden" />
+                                <item.icon className="size-[17px] shrink-0 opacity-80" />
                                 <span>{item.label}</span>
                               </Link>
                             </SidebarMenuButton>

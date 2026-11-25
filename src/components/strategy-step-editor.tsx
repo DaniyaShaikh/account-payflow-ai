@@ -37,7 +37,13 @@ const addableKinds: StrategyNodeKind[] = [
   "Case Action",
 ];
 
-export function TemplatePreview({ node, content }: { node: StrategyNode; content?: { name: string; channel: string; subject?: string | undefined; body: string } }) {
+export function TemplatePreview({
+  node,
+  content,
+}: {
+  node: StrategyNode;
+  content?: { name: string; channel: string; subject?: string | undefined; body: string };
+}) {
   const template = content ?? templateForNode(node);
   if (!template) return null;
   const isSms = template.channel === "SMS";
@@ -69,6 +75,7 @@ export function StepConfigForm({
   strategy,
   node,
   canEdit = true,
+  adaptive = false,
   onChange,
   onToggleDisabled,
   onAddAfter,
@@ -77,6 +84,7 @@ export function StepConfigForm({
   strategy: Strategy;
   node: StrategyNode;
   canEdit?: boolean;
+  adaptive?: boolean;
   onChange: (patch: NodeConfig) => void;
   onToggleDisabled: () => void;
   onAddAfter: (kind: StrategyNodeKind) => void;
@@ -119,7 +127,14 @@ export function StepConfigForm({
               }}
             />
           </Field>
-          <CommunicationVersionEditor key={node.id} strategy={strategy} node={node} canEdit={canEdit} onChange={onChange} onDirtyChange={onDirtyChange} />
+          <CommunicationVersionEditor
+            key={node.id}
+            strategy={strategy}
+            node={node}
+            canEdit={canEdit}
+            onChange={onChange}
+            onDirtyChange={onDirtyChange}
+          />
         </>
       )}
 
@@ -207,7 +222,7 @@ export function StepConfigForm({
         </>
       )}
 
-      {node.config.referenceEvent && (
+      {!adaptive && node.config.referenceEvent && (
         <>
           <Field label="Timing Reference">
             <SelectInput
@@ -252,13 +267,13 @@ export function StepConfigForm({
         </>
       )}
 
-      {canEdit && node.kind !== "Trigger" && (
+      {!adaptive && canEdit && node.kind !== "Trigger" && (
         <div className="flex flex-wrap gap-2 border-t border-border/60 pt-3">
           <Btn onClick={onToggleDisabled}>{node.disabled ? "Enable step" : "Disable step"}</Btn>
         </div>
       )}
 
-      {canEdit && node.kind !== "Condition" && (
+      {!adaptive && canEdit && node.kind !== "Condition" && (
         <div className="border-t border-border/60 pt-3">
           <Field
             label="Add a step after this one"
@@ -300,8 +315,21 @@ export function StepEditorDialog({
 }) {
   const [dirty, setDirty] = useState(false);
   const close = (next: boolean) => {
-    if (!next && dirty && !window.confirm("Close with unsaved changes? Unsaved content will be discarded and this version will still require review.")) return;
-    if (!next && node?.config.communicationVersions) onChange({ communicationVersions: node.config.communicationVersions.map((v) => ({ ...v, hasUnsavedChanges: false })) });
+    if (
+      !next &&
+      dirty &&
+      !window.confirm(
+        "Close with unsaved changes? Unsaved content will be discarded and this version will still require review.",
+      )
+    )
+      return;
+    if (!next && node?.config.communicationVersions)
+      onChange({
+        communicationVersions: node.config.communicationVersions.map((v) => ({
+          ...v,
+          hasUnsavedChanges: false,
+        })),
+      });
     setDirty(false);
     onOpenChange(next);
   };

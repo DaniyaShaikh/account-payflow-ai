@@ -1,6 +1,16 @@
+import {
+  seedAdaptiveWorkflow,
+  seedAdaptiveCases,
+  writeFollowup,
+  type AdaptiveCase,
+} from "./adaptive-workflow-data";
 import { useContext, useMemo, useState, type ReactNode } from "react";
 import { createStableContext } from "./stable-context";
-import { communicationReviewIssues, seedCommunicationVersions, finalizeCommunicationVersions } from "./communication-versions";
+import {
+  communicationReviewIssues,
+  seedCommunicationVersions,
+  finalizeCommunicationVersions,
+} from "./communication-versions";
 import { seedPortfolios, type Portfolio } from "./portfolio-data";
 import {
   seedStrategies,
@@ -12,6 +22,11 @@ import {
 } from "./strategy-data";
 
 interface StrategyContextValue {
+  adaptiveCases: AdaptiveCase[];
+  updateAdaptiveCase: (state: AdaptiveCase) => void;
+  setAdaptiveEnabled: (strategyId: string, enabled: boolean) => void;
+  updateFollowup: (strategyId: string, followupId: string, patch: NodeConfig) => void;
+  writeFollowupMessages: (strategyId: string, followupId: string) => void;
   portfolios: Portfolio[];
   portfoliosForClient: (clientId: string) => Portfolio[];
   portfolioById: (id: string) => Portfolio | undefined;
@@ -50,7 +65,11 @@ function bumpVersion(version: string) {
 
 export function StrategyProvider({ children }: { children: ReactNode }) {
   const [portfolios, setPortfolios] = useState<Portfolio[]>(seedPortfolios);
-  const [strategies, setStrategies] = useState<Strategy[]>(() => seedStrategies.map(seedCommunicationVersions));
+  const [strategies, setStrategies] = useState<Strategy[]>(() =>
+    seedStrategies.map(seedCommunicationVersions).map(seedAdaptiveWorkflow),
+  );
+
+  const [adaptiveCases, setAdaptiveCases] = useState<AdaptiveCase[]>(seedAdaptiveCases);
 
   const value = useMemo<StrategyContextValue>(() => {
     const patchStrategy = (strategyId: string, patch: (s: Strategy) => Strategy) =>
@@ -64,7 +83,35 @@ export function StrategyProvider({ children }: { children: ReactNode }) {
       nodes: { ...strategy.nodes, [nodeId]: { ...node, origin: "Human Modified" } },
     });
 
+    const edited = (s: Strategy): Strategy => ({
+      ...s,
+      status: "Under Review",
+      lastUpdated: today,
+    });
     return {
+      adaptiveCases,
+      updateAdaptiveCase: (state) =>
+        setAdaptiveCases((prev) => prev.map((c) => (c.accountId === state.accountId ? state : c))),
+      setAdaptiveEnabled: (id, enabled) =>
+        patchStrategy(id, (s) => ({
+          ...edited(s),
+          adaptiveEnabled: enabled,
+          adaptiveFollowups: s.adaptiveFollowups ?? seedAdaptiveWorkflow(s).adaptiveFollowups ?? [],
+        })),
+      updateFollowup: (id, followupId, patch) =>
+        patchStrategy(id, (s) => ({
+          ...edited(s),
+          adaptiveFollowups:
+            s.adaptiveFollowups?.map((f) =>
+              f.id === followupId ? { ...f, config: { ...f.config, ...patch } } : f,
+            ) ?? [],
+        })),
+      writeFollowupMessages: (id, followupId) =>
+        patchStrategy(id, (s) => ({
+          ...edited(s),
+          adaptiveFollowups:
+            s.adaptiveFollowups?.map((f) => (f.id === followupId ? writeFollowup(s, f) : f)) ?? [],
+        })),
       portfolios,
       portfoliosForClient: (clientId) => portfolios.filter((p) => p.clientId === clientId),
       portfolioById: (id) => portfolios.find((p) => p.id === id),
@@ -195,18 +242,22 @@ export function StrategyProvider({ children }: { children: ReactNode }) {
         return id;
       },
       approveStrategy: (strategyId, approver) =>
-        patchStrategy(strategyId, (s) => communicationReviewIssues(s).length ? s : ({
-          ...finalizeCommunicationVersions(s),
-          status: "Active",
-          approvedBy: approver,
-          approvalDate: today,
-          version: bumpVersion(s.version),
-          lastUpdated: today,
-          versions: [
-            { version: bumpVersion(s.version), date: today, note: `Approved by ${approver}` },
-            ...s.versions,
-          ],
-        })),
+        patchStrategy(strategyId, (s) =>
+          communicationReviewIssues(s).length
+            ? s
+            : {
+                ...finalizeCommunicationVersions(s),
+                status: "Active",
+                approvedBy: approver,
+                approvalDate: today,
+                version: bumpVersion(s.version),
+                lastUpdated: today,
+                versions: [
+                  { version: bumpVersion(s.version), date: today, note: `Approved by ${approver}` },
+                  ...s.versions,
+                ],
+              },
+        ),
       rejectStrategy: (strategyId, note) =>
         patchStrategy(strategyId, (s) => ({
           ...s,
@@ -231,7 +282,7 @@ export function StrategyProvider({ children }: { children: ReactNode }) {
           versions: [{ version: s.version, date: today, note: "Draft saved" }, ...s.versions],
         })),
     };
-  }, [portfolios, strategies]);
+  }, [portfolios, strategies, adaptiveCases]);
 
   return <StrategyContext.Provider value={value}>{children}</StrategyContext.Provider>;
 }

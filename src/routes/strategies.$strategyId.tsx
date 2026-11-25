@@ -1,3 +1,4 @@
+import { AdaptiveFollowups } from "@/components/adaptive-followups";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Sparkles, Info } from "lucide-react";
@@ -35,10 +36,9 @@ export const Route = createFileRoute("/strategies/$strategyId")({
   component: StrategyBuilder,
 });
 
-
 function StrategyBuilder() {
   const { strategyId } = Route.useParams();
-  const { canSeeClient, isAdmin, userName } = useRole();
+  const { canSeeClient, isAdmin, userName, can } = useRole();
   const {
     strategyById,
     portfolioById,
@@ -84,8 +84,14 @@ function StrategyBuilder() {
   const reviewIssues = communicationReviewIssues(strategy);
   const changeSelection = (id: string) => {
     if (node?.config.communicationVersions?.some((v) => v.hasUnsavedChanges)) {
-      if (!window.confirm("Discard unsaved communication changes and select another step?")) return false;
-      updateNodeConfig(strategy.id, node.id, { communicationVersions: node.config.communicationVersions.map((v) => ({ ...v, hasUnsavedChanges: false })) });
+      if (!window.confirm("Discard unsaved communication changes and select another step?"))
+        return false;
+      updateNodeConfig(strategy.id, node.id, {
+        communicationVersions: node.config.communicationVersions.map((v) => ({
+          ...v,
+          hasUnsavedChanges: false,
+        })),
+      });
     }
     setSelectedId(id);
     return true;
@@ -114,7 +120,12 @@ function StrategyBuilder() {
               {strategy.status}
             </StatusPill>
             <StatusPill>{strategy.version}</StatusPill>
-            <Btn onClick={() => { saveDraft(strategy.id); setNotice("Draft saved."); }}>
+            <Btn
+              onClick={() => {
+                saveDraft(strategy.id);
+                setNotice("Draft saved.");
+              }}
+            >
               Save Draft
             </Btn>
             {humanCreated ? (
@@ -154,7 +165,12 @@ function StrategyBuilder() {
         }
       />
 
-      {reviewIssues.length > 0 && <p className="mb-4 text-xs text-muted-foreground" role="status">Save changes and resolve message or segment validation issues before approving the workflow. {reviewIssues.length} issue{reviewIssues.length === 1 ? "" : "s"} remaining.</p>}
+      {reviewIssues.length > 0 && (
+        <p className="mb-4 text-xs text-muted-foreground" role="status">
+          Save changes and resolve message or segment validation issues before approving the
+          workflow. {reviewIssues.length} issue{reviewIssues.length === 1 ? "" : "s"} remaining.
+        </p>
+      )}
 
       {notice && (
         <div className="mb-4 rounded-lg border border-primary/25 bg-primary/[0.06] px-4 py-2.5 text-[12.5px] text-foreground">
@@ -191,7 +207,10 @@ function StrategyBuilder() {
         >
           <dl className="grid gap-x-8 gap-y-2 sm:grid-cols-2">
             {strategy.aiContext.map((item) => (
-              <div key={item.label} className="flex items-baseline justify-between gap-4 border-b border-border/50 pb-1.5">
+              <div
+                key={item.label}
+                className="flex items-baseline justify-between gap-4 border-b border-border/50 pb-1.5"
+              >
                 <dt className="text-[12px] text-muted-foreground">{item.label}</dt>
                 <dd className="text-[12.5px] font-medium text-foreground">{item.value}</dd>
               </div>
@@ -243,8 +262,8 @@ function StrategyBuilder() {
           {!node ? (
             <Panel title="Step configuration">
               <p className="text-[12.5px] leading-relaxed text-muted-foreground">
-                Select a step on the canvas to see its configuration. Timing, channels, templates and
-                conditions use the values PayFlow allows for this client.
+                Select a step on the canvas to see its configuration. Timing, channels, templates
+                and conditions use the values PayFlow allows for this client.
               </p>
             </Panel>
           ) : (
@@ -252,25 +271,34 @@ function StrategyBuilder() {
               title={node.kind}
               description={node.title}
               action={
-                <Btn variant="ghost" onClick={() => { if (changeSelection(node.id)) setDialogOpen(true); }}>
+                <Btn
+                  variant="ghost"
+                  onClick={() => {
+                    if (changeSelection(node.id)) setDialogOpen(true);
+                  }}
+                >
                   Expand
                 </Btn>
               }
             >
-              {!dialogOpen && <StepConfigForm
-                key={node.id}
-                strategy={strategy}
-                node={node}
-                onChange={set}
-                onToggleDisabled={() => {
-                  toggleNodeDisabled(strategy.id, node.id);
-                  setNotice(node.disabled ? "Step re-enabled." : "Step disabled in this strategy.");
-                }}
-                onAddAfter={(kind) => {
-                  addNodeAfter(strategy.id, node.id, kind);
-                  setNotice(`${kind} step added and marked Human Modified.`);
-                }}
-              />}
+              {!dialogOpen && (
+                <StepConfigForm
+                  key={node.id}
+                  strategy={strategy}
+                  node={node}
+                  onChange={set}
+                  onToggleDisabled={() => {
+                    toggleNodeDisabled(strategy.id, node.id);
+                    setNotice(
+                      node.disabled ? "Step re-enabled." : "Step disabled in this strategy.",
+                    );
+                  }}
+                  onAddAfter={(kind) => {
+                    addNodeAfter(strategy.id, node.id, kind);
+                    setNotice(`${kind} step added and marked Human Modified.`);
+                  }}
+                />
+              )}
             </Panel>
           )}
 
@@ -302,7 +330,9 @@ function StrategyBuilder() {
                 {strategy.versions.map((v, i) => (
                   <li key={`${v.version}-${i}`}>
                     <div className="flex items-baseline justify-between gap-3">
-                      <span className="text-[12.5px] font-semibold text-foreground">{v.version}</span>
+                      <span className="text-[12.5px] font-semibold text-foreground">
+                        {v.version}
+                      </span>
                       <span className="text-[11px] text-muted-foreground">{v.date}</span>
                     </div>
                     <p className="text-[11.5px] text-muted-foreground">{v.note}</p>
@@ -313,18 +343,23 @@ function StrategyBuilder() {
           </Panel>
 
           {!humanCreated && (
-          <Panel title="Request regeneration">
-            <Field label="Note for PayFlow" hint="Optional. Explain what should change.">
-              <TextArea
-                value={rejectNote}
-                onChange={setRejectNote}
-                placeholder="e.g. reduce contact volume for low balances"
-              />
-            </Field>
-          </Panel>
+            <Panel title="Request regeneration">
+              <Field label="Note for PayFlow" hint="Optional. Explain what should change.">
+                <TextArea
+                  value={rejectNote}
+                  onChange={setRejectNote}
+                  placeholder="e.g. reduce contact volume for low balances"
+                />
+              </Field>
+            </Panel>
           )}
         </div>
       </div>
+
+      <AdaptiveFollowups
+        strategy={strategy}
+        canEdit={can("Modify / Guide AI Recommendation", strategy.clientId)}
+      />
 
       <StepEditorDialog
         strategy={strategy}

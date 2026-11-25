@@ -63,6 +63,8 @@ export interface StrategyVersion {
 }
 
 export interface Strategy {
+  adaptiveEnabled?: boolean;
+  adaptiveFollowups?: import("./adaptive-workflow-data").AdaptiveFollowup[];
   id: string;
   name: string;
   clientId: string;

@@ -20,3 +20,5 @@
 - Keep communication versions and ordered demographic criteria in node configuration; workflow approval finalizes saved valid active messages together, retaining shared-copy and segment validation, while priority matching remains review-only and never workflow execution.
 - Generate combined communication versions from explicit workflow-scoped mock recipient cohorts during proposal setup or segment-save, never a demographic cross-product; preserve existing edits and reviews to avoid silent content replacement.
 - Reuse CommunicationTable and CommunicationExport on client communications with client-scoped rows and initialClient set to the owner name so portfolio filters and report headers share the same scope.
+
+- Keep optional adaptive follow-ups outside the fixed node graph and case decisions in StrategyProvider session state; reuse message validation/finalization and permission-gated case review so mock reassessment never changes the original flow or invokes services.
