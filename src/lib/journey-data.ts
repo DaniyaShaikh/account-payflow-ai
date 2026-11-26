@@ -415,9 +415,9 @@ const accountJourneyStates: Record<string, AccountJourneyState> = {
   },
   "pp-88831": {
     journeyId: "escalated-collection",
-    stage: "Human Review",
+    stage: "Reminder 4 (planned)",
     startedAt: "10 Aug 2026",
-    nextAction: "Awaiting supervisor decision",
+    nextAction: "Reminder 4 · Email · 28 Nov, 14:00 UTC — sent as planned unless the change is approved first",
     whySelected:
       "High balance with no response after repeated attempts, which the client's governance requires a supervisor to review.",
   },

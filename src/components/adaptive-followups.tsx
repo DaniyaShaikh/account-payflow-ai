@@ -20,7 +20,9 @@ export function AdaptiveFollowups({ strategy, canEdit }: { strategy: Strategy; c
     ...found,
     config: occurrence === "repeat" ? (found.repeat ?? { communicationVersions: [] }) : found.config,
   };
-  const followups = strategy.adaptiveFollowups ?? [];
+  // A follow-up only ever takes a reminder's place; with no reminder there is nothing to replace.
+  const hasReminder = Object.values(strategy.nodes).some((n) => n.kind === "Communication");
+  const followups = hasReminder ? (strategy.adaptiveFollowups ?? []) : [];
   const close = () => {
     if (
       dirty &&
@@ -90,7 +92,7 @@ export function AdaptiveFollowups({ strategy, canEdit }: { strategy: Strategy; c
                   <div className="flex flex-wrap items-center gap-2">
                     {sets.map(({ o, n }) => (
                       <StatusPill key={o} tone={n ? "neutral" : "warning"}>
-                        {occurrenceLabel[o]} · {n ? "Written" : "Not Written Yet"}
+                        {occurrenceLabel[o]} · {n ? "Written" : "Not written yet"}
                       </StatusPill>
                     ))}
                     <Btn variant="ghost" onClick={() => setSelected(f.id)}>
@@ -101,9 +103,14 @@ export function AdaptiveFollowups({ strategy, canEdit }: { strategy: Strategy; c
                 </div>
               );
             })}
-            {!strategy.adaptiveFollowups?.length && (
+            {!followups.length && (
               <p className="py-3 text-xs text-muted-foreground">
-                No follow-ups available for this workflow.
+                No follow-ups: nothing for them to replace.
+              </p>
+            )}
+            {followups.length > 0 && (
+              <p className="pt-3 text-[11px] text-muted-foreground">
+                A follow-up without text is never sent.
               </p>
             )}
           </div>
@@ -160,7 +167,7 @@ export function AdaptiveFollowups({ strategy, canEdit }: { strategy: Strategy; c
               </p>
               {!followup.config.communicationVersions?.length ? (
                 <div className="space-y-3">
-                  <StatusPill tone="warning">Not Written Yet</StatusPill>
+                  <StatusPill tone="warning">Not written yet · won't be sent</StatusPill>
                   <div>
                     <Btn
                       variant="primary"

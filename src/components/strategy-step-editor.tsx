@@ -100,12 +100,18 @@ export function StepConfigForm({
         <>
           <div className="grid grid-cols-2 gap-2">
             <Field label="Channel">
-              <SelectInput
-                value={node.config.channel ?? "Email"}
-                options={channels}
-                disabled={!canEdit}
-                onChange={(v) => onChange({ channel: v, templateId: "", subjectOverride: "" })}
-              />
+              {adaptive ? (
+                <p className="flex h-9 items-center rounded-md border border-border bg-muted/40 px-3 text-xs text-muted-foreground">
+                  Email or SMS, chosen when sending
+                </p>
+              ) : (
+                <SelectInput
+                  value={node.config.channel ?? "Email"}
+                  options={channels}
+                  disabled={!canEdit}
+                  onChange={(v) => onChange({ channel: v, templateId: "", subjectOverride: "" })}
+                />
+              )}
             </Field>
             <Field label="Message Purpose">
               <SelectInput
@@ -116,7 +122,7 @@ export function StepConfigForm({
               />
             </Field>
           </div>
-          <Field label="Template" hint="What the customer receives at this step.">
+          {!adaptive && <Field label="Template" hint="What the customer receives at this step.">
             <SelectInput
               value={activeTemplate?.name ?? templates[0]?.name ?? ""}
               options={templates.map((t) => t.name)}
@@ -126,7 +132,7 @@ export function StepConfigForm({
                 if (match) onChange({ templateId: match.id, subjectOverride: "" });
               }}
             />
-          </Field>
+          </Field>}
           <CommunicationVersionEditor
             key={node.id}
             strategy={strategy}

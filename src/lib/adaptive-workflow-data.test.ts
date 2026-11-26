@@ -3,6 +3,7 @@ import {
   canReviewDecision,
   followupNode,
   reassessAdaptiveCase,
+  needsApproval,
   resolveAdaptiveDecision,
   seedAdaptiveCases,
   seedAdaptiveWorkflow,
@@ -130,20 +131,18 @@ describe("adaptive workflow safeguards", () => {
       canReviewDecision({ ...d, compliance: "Blocked — contact restriction" }, true, now),
     ).toBe(false);
   });
-  it("retains human approval after modification and records who changed the decision", () => {
+  it("marks Operations modifications as Changed and keeps the AI original suggestion in history", () => {
     const modified = resolveAdaptiveDecision(pendingCase(), "Modified", "Operations", now, {
       channel: "SMS",
-      action: "Switch communication channel",
+      action: "Switch channel",
     });
     expect(modified.decision.channel).toBe("SMS");
-    expect(modified.decision.status).toBe("Pending");
-    expect(modified.decision.requiresApproval).toBe(true);
-    expect(modified.history.at(-1)?.detail).toContain(
-      "Operations: Switch communication channel · SMS",
-    );
-    const approved = resolveAdaptiveDecision(modified, "Approved", "Operations", now);
+    expect(modified.decision.status).toBe("Changed");
+    expect(modified.history.some((e) => e.label.startsWith("AI original suggestion"))).toBe(true);
+    expect(modified.history.at(-1)?.detail).toContain("Operations: Switch channel · SMS");
+    expect(canReviewDecision(modified.decision, true, now)).toBe(false);
+    const approved = resolveAdaptiveDecision(pendingCase(), "Approved", "Operations", now);
     expect(approved.decision.status).toBe("Approved");
-    expect(canReviewDecision(approved.decision, true, now)).toBe(false);
   });
   it("supersedes previous recommendations on newer events and blocks restricted communications", () => {
     const state = pendingCase();
@@ -171,8 +170,17 @@ describe("adaptive workflow safeguards", () => {
     const automatic = seedAdaptiveCases.find((c) => c.accountId === "pp-10482");
     expect(automatic?.decision.status).toBe("Applied");
     expect(automatic?.decision.requiresApproval).toBe(false);
-    expect(automatic?.history.some((event) => event.detail.includes("Replaced Reminder 3"))).toBe(
+    expect(automatic?.history.some((event) => event.detail.includes("replaced Reminder 3"))).toBe(
       true,
     );
+  });
+  it("only AI decisions for supervised clients need approval; fixed rules apply automatically", () => {
+    expect(needsApproval("Rule-Based", true)).toBe(false);
+    expect(needsApproval("AI", true)).toBe(true);
+    expect(needsApproval("AI", false)).toBe(false);
+  });
+  it("expires an AI decision when the planned message is due so the plan keeps running", () => {
+    const d = pendingCase().decision;
+    expect(canReviewDecision(d, true, "2026-11-28T14:00:00Z")).toBe(false);
   });
 });

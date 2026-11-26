@@ -9,7 +9,9 @@ export function EmailPerformanceSuggestions({
   onSelect,
   canEdit = true,
   defaultStage = "First reminder",
+  fixedStage,
 }: {
+  fixedStage?: string;
   clientId: string;
   workflowId: string;
   purpose: string;
@@ -18,7 +20,8 @@ export function EmailPerformanceSuggestions({
   canEdit?: boolean;
   defaultStage?: string;
 }) {
-  const [stage, setStage] = useState(defaultStage);
+  const [chosen, setStage] = useState(defaultStage);
+  const stage = fixedStage ?? chosen;
   const [expanded, setExpanded] = useState(false);
   const history = historicalExamples(clientId, workflowId, stage, purpose);
   return (
@@ -28,7 +31,11 @@ export function EmailPerformanceSuggestions({
         <StatusPill tone="ai">AI · Simulated</StatusPill>
       </div>
       <div className="mt-2">
-        <FilterSelect
+        {fixedStage ? (
+          <p className="text-[11px] text-muted-foreground">
+            Reminder Stage · <span className="font-medium text-foreground">{fixedStage}</span> — follow-up results are counted separately from reminders.
+          </p>
+        ) : <FilterSelect
           label="Reminder Stage"
           value={stage}
           options={reminderTypes}
@@ -36,7 +43,7 @@ export function EmailPerformanceSuggestions({
             setStage(v);
             setExpanded(false);
           }}
-        />
+        />}
       </div>
       <p className="mt-2 text-[11px] text-muted-foreground">
         {history.scope} · {purpose}

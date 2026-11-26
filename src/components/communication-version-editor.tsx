@@ -130,7 +130,7 @@ export function CommunicationVersionEditor({ strategy, node, canEdit, onChange, 
     </details>
     <details className="border-t border-border pt-2">
       <summary className="cursor-pointer text-xs font-semibold">Performance insights</summary>
-      <EmailPerformanceSuggestions clientId={strategy.clientId} workflowId={strategy.id} purpose={node.config.purpose ?? "Payment Reminder"} subject={value.subject} canEdit={canEdit} onSelect={(subject) => edit({ subject })} />
+      <EmailPerformanceSuggestions {...(strategy.adaptiveFollowups?.some((f) => f.id === node.id) ? { fixedStage: "Follow-up" } : {})} clientId={strategy.clientId} workflowId={strategy.id} purpose={node.config.purpose ?? "Payment Reminder"} subject={value.subject} canEdit={canEdit} onSelect={(subject) => edit({ subject })} />
     </details>
     <div className="border-t border-border pt-3">
       <h4 className="mb-2 text-xs font-semibold">Version Summary</h4>
